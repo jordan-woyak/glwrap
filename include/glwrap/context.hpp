@@ -37,6 +37,14 @@ enum class capability : GLenum
 	program_point_size = GL_PROGRAM_POINT_SIZE
 };
 
+enum class provoke_mode : GLenum
+{
+	first = GL_FIRST_VERTEX_CONVENTION,
+	last = GL_LAST_VERTEX_CONVENTION,
+};
+
+typedef double_t depth_t;
+
 class context
 {
 public:
@@ -44,6 +52,38 @@ public:
 	{
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	void clear_stencil(int_t _index)
+	{
+		glClearStencil(_index);
+		glClear(GL_STENCIL_BUFFER_BIT);
+	}
+
+	void clear_depth(depth_t _depth)
+	{
+		glClearDepth(_depth);
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
+
+	void line_width(int_t _width)
+	{
+		glLineWidth(_width);
+	}
+
+	void polygon_offset(float_t _factor, float_t _units)
+	{
+		glPolygonOffset(_factor, _units);
+	}
+
+	void point_size(float_t _size)
+	{
+		glPointSize(_size);
+	}
+
+	void provoking_vertex(provoke_mode _mode)
+	{
+		glProvokingVertex(static_cast<GLenum>(_mode));
 	}
 
 	template <typename T>
@@ -59,6 +99,11 @@ public:
 	void disable_vertex_attribute(const attribute<T>& _attrib)
 	{
 		glDisableVertexAttribArray(_attrib.get_location());
+	}
+
+	void enable(capability _cap)
+	{
+		glEnable(static_cast<GLenum>(_cap));
 	}
 
 	void disable(capability _cap)

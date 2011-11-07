@@ -69,5 +69,6 @@ int main()
 
 		modelview *= gl::rotate(6.28f / 60 / 2, 0, 0, 1);
 	});
+
 	dsp.run_loop();
 }
