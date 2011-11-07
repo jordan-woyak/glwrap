@@ -116,9 +116,9 @@ public:
 		static_assert(std::is_same<typename std::remove_reference<decltype(*begin)>::type, element_type>::value,
 			"range must contain element_type");
 
-		glBindBuffer(GL_ARRAY_BUFFER, native_handle());
+		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
 
-		glBufferData(GL_ARRAY_BUFFER, size * sizeof(element_type), &*begin, GL_STATIC_DRAW);
+		glBufferData(GL_COPY_WRITE_BUFFER, size * sizeof(element_type), &*begin, GL_STATIC_DRAW);
 	}
 
 	explicit vertex_buffer(context& _context)
