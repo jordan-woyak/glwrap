@@ -1,0 +1,73 @@
+
+#include <iostream>
+
+#include "glwrap/gl.hpp"
+
+int main()
+{
+	gl::context glc;
+	gl::display dsp(glc);
+
+	gl::program prog(glc);
+
+	auto mvp = prog.create_uniform<gl::matrix4>("mvp");
+
+	auto color_attrib = prog.create_attribute<gl::fvec3>("color");
+	auto pos_attrib = prog.create_attribute<gl::fvec2>("position");
+
+	auto fragdata = prog.create_fragdata<gl::fvec4>("fragdata");
+
+	prog.set_vertex_shader_source(
+		"out vec3 col;"
+		"void main(void)"
+		"{"
+			"col = color;"
+			"gl_Position = mvp * vec4(position, 0, 1);"
+		"}"
+	);
+
+	prog.set_fragment_shader_source(
+		"in vec3 col;"
+		"void main(void)"
+		"{"
+			"fragdata = vec4(col, 1);"
+		"}"
+	);
+
+	prog.compile();
+	//if (!prog.is_good())
+		std::cout << "program log:\n" << prog.get_log() << std::endl;
+
+	struct FooVertex
+	{
+		gl::fvec2 pos;
+		gl::fvec3 color;
+	};
+
+	gl::vertex_buffer<FooVertex> verbuf(glc);
+	std::vector<FooVertex> verts =
+	{
+		{{16, 16}, {1, 0, 0}},
+		{{16, 464}, {0, 1, 0}},
+		{{624, 464}, {0, 0, 1}},
+		{{624, 16}, {0, 0, 0}},
+	};
+	verbuf.assign(verts);
+
+	gl::vertex_array arr(glc);
+	arr.bind_vertex_attribute(pos_attrib, verbuf.get_component(&FooVertex::pos));
+	arr.bind_vertex_attribute(color_attrib, verbuf.get_component(&FooVertex::color));
+
+	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
+
+	dsp.set_display_func([&]
+	{
+		glc.clear_color({1, 1, 1, 1});
+
+		prog.set_uniform(mvp, modelview);
+		prog.draw_arrays(arr, gl::primitive::triangle_fan, 0, 4);
+
+		modelview *= gl::rotate(6.28f / 60 / 2, 0, 0, 1);
+	});
+	dsp.run_loop();
+}
