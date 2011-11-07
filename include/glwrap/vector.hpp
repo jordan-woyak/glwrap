@@ -14,6 +14,7 @@ typedef GLushort ushort_t;
 typedef GLint int_t;
 typedef GLuint uint_t;
 typedef GLfloat float_t;
+typedef GLdouble double_t;
 typedef GLboolean bool_t;
 
 template <typename T, int D>

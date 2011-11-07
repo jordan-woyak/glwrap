@@ -43,6 +43,37 @@ enum class provoke_mode : GLenum
 	last = GL_LAST_VERTEX_CONVENTION,
 };
 
+enum class stencil_action : GLenum
+{
+	keep = GL_KEEP,
+	zero = GL_ZERO,
+	replace = GL_REPLACE,
+	increment = GL_INCR,
+	increment_wrap = GL_INCR_WRAP,
+	decrement = GL_DECR,
+	decrement_wrap = GL_DECR_WRAP,
+	invert = GL_INVERT
+};
+
+enum class stencil_test : GLenum
+{
+	never = GL_NEVER,
+	less = GL_LESS,
+	less_equal = GL_LEQUAL,
+	greater = GL_GREATER,
+	greater_equal = GL_GEQUAL,
+	equal = GL_EQUAL,
+	not_equal = GL_NOTEQUAL,
+	always = GL_ALWAYS
+};
+
+enum class face : GLenum
+{
+	back = GL_BACK,
+	front = GL_FRONT,
+	both = GL_FRONT_AND_BACK
+};
+
 typedef double_t depth_t;
 
 class context
@@ -84,6 +115,22 @@ public:
 	void provoking_vertex(provoke_mode _mode)
 	{
 		glProvokingVertex(static_cast<GLenum>(_mode));
+	}
+
+	void stencil_op(stencil_action _fail, stencil_action _pass_fail, stencil_action _pass, face _face = face::both)
+	{
+		glStencilOpSeparate(static_cast<GLenum>(_face),
+			static_cast<GLenum>(_fail), static_cast<GLenum>(_pass_fail), static_cast<GLenum>(_pass));
+	}
+
+	void stencil_func(stencil_test _test, int_t _ref, uint_t _mask, face _face = face::both)
+	{
+		glStencilFuncSeparate(static_cast<GLenum>(_face), static_cast<GLenum>(_test), _ref, _mask);
+	}
+
+	void stencil_mask(uint_t _mask, face _face = face::both)
+	{
+		glStencilMaskSeparate(static_cast<GLenum>(_face), _mask);
 	}
 
 	template <typename T>
