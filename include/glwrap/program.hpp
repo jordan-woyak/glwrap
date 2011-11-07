@@ -4,7 +4,6 @@
 
 #include <boost/format.hpp>
 
-#include "uptr.hpp"
 #include "uniform.hpp"
 #include "attribute.hpp"
 #include "framebuffer.hpp"
@@ -116,10 +115,10 @@ public:
 
 		if (log_length)
 		{
-			auto log_buffer = unew<GLchar[]>(log_length);
-			glGetProgramInfoLog(native_handle(), log_length, NULL, log_buffer.get());
+			std::vector<GLchar> log_buffer(log_length);
+			glGetProgramInfoLog(native_handle(), log_length, NULL, log_buffer.data());
 
-			log.assign(log_buffer.get(), log_length - 1);
+			log.assign(log_buffer.begin(), log_buffer.end());
 		}
 
 		return log;
@@ -151,21 +150,21 @@ public:
 	template <typename T>
 	uniform<T> create_uniform(const std::string& _name)
 	{
-		m_uniforms.push_back(unew<variable<T>>(_name));
+		m_uniforms.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
 		return uniform<T>(std::prev(m_uniforms.end()));
 	}
 
 	template <typename T>
 	attribute<T> create_attribute(const std::string& _name)
 	{
-		m_attributes.push_back(unew<variable<T>>(_name));
+		m_attributes.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
 		return attribute<T>(std::prev(m_attributes.end()));
 	}
 
 	template <typename T>
 	fragdata<T> create_fragdata(const std::string& _name)
 	{
-		m_fragdatas.push_back(unew<variable<T>>(_name));
+		m_fragdatas.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
 		return fragdata<T>(std::prev(m_fragdatas.end()));
 	}
 
@@ -199,9 +198,9 @@ private:
 	std::string m_fragment_src;
 
 	// TODO: don't need pointer
-	std::list<uptr<variable_base>> m_attributes;
-	std::list<uptr<variable_base>> m_fragdatas;
-	std::list<uptr<variable_base>> m_uniforms;
+	std::list<std::unique_ptr<variable_base>> m_attributes;
+	std::list<std::unique_ptr<variable_base>> m_fragdatas;
+	std::list<std::unique_ptr<variable_base>> m_uniforms;
 };
 
 }

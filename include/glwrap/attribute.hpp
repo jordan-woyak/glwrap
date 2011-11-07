@@ -2,7 +2,6 @@
 
 #include "variable.hpp"
 #include "vertex_buffer.hpp"
-#include "uptr.hpp"
 
 #include <list>
 
@@ -29,7 +28,7 @@ public:
 	}
 
 private:
-	typedef std::list<uptr<variable_base>>::iterator iter_t;
+	typedef std::list<std::unique_ptr<variable_base>>::iterator iter_t;
 
 	attribute(iter_t _iter)
 		: m_iter(_iter)

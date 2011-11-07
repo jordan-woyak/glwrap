@@ -14,7 +14,7 @@ class fragdata
 	friend class program;
 
 private:
-	typedef std::list<uptr<variable_base>>::iterator iter_t;
+	typedef std::list<std::unique_ptr<variable_base>>::iterator iter_t;
 
 	fragdata(iter_t _iter)
 		: m_iter(_iter)

@@ -21,7 +21,6 @@ public:
 
 	virtual std::string get_type_name() const = 0;
 	virtual std::size_t get_index_count() const = 0;
-	//virtual std::string get_suffix() const = 0;
 
 	const std::string& get_name() const
 	{
