@@ -74,6 +74,33 @@ enum class face : GLenum
 	both = GL_FRONT_AND_BACK
 };
 
+enum class blend_mode : GLenum
+{
+	add = GL_FUNC_ADD,
+	subtract = GL_FUNC_SUBTRACT,
+	reverse_subtract = GL_FUNC_REVERSE_SUBTRACT,
+	min = GL_MIN,
+	max = GL_MAX
+};
+
+enum class blend_factor : GLenum
+{
+	zero = GL_ZERO,
+	one = GL_ONE,
+	src_color = GL_SRC_COLOR,
+	inverse_src_color = GL_ONE_MINUS_SRC_COLOR,
+	dst_color = GL_DST_COLOR,
+	inverse_dst_color = GL_ONE_MINUS_DST_COLOR,
+	src_alpha = GL_SRC_ALPHA,
+	inverse_src_alpha = GL_ONE_MINUS_SRC_ALPHA,
+	dst_alpha = GL_DST_ALPHA,
+	inverse_dst_alpha = GL_ONE_MINUS_DST_ALPHA,
+	constant_color = GL_CONSTANT_COLOR,
+	inverse_constant_color = GL_ONE_MINUS_CONSTANT_COLOR,
+	constant_alpha = GL_CONSTANT_ALPHA,
+	inverse_constant_alpha = GL_ONE_MINUS_CONSTANT_ALPHA
+};
+
 typedef double_t depth_t;
 
 class context
@@ -131,6 +158,37 @@ public:
 	void stencil_mask(uint_t _mask, face _face = face::both)
 	{
 		glStencilMaskSeparate(static_cast<GLenum>(_face), _mask);
+	}
+
+	void viewport(int_t x, int_t y, size_t w, size_t h)
+	{
+		glViewport(x, y, w, h);
+	}
+
+	void blend_color(fvec4 _color)
+	{
+		glBlendColor(_color.x, _color.y, _color.z, _color.w);
+	}
+
+	void blend_equation(blend_mode _mode)
+	{
+		glBlendEquation(static_cast<GLenum>(_mode));
+	}
+
+	void blend_equation(blend_mode _mode_rgb, blend_mode _mode_alpha)
+	{
+		glBlendEquationSeparate(static_cast<GLenum>(_mode_rgb), static_cast<GLenum>(_mode_alpha));
+	}
+
+	void blend_func(blend_factor _sfactor, blend_factor _dfactor)
+	{
+		glBlendFunc(static_cast<GLenum>(_sfactor), static_cast<GLenum>(_dfactor));
+	}
+
+	void blend_func(blend_factor _sfactor_rgb, blend_factor _dfactor_rgb, blend_factor _sfactor_alpha, blend_factor _dfactor_alpha)
+	{
+		glBlendFuncSeparate(static_cast<GLenum>(_sfactor_rgb), static_cast<GLenum>(_dfactor_rgb),
+			static_cast<GLenum>(_sfactor_alpha), static_cast<GLenum>(_dfactor_alpha));
 	}
 
 	template <typename T>
