@@ -16,7 +16,8 @@ typedef GLuint uint_t;
 typedef GLfloat float_t;
 typedef GLdouble double_t;
 typedef GLboolean bool_t;
-typedef GLsizei size_t;
+typedef GLsizei sizei_t;
+typedef double_t depth_t;
 
 template <typename T, int D>
 class basic_vec;

@@ -106,19 +106,36 @@ public:
 		return vertex_buffer_component<T>(0, 0, native_handle());
 	}
 
-	// TODO: fails hard for non-array/vector
-	template <typename R>
-	void assign(R& range)
+	void assign(std::vector<T> const& _range)
 	{
-		auto const begin = std::begin(range), end = std::end(range);
-		auto const size = end - begin;
+		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
+		glBufferData(GL_COPY_WRITE_BUFFER, _range.size() * sizeof(element_type), _range.data(), GL_STATIC_DRAW);
+	}
 
-		static_assert(std::is_same<typename std::remove_reference<decltype(*begin)>::type, element_type>::value,
-			"range must contain element_type");
+	template <std::size_t S>
+	void assign(std::array<T, S> const& _range)
+	{
+		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
+		glBufferData(GL_COPY_WRITE_BUFFER, _range.size() * sizeof(element_type), _range.data(), GL_STATIC_DRAW);
+	}
 
+	template <typename R>
+	void assign(R const& _range)
+	{
+		std::vector<T> vec(_range.begin(), _range.end());
+		assign(vec);
+	}
+
+	void assign(vertex_buffer const& _other)
+	{
+		glBindBuffer(GL_COPY_READ_BUFFER, _other.native_handle());
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
 
-		glBufferData(GL_COPY_WRITE_BUFFER, size * sizeof(element_type), &*begin, GL_STATIC_DRAW);
+		sizei_t size = 0;
+		glGetBufferParameteriv(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &size);
+
+		glBufferData(GL_COPY_WRITE_BUFFER, size, nullptr, GL_STATIC_DRAW);
+		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size);
 	}
 
 	explicit vertex_buffer(context& _context)

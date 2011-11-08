@@ -4,6 +4,7 @@
 #include "vector.hpp"
 #include "vertex_buffer.hpp"
 #include "attribute.hpp"
+#include "texture.hpp"
 
 namespace gl
 {
@@ -74,6 +75,12 @@ enum class face : GLenum
 	both = GL_FRONT_AND_BACK
 };
 
+enum class orientation : GLenum
+{
+	cw = GL_CW,
+	ccw = GL_CCW
+};
+
 enum class blend_mode : GLenum
 {
 	add = GL_FUNC_ADD,
@@ -101,7 +108,29 @@ enum class blend_factor : GLenum
 	inverse_constant_alpha = GL_ONE_MINUS_CONSTANT_ALPHA
 };
 
-typedef double_t depth_t;
+class context;
+
+template <int D>
+struct bound_texture
+{
+public:
+	int_t get_unit() const
+	{
+		return m_unit;
+	}
+
+private:
+	friend class context;
+
+	explicit bound_texture(int_t _unit)
+		: m_unit(_unit)
+	{}
+
+	bound_texture(const bound_texture&) = default;
+	bound_texture& operator=(const bound_texture&) = delete;
+
+	int_t m_unit;
+};
 
 class context
 {
@@ -142,6 +171,11 @@ public:
 	void provoking_vertex(provoke_mode _mode)
 	{
 		glProvokingVertex(static_cast<GLenum>(_mode));
+	}
+
+	void front_face(orientation _orient)
+	{
+		glFrontFace(static_cast<GLenum>(_orient));
 	}
 
 	void stencil_op(stencil_action _fail, stencil_action _pass_fail, stencil_action _pass, face _face = face::both)
@@ -214,6 +248,14 @@ public:
 	void disable(capability _cap)
 	{
 		glDisable(static_cast<GLenum>(_cap));
+	}
+
+	template <int D>
+	bound_texture<D> bind_texture(size_t _unit, texture<D>& _texture)
+	{
+		glActiveTexture(GL_TEXTURE0 + _unit);
+		_texture.bind();
+		return bound_texture<D>(_unit);
 	}
 };
 

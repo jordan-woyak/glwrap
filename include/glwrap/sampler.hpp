@@ -5,8 +5,18 @@ namespace gl
 {
 
 template <int D>
-class sampler
+class sampler : public native_handle_base<GLuint>
 {
+public:
+	sampler(context& _context)
+		: native_handle_base<GLuint>(gen_return(glGenSamplers))
+	{}
+
+	~sampler()
+	{
+		auto const nh = native_handle();
+		glDeleteSamplers(1, &nh);
+	}
 };
 
 typedef sampler<1> sampler_1d;

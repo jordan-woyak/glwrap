@@ -99,6 +99,12 @@ std::size_t get_index_count<matrix4>()
 	return 4 * 4;
 }
 
+template <>
+std::size_t get_index_count<sampler_2d>()
+{
+	return 0;
+}
+
 }
 }
 }

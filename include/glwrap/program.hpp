@@ -168,8 +168,8 @@ public:
 		return fragdata<T>(std::prev(m_fragdatas.end()));
 	}
 
-	template <typename T>
-	void set_uniform(uniform<T>& _uniform, const T& _value)
+	template <typename T, typename T2>
+	void set_uniform(uniform<T>& _uniform, const T2& _value)
 	{
 		glUseProgram(native_handle());
 		_uniform.set_value(_value);

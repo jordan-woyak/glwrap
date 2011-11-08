@@ -1,7 +1,6 @@
 #pragma once
 
 #include "vector.hpp"
-#include "sampler.hpp"
 #include "native_handle.hpp"
 #include "util.hpp"
 
@@ -11,7 +10,7 @@ namespace gl
 class context;
 
 template <int D>
-class texture : public sampler<D>, public native_handle_base<GLuint>
+class texture : public native_handle_base<GLuint>
 {
 	friend class context;
 
@@ -28,16 +27,16 @@ public:
 		glDeleteTextures(1, &nh);
 	}
 
-	explicit texture(device& _context)
+	explicit texture(context& _context)
 		: native_handle_base<GLuint>(gen_return(glGenTextures))
 	{}
 
 private:
-	void bind_texture_unit(int_t _unit)
-	{
-		glActiveTexture(GL_TEXTURE0 + _unit);
-		bind();
-	}
+	//void bind_texture_unit(int_t _unit)
+	//{
+	//	glActiveTexture(GL_TEXTURE0 + _unit);
+	//	bind();
+	//}
 
 	void bind();
 };

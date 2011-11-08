@@ -23,4 +23,18 @@ private:
 	iter_t m_iter;
 };
 
+class framebuffer : public native_handle_base<GLuint>
+{
+public:
+	framebuffer(context& _context)
+		: native_handle_base<GLuint>(gen_return(glGenFramebuffers))
+	{}
+
+	~framebuffer()
+	{
+		auto const nh = native_handle();
+		glDeleteFramebuffers(1, &nh);
+	}
+};
+
 }
