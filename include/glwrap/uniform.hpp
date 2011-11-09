@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vertex_buffer.hpp"
+#include "buffer.hpp"
 #include "variable.hpp"
 
 namespace gl

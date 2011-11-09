@@ -53,7 +53,7 @@ int main()
 		gl::fvec3 color;
 	};
 
-	gl::vertex_buffer<FooVertex> verbuf(glc);
+	gl::buffer<FooVertex> verbuf(glc);
 	std::vector<FooVertex> verts =
 	{
 		{{16, 16}, {0, 0}, {1, 0, 0}},

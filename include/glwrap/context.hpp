@@ -2,7 +2,7 @@
 #pragma once
 
 #include "vector.hpp"
-#include "vertex_buffer.hpp"
+#include "buffer.hpp"
 #include "attribute.hpp"
 #include "texture.hpp"
 
@@ -226,7 +226,7 @@ public:
 	}
 
 	template <typename T>
-	void bind_vertex_attribute(const attribute<T>& _attrib, const vertex_buffer_component<T>& _comp)
+	void bind_vertex_attribute(const attribute<T>& _attrib, const buffer_component<T>& _comp)
 	{
 		auto const index = _attrib.get_location();
 
