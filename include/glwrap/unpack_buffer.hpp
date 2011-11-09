@@ -1,6 +1,6 @@
 #pragma once
 
-#include "buffer.hpp"
+#include "array_buffer.hpp"
 
 #include <boost/multi_array.hpp>
 

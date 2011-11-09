@@ -3,7 +3,7 @@
 #include "vector.hpp"
 #include "native_handle.hpp"
 #include "util.hpp"
-#include "buffer.hpp"
+#include "array_buffer.hpp"
 #include "unpack_buffer.hpp"
 
 namespace gl
@@ -17,12 +17,6 @@ class texture : public native_handle_base<GLuint>
 	friend class context;
 
 public:
-	texture(const texture&) = delete;
-	texture& operator=(const texture&) = delete;
-
-	texture(texture&&) = default;
-	texture& operator=(texture&&) = default;
-
 	~texture()
 	{
 		auto const nh = native_handle();
@@ -49,7 +43,7 @@ public:
 	}
 
 private:
-	void bind();
+	void bind() const;
 };
 
 typedef texture<1> texture_1d;
@@ -57,19 +51,19 @@ typedef texture<2> texture_2d;
 typedef texture<3> texture_3d;
 
 template <>
-void texture<1>::bind()
+void texture<1>::bind() const
 {
 	glBindTexture(GL_TEXTURE_1D, native_handle());
 }
 
 template <>
-void texture<2>::bind()
+void texture<2>::bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, native_handle());
 }
 
 template <>
-void texture<3>::bind()
+void texture<3>::bind() const
 {
 	glBindTexture(GL_TEXTURE_3D, native_handle());
 }

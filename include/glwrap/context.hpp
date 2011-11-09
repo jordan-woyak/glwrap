@@ -2,7 +2,7 @@
 #pragma once
 
 #include "vector.hpp"
-#include "buffer.hpp"
+#include "array_buffer.hpp"
 #include "attribute.hpp"
 #include "texture.hpp"
 
@@ -106,6 +106,15 @@ enum class blend_factor : GLenum
 	inverse_constant_color = GL_ONE_MINUS_CONSTANT_COLOR,
 	constant_alpha = GL_CONSTANT_ALPHA,
 	inverse_constant_alpha = GL_ONE_MINUS_CONSTANT_ALPHA
+};
+
+enum class color_buffer : GLenum
+{
+	none = GL_NONE,
+	front_left = GL_FRONT_LEFT,
+	front_right = GL_FRONT_RIGHT,
+	back_left = GL_BACK_LEFT,
+	back_right = GL_BACK_RIGHT
 };
 
 class context;
@@ -226,13 +235,25 @@ public:
 	}
 
 	template <typename T>
-	void bind_vertex_attribute(const attribute<T>& _attrib, const buffer_component<T>& _comp)
+	void bind_vertex_attribute(const attribute<T>& _attrib, const array_buffer_component<T>& _comp)
 	{
+		// TODO: unbind VAO
 		auto const index = _attrib.get_location();
 
 		glEnableVertexAttribArray(index);
 		_comp.bind_to_attrib(index);
 	}
+
+	// TODO: rename?
+	/*
+	template <typename T>
+	void draw_buffers(fragdata<T>& _fragdata, color_buffer _cbuf)
+	{
+		std::array<GLenum,
+
+		glDrawBuffers
+	}
+	*/
 
 	template <typename T>
 	void disable_vertex_attribute(const attribute<T>& _attrib)

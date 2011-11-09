@@ -1,7 +1,7 @@
 #pragma once
 
 #include "variable.hpp"
-#include "buffer.hpp"
+#include "array_buffer.hpp"
 
 #include <list>
 
@@ -17,7 +17,7 @@ class attribute
 	friend class vertex_array;
 
 public:
-	void bind(buffer_component<fvec2>& _comp)
+	void bind(array_buffer_component<fvec2>& _comp)
 	{
 		_comp.bind_to_attrib((*m_iter)->get_location());
 	}

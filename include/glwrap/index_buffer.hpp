@@ -21,12 +21,6 @@ class index_buffer : public native_handle_base<GLuint>
 public:
 	typedef T element_type;
 
-	index_buffer(const index_buffer&) = delete;
-	index_buffer& operator=(const index_buffer&) = delete;
-
-	index_buffer(index_buffer&&) = default;
-	index_buffer& operator=(index_buffer&&) = default;
-
 	~index_buffer()
 	{
 		auto const nh = native_handle();

@@ -30,12 +30,6 @@ enum class primitive : GLenum
 class program : public native_handle_base<GLuint>
 {
 public:
-	program(const program&) = delete;
-	program& operator=(const program&) = delete;
-
-	program(program&&) = default;
-	program& operator=(program&&) = default;
-
 	~program()
 	{
 		glDeleteProgram(native_handle());

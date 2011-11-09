@@ -10,12 +10,6 @@ namespace gl
 class vertex_array : public native_handle_base<GLuint>
 {
 public:
-	vertex_array(vertex_array const&) = delete;
-	vertex_array& operator=(vertex_array const&) = delete;
-
-	vertex_array(vertex_array&&) = default;
-	vertex_array& operator=(vertex_array&&) = default;
-
 	explicit vertex_array(context& _context)
 		: native_handle_base<GLuint>(gen_return(glGenVertexArrays))
 	{}
@@ -27,7 +21,7 @@ public:
 	}
 
 	template <typename T>
-	void bind_vertex_attribute(const attribute<T>& _attrib, const buffer_component<T>& _comp)
+	void bind_vertex_attribute(const attribute<T>& _attrib, const array_buffer_component<T>& _comp)
 	{
 		auto const index = _attrib.get_location();
 
