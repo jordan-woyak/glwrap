@@ -22,17 +22,19 @@ typedef double_t depth_t;
 template <typename T, int D>
 class basic_vec;
 
-template <>
-class basic_vec<float_t, 2>
+template <typename T>
+class basic_vec<T, 2>
 {
 public:
-	float_t x, y;
+	T x, y;
+
+	static const int dims = 2;
 
 	// TODO: silly
-	float_t* data()
+	T* data()
 	{ return &x; }
 
-	const float_t* data() const
+	const T* data() const
 	{ return &x; }
 
 	basic_vec()
@@ -40,55 +42,59 @@ public:
 		, y()
 	{}
 
-	basic_vec(float_t _x, float_t _y)
+	basic_vec(T _x, T _y)
 		: x(_x)
 		, y(_y)
 	{}
 };
 
-template <>
-class basic_vec<float_t, 3> : private basic_vec<float_t, 2>
+template <typename T>
+class basic_vec<T, 3> : private basic_vec<T, 2>
 {
 public:
-	using basic_vec<float_t, 2>::x;
-	using basic_vec<float_t, 2>::y;
+	using basic_vec<T, 2>::x;
+	using basic_vec<T, 2>::y;
+
+	static const int dims = 3;
 
 	basic_vec()
-		: basic_vec<float_t, 2>()
+		: basic_vec<T, 2>()
 		, z()
 	{}
 
-	basic_vec(float_t _x, float_t _y, float_t _z)
-		: basic_vec<float_t, 2>(_x, _y)
+	basic_vec(T _x, T _y, T _z)
+		: basic_vec<T, 2>(_x, _y)
 		, z(_z)
 	{}
 
-	using basic_vec<float_t, 2>::data;
+	using basic_vec<T, 2>::data;
 
-	float_t z;
+	T z;
 };
 
-template <>
-class basic_vec<float_t, 4> : private basic_vec<float_t, 3>
+template <typename T>
+class basic_vec<T, 4> : private basic_vec<T, 3>
 {
 public:
-	using basic_vec<float_t, 3>::x;
-	using basic_vec<float_t, 3>::y;
-	using basic_vec<float_t, 3>::z;
+	using basic_vec<T, 3>::x;
+	using basic_vec<T, 3>::y;
+	using basic_vec<T, 3>::z;
+
+	static const int dims = 4;
 
 	basic_vec()
-		: basic_vec<float_t, 3>()
+		: basic_vec<T, 3>()
 		, w()
 	{}
 
-	basic_vec(float_t _x, float_t _y, float_t _z, float_t _w)
-		: basic_vec<float_t, 3>(_x, _y, _z)
+	basic_vec(T _x, T _y, T _z, T _w)
+		: basic_vec<T, 3>(_x, _y, _z)
 		, w(_w)
 	{}
 
-	using basic_vec<float_t, 3>::data;
+	using basic_vec<T, 3>::data;
 
-	float_t w;
+	T w;
 };
 
 // template aliases

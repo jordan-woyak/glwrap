@@ -129,7 +129,7 @@ private:
 	bound_texture(const bound_texture&) = default;
 	bound_texture& operator=(const bound_texture&) = delete;
 
-	int_t m_unit;
+	int_t const m_unit;
 };
 
 class context

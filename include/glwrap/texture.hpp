@@ -3,6 +3,8 @@
 #include "vector.hpp"
 #include "native_handle.hpp"
 #include "util.hpp"
+#include "buffer.hpp"
+#include "unpack_buffer.hpp"
 
 namespace gl
 {
@@ -31,13 +33,22 @@ public:
 		: native_handle_base<GLuint>(gen_return(glGenTextures))
 	{}
 
-private:
-	//void bind_texture_unit(int_t _unit)
-	//{
-	//	glActiveTexture(GL_TEXTURE0 + _unit);
-	//	bind();
-	//}
+	template <typename T>
+	void assign(unpack_buffer<T, D> const& _buffer)
+	{
+		bind();
+		// TODO: super lame
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _buffer.m_dims.x, _buffer.m_dims.y,
+			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
+
+private:
 	void bind();
 };
 
