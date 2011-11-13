@@ -25,8 +25,6 @@ int main()
 	gl::texture_2d tex(glc);
 	tex.assign(gl::unpack(texdata.data(), gl::pixel_format::red, {8, 8}));
 
-	//gl::renderbuffer renbuf(glc);
-
 	auto mvp_uni = prog.create_uniform<gl::matrix4>("mvp");
 	auto tex_uni = prog.create_uniform<gl::sampler_2d>("tex");
 
@@ -83,6 +81,11 @@ int main()
 	arr.bind_vertex_attribute(pos_attrib, verbuf.get_component(&FooVertex::pos));
 	arr.bind_vertex_attribute(texpos_attrib, verbuf.get_component(&FooVertex::texpos));
 	arr.bind_vertex_attribute(color_attrib, verbuf.get_component(&FooVertex::color));
+
+	gl::texture_2d tex2(glc);
+
+	gl::framebuffer framebuf(glc);
+	framebuf.attach_draw(gl::texture_attachment(tex2, 0));
 
 	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
 

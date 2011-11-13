@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "vector.hpp"
+
 namespace gl
 {
 
@@ -11,5 +13,15 @@ GLuint gen_return(glgenfunc f)
 	f(1, &name);
 	return name;
 }
+
+struct pixel_block
+{
+	basic_vec<int_t, 2> lower, upper;
+
+	void bind(GLenum _target) const
+	{
+
+	}
+};
 
 }

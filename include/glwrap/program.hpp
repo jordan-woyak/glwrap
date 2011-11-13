@@ -177,6 +177,9 @@ public:
 
 	void draw_arrays(vertex_array& arr, primitive mode, int_t first, int_t count)
 	{
+		// TODO: kill
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		arr.bind();
 		glUseProgram(native_handle());
 		glDrawArrays(static_cast<GLenum>(mode), first, count);

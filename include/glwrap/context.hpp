@@ -38,6 +38,12 @@ enum class capability : GLenum
 	program_point_size = GL_PROGRAM_POINT_SIZE
 };
 
+enum class filter : GLenum
+{
+	nearest = GL_NEAREST,
+	linear = GL_LINEAR
+};
+
 enum class provoke_mode : GLenum
 {
 	first = GL_FIRST_VERTEX_CONVENTION,
@@ -277,6 +283,20 @@ public:
 		glActiveTexture(GL_TEXTURE0 + _unit);
 		_texture.bind();
 		return bound_texture<D>(_unit);
+	}
+
+	void blit_pixels(pixel_block const& src, pixel_block const& dst, filter _filter)
+	{
+		// TODO: mask
+		auto _mask = GL_COLOR_BUFFER_BIT;
+
+		src.bind(GL_READ_FRAMEBUFFER);
+		dst.bind(GL_DRAW_FRAMEBUFFER);
+
+		glBlitFramebuffer(
+			src.lower.x, src.lower.y, src.lower.x, src.lower.y,
+			dst.lower.x, dst.lower.y, dst.upper.x, dst.upper.y,
+			_mask, static_cast<GLenum>(_filter));
 	}
 };
 

@@ -42,8 +42,13 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 
+	static GLenum get_target();
+
 private:
-	void bind() const;
+	void bind() const
+	{
+		glBindTexture(get_target(), native_handle());
+	}
 };
 
 typedef texture<1> texture_1d;
@@ -51,21 +56,21 @@ typedef texture<2> texture_2d;
 typedef texture<3> texture_3d;
 
 template <>
-void texture<1>::bind() const
+GLenum texture<1>::get_target()
 {
-	glBindTexture(GL_TEXTURE_1D, native_handle());
+	return GL_TEXTURE_1D;
 }
 
 template <>
-void texture<2>::bind() const
+GLenum texture<2>::get_target()
 {
-	glBindTexture(GL_TEXTURE_2D, native_handle());
+	return GL_TEXTURE_2D;
 }
 
 template <>
-void texture<3>::bind() const
+GLenum texture<3>::get_target()
 {
-	glBindTexture(GL_TEXTURE_3D, native_handle());
+	return GL_TEXTURE_3D;
 }
 
 }
