@@ -12,23 +12,12 @@
 namespace gl
 {
 
-enum class primitive : GLenum
-{
-	points = GL_POINTS,
-	line_strip = GL_LINE_STRIP,
-	line_loop = GL_LINE_LOOP,
-	lines = GL_LINES,
-	line_strip_adjacency = GL_LINE_STRIP_ADJACENCY,
-	lines_adjacency = GL_LINES_ADJACENCY,
-	triangle_strip = GL_TRIANGLE_STRIP,
-	triangle_fan = GL_TRIANGLE_FAN,
-	triangles = GL_TRIANGLES,
-	triangle_strip_adjacency = GL_TRIANGLE_STRIP_ADJACENCY,
-	triangles_adjacency = GL_TRIANGLES_ADJACENCY
-};
+class context;
 
 class program : public native_handle_base<GLuint>
 {
+	friend class context;
+
 public:
 	~program()
 	{
@@ -165,24 +154,8 @@ public:
 	template <typename T, typename T2>
 	void set_uniform(uniform<T>& _uniform, const T2& _value)
 	{
-		glUseProgram(native_handle());
+		bind();
 		_uniform.set_value(_value);
-	}
-
-	void draw_arrays(primitive mode, int_t first, int_t count)
-	{
-		glUseProgram(native_handle());
-		glDrawArrays(static_cast<GLenum>(mode), first, count);
-	}
-
-	void draw_arrays(vertex_array& arr, primitive mode, int_t first, int_t count)
-	{
-		// TODO: kill
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		arr.bind();
-		glUseProgram(native_handle());
-		glDrawArrays(static_cast<GLenum>(mode), first, count);
 	}
 
 	explicit program(context& _context)
@@ -190,6 +163,11 @@ public:
 	{}
 
 private:
+	void bind() const
+	{
+		glUseProgram(native_handle());
+	};
+
 	// TODO: kill, move to compile parameters
 	std::string m_vertex_src;
 	std::string m_fragment_src;

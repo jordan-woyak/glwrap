@@ -3,153 +3,24 @@
 
 #include "vector.hpp"
 #include "array_buffer.hpp"
+#include "vertex_array.hpp"
 #include "attribute.hpp"
 #include "texture.hpp"
+#include "constants.hpp"
+#include "program.hpp"
 
 namespace gl
 {
 
-enum class capability : GLenum
-{
-	blend = GL_BLEND,
-	color_logic_op = GL_COLOR_LOGIC_OP,
-	cull_face = GL_CULL_FACE,
-	depth_clamp = GL_DEPTH_CLAMP,
-	dither = GL_DITHER,
-	line_smooth = GL_LINE_SMOOTH,
-	multisample = GL_MULTISAMPLE,
-
-	polygon_offset_fill = GL_POLYGON_OFFSET_FILL,
-	polygon_offset_line = GL_POLYGON_OFFSET_LINE,
-	polygon_offset_point = GL_POLYGON_OFFSET_POINT,
-	polygon_smooth = GL_POLYGON_SMOOTH,
-
-	primitive_restart = GL_PRIMITIVE_RESTART,
-
-	sample_alpha_to_coverage = GL_SAMPLE_ALPHA_TO_COVERAGE,
-	sample_alpha_to_one = GL_SAMPLE_ALPHA_TO_ONE,
-	sample_coverage = GL_SAMPLE_COVERAGE,
-
-	depth_test = GL_DEPTH_TEST,
-	scissor_test = GL_SCISSOR_TEST,
-	stencil_test = GL_STENCIL_TEST,
-
-	texture_cube_map_seamless = GL_TEXTURE_CUBE_MAP_SEAMLESS,
-	program_point_size = GL_PROGRAM_POINT_SIZE
-};
-
-enum class filter : GLenum
-{
-	nearest = GL_NEAREST,
-	linear = GL_LINEAR
-};
-
-enum class provoke_mode : GLenum
-{
-	first = GL_FIRST_VERTEX_CONVENTION,
-	last = GL_LAST_VERTEX_CONVENTION,
-};
-
-enum class stencil_action : GLenum
-{
-	keep = GL_KEEP,
-	zero = GL_ZERO,
-	replace = GL_REPLACE,
-	increment = GL_INCR,
-	increment_wrap = GL_INCR_WRAP,
-	decrement = GL_DECR,
-	decrement_wrap = GL_DECR_WRAP,
-	invert = GL_INVERT
-};
-
-enum class stencil_test : GLenum
-{
-	never = GL_NEVER,
-	less = GL_LESS,
-	less_equal = GL_LEQUAL,
-	greater = GL_GREATER,
-	greater_equal = GL_GEQUAL,
-	equal = GL_EQUAL,
-	not_equal = GL_NOTEQUAL,
-	always = GL_ALWAYS
-};
-
-enum class face : GLenum
-{
-	back = GL_BACK,
-	front = GL_FRONT,
-	both = GL_FRONT_AND_BACK
-};
-
-enum class orientation : GLenum
-{
-	cw = GL_CW,
-	ccw = GL_CCW
-};
-
-enum class blend_mode : GLenum
-{
-	add = GL_FUNC_ADD,
-	subtract = GL_FUNC_SUBTRACT,
-	reverse_subtract = GL_FUNC_REVERSE_SUBTRACT,
-	min = GL_MIN,
-	max = GL_MAX
-};
-
-enum class blend_factor : GLenum
-{
-	zero = GL_ZERO,
-	one = GL_ONE,
-	src_color = GL_SRC_COLOR,
-	inverse_src_color = GL_ONE_MINUS_SRC_COLOR,
-	dst_color = GL_DST_COLOR,
-	inverse_dst_color = GL_ONE_MINUS_DST_COLOR,
-	src_alpha = GL_SRC_ALPHA,
-	inverse_src_alpha = GL_ONE_MINUS_SRC_ALPHA,
-	dst_alpha = GL_DST_ALPHA,
-	inverse_dst_alpha = GL_ONE_MINUS_DST_ALPHA,
-	constant_color = GL_CONSTANT_COLOR,
-	inverse_constant_color = GL_ONE_MINUS_CONSTANT_COLOR,
-	constant_alpha = GL_CONSTANT_ALPHA,
-	inverse_constant_alpha = GL_ONE_MINUS_CONSTANT_ALPHA
-};
-
-enum class color_buffer : GLenum
-{
-	none = GL_NONE,
-	front_left = GL_FRONT_LEFT,
-	front_right = GL_FRONT_RIGHT,
-	back_left = GL_BACK_LEFT,
-	back_right = GL_BACK_RIGHT
-};
-
 class context;
-
-template <int D>
-struct bound_texture
-{
-public:
-	int_t get_unit() const
-	{
-		return m_unit;
-	}
-
-private:
-	friend class context;
-
-	explicit bound_texture(int_t _unit)
-		: m_unit(_unit)
-	{}
-
-	bound_texture(const bound_texture&) = default;
-	bound_texture& operator=(const bound_texture&) = delete;
-
-	int_t const m_unit;
-};
 
 class context
 {
 public:
+	context()
+		: m_fb(nullptr)
+	{}
+
 	void clear_color(fvec4 const& _color)
 	{
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
@@ -209,9 +80,9 @@ public:
 		glStencilMaskSeparate(static_cast<GLenum>(_face), _mask);
 	}
 
-	void viewport(int_t x, int_t y, size_t w, size_t h)
+	void viewport(basic_vec<int_t, 2> _pos, basic_vec<int_t, 2> _size)
 	{
-		glViewport(x, y, w, h);
+		glViewport(_pos.x, _pos.y, _size.x, _size.y);
 	}
 
 	void blend_color(fvec4 _color)
@@ -294,10 +165,27 @@ public:
 		dst.bind(GL_DRAW_FRAMEBUFFER);
 
 		glBlitFramebuffer(
-			src.lower.x, src.lower.y, src.lower.x, src.lower.y,
-			dst.lower.x, dst.lower.y, dst.upper.x, dst.upper.y,
+			src.m_lower.x, src.m_lower.y, src.m_lower.x, src.m_lower.y,
+			dst.m_lower.x, dst.m_lower.y, dst.m_upper.x, dst.m_upper.y,
 			_mask, static_cast<GLenum>(_filter));
 	}
+
+	void draw_arrays(program& _prog, primitive _mode, int_t _first, int_t _count)
+	{
+		// TODO: kill
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		_prog.bind();
+		glDrawArrays(static_cast<GLenum>(_mode), _first, _count);
+	}
+
+	framebuffer& default_framebuffer()
+	{
+		return m_fb;
+	}
+
+private:
+	framebuffer m_fb;
 };
 
 }

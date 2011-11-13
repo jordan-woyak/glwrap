@@ -2,10 +2,12 @@
 #pragma once
 
 #include "native_handle.hpp"
-#include "context.hpp"
+#include "attribute.hpp"
 
 namespace gl
 {
+
+class context;
 
 class vertex_array : public native_handle_base<GLuint>
 {

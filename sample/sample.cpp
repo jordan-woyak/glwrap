@@ -77,15 +77,15 @@ int main()
 	};
 	verbuf.assign(verts);
 
+	// TODO: vertex_array is very per-program, but they don't imply that
 	gl::vertex_array arr(glc);
 	arr.bind_vertex_attribute(pos_attrib, verbuf.get_component(&FooVertex::pos));
 	arr.bind_vertex_attribute(texpos_attrib, verbuf.get_component(&FooVertex::texpos));
 	arr.bind_vertex_attribute(color_attrib, verbuf.get_component(&FooVertex::color));
 
-	gl::texture_2d tex2(glc);
-
-	gl::framebuffer framebuf(glc);
-	framebuf.attach_draw(gl::texture_attachment(tex2, 0));
+	//gl::texture_2d tex2(glc);
+	//gl::framebuffer framebuf(glc);
+	//framebuf.attach_draw(gl::texture_attachment(tex2, 0));
 
 	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
 
@@ -94,7 +94,17 @@ int main()
 		glc.clear_color({1, 1, 1, 1});
 
 		prog.set_uniform(mvp_uni, modelview);
-		prog.draw_arrays(arr, gl::primitive::triangle_fan, 0, 4);
+
+		// TODO: method of using vertex array is lame
+		arr.bind();
+		glc.draw_arrays(prog, gl::primitive::triangle_fan, 0, 4);
+
+		/*
+		glc.blit_pixels(
+			gl::pixel_block(glc.default_framebuffer(), {0, 0}, {100, 100}),
+			gl::pixel_block(glc.default_framebuffer(), {100, 100}, {200, 200}),
+			gl::filter::nearest);
+		*/
 
 		modelview *= gl::rotate(6.28f / 60 / 2, 0, 0, 1);
 	});

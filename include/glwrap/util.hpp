@@ -14,14 +14,4 @@ GLuint gen_return(glgenfunc f)
 	return name;
 }
 
-struct pixel_block
-{
-	basic_vec<int_t, 2> lower, upper;
-
-	void bind(GLenum _target) const
-	{
-
-	}
-};
-
 }

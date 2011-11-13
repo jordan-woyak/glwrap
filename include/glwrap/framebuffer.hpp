@@ -59,6 +59,12 @@ attachment renderbuffer_attachment(renderbuffer& _rendbuf)
 
 class framebuffer : public native_handle_base<GLuint>
 {
+	friend class context;
+
+	framebuffer(void*)
+		: native_handle_base<GLuint>()
+	{}
+
 public:
 	framebuffer(context& _context)
 		: native_handle_base<GLuint>(gen_return(glGenFramebuffers))
@@ -99,6 +105,25 @@ private:
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, native_handle());
 	}
+};
+
+class pixel_block
+{
+	friend class context;
+
+public:
+	pixel_block(framebuffer& _fb, basic_vec<int_t, 2> _lower, basic_vec<int_t, 2> _upper)
+		: m_fb(_fb.native_handle()), m_lower(_lower), m_upper(_upper)
+	{}
+
+private:
+	void bind(GLenum _target) const
+	{
+		glBindFramebuffer(_target, m_fb);
+	}
+
+	framebuffer::native_handle_type m_fb;
+	basic_vec<int_t, 2> m_lower, m_upper;
 };
 
 }
