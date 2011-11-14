@@ -89,6 +89,13 @@ int main()
 	};
 	verbuf.assign(verts);
 
+	gl::index_buffer<gl::ushort_t> indbuf(glc);
+	std::vector<gl::ushort_t> indbufdata =
+	{
+		0, 1, 2, 3
+	};
+	indbuf.assign(indbufdata);
+
 	// TODO: vertex_array is very per-program, but they don't imply that
 	gl::vertex_array arr(glc);
 	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
@@ -110,7 +117,8 @@ int main()
 
 		prog.set_uniform(mvp_uni, modelview);
 
-		glc.draw_arrays(prog, gl::primitive::triangle_fan, 0, 4);
+		//glc.draw_arrays(prog, gl::primitive::triangle_fan, 0, 4);
+		glc.draw_elements(prog, gl::primitive::triangle_fan, indbuf, 0, 4);
 
 		/*
 		glc.blit_pixels(

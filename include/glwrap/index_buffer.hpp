@@ -28,18 +28,24 @@ public:
 	}
 
 	template <typename R>
-	void set_data(const R& range)
+	void assign(const R& range)
 	{
 		static_assert(std::is_same<typename R::value_type, element_type>::value,
 			"range must contain element_type");
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, native_handle());
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, range.size() * sizeof(element_type), range.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
+		glBufferData(GL_COPY_WRITE_BUFFER, range.size() * sizeof(element_type), range.data(), GL_STATIC_DRAW);
 	}
 
-	explicit index_buffer(device& _context)
+	explicit index_buffer(context& _context)
 		: globject(gen_return(glGenBuffers))
 	{}
+
+private:
+	void bind()
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, native_handle());
+	}
 };
 
 }
