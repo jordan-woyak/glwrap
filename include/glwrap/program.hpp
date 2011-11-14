@@ -32,24 +32,20 @@ public:
 
 		std::string uniform_header;
 		{
-		//int cur_location = 0;
-		for (auto& var : m_uniforms)
+		for (auto& uni : m_uniforms)
 		{
 			uniform_header += (boost::format("uniform %s %s;\n")
-				% var->get_type_name() % var->get_name()).str();
-			//cur_location += var->get_index_count();
+				% uni.get_variable().get_type_name() % uni.get_variable().get_name()).str();
 		}
 		}
 
 		{
 		std::string vshad_header("#version 330\n");
 
-		//int cur_location = 0;
 		for (auto& var : m_attributes)
 		{
 			vshad_header += (boost::format("in %s %s;\n")
 				% var->get_type_name() % var->get_name()).str();
-			//cur_location += var->get_index_count();
 		}
 
 		std::array<const char*, 3> vshad_src = {{vshad_header.c_str(), uniform_header.c_str(), m_vertex_src.c_str()}};
@@ -59,14 +55,10 @@ public:
 		{
 		std::string fshad_header("#version 330\n");
 
-		int cur_location = 0;
 		for (auto& var : m_fragdatas)
 		{
-			fshad_header += (boost::format("layout(location = %i) out %s %s;\n")
-				% cur_location % var->get_type_name() % var->get_name()).str();
-			var->set_location(cur_location);
-			// TODO: correct?
-			cur_location += 1;
+			fshad_header += (boost::format("out %s %s;\n")
+				% var->get_type_name() % var->get_name()).str();
 		}
 
 		std::array<const char*, 3> fshad_src = {{fshad_header.c_str(), uniform_header.c_str(), m_fragment_src.c_str()}};
@@ -85,11 +77,10 @@ public:
 	{
 		glLinkProgram(native_handle());
 
-		for (auto& var : m_uniforms)
-			var->set_location(glGetUniformLocation(native_handle(), var->get_name().c_str()));
-
-		for (auto& var : m_attributes)
-			var->set_location(glGetAttribLocation(native_handle(), var->get_name().c_str()));
+		// TODO: is this really needed?
+		for (auto& uni : m_uniforms)
+			uni.set_location(glGetUniformLocation(native_handle(),
+				uni.get_variable().get_name().c_str()));
 	}
 
 	std::string get_log() const
@@ -136,7 +127,7 @@ public:
 	template <typename T>
 	uniform<T> create_uniform(const std::string& _name)
 	{
-		m_uniforms.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
+		m_uniforms.push_back(uniform_variable(variable<T>(_name)));
 		return uniform<T>(std::prev(m_uniforms.end()));
 	}
 
@@ -177,14 +168,14 @@ private:
 		glUseProgram(native_handle());
 	};
 
-	// TODO: kill, move to compile parameters
+	// TODO: kill, move to compile parameters, maybe
 	std::string m_vertex_src;
 	std::string m_fragment_src;
 
-	// TODO: don't need pointer
+	// TODO: kill pointers
 	std::list<std::unique_ptr<variable_base>> m_attributes;
 	std::list<std::unique_ptr<variable_base>> m_fragdatas;
-	std::list<std::unique_ptr<variable_base>> m_uniforms;
+	std::list<uniform_variable> m_uniforms;
 };
 
 }

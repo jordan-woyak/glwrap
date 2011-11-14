@@ -59,16 +59,6 @@ class attribute
 	friend class vertex_array;
 
 public:
-	void bind(array_buffer_component<fvec2>& _comp)
-	{
-		_comp.bind_to_attrib((*m_iter)->get_location());
-	}
-
-	std::size_t get_location() const
-	{
-		return (*m_iter)->get_location();
-	}
-
 	std::string const& get_name() const
 	{
 		return (*m_iter)->get_name();

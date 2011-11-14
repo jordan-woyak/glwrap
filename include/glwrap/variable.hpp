@@ -9,6 +9,7 @@ namespace gl
 
 class program;
 
+// TODO: kill, location is only needed for uniforms
 class variable_base
 {
 	friend class program;
@@ -16,7 +17,6 @@ class variable_base
 public:
 	variable_base(const std::string& _name)
 		: m_name(_name)
-		, m_location()
 	{}
 
 	virtual std::string get_type_name() const = 0;
@@ -27,19 +27,8 @@ public:
 		return m_name;
 	}
 
-	GLuint get_location() const
-	{
-		return m_location;
-	}
-
 private:
-	void set_location(GLuint _location)
-	{
-		m_location = _location;
-	}
-
 	std::string m_name;
-	GLuint m_location;
 };
 
 template <typename T>
