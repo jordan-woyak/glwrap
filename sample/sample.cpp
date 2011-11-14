@@ -56,6 +56,11 @@ int main()
 
 	prog.compile();
 
+	gl::attribute_location_alloter locs(glc);
+	auto color_loc = locs.allot<gl::fvec3>();
+	auto pos_loc = locs.allot<gl::fvec2>();
+	auto texpos_loc = locs.allot<gl::fvec2>();
+
 	prog.link();
 
 	//if (!prog.is_good())
