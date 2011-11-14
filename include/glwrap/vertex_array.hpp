@@ -11,6 +11,8 @@ class context;
 
 class vertex_array : public globject
 {
+	friend class context;
+
 public:
 	explicit vertex_array(context& _context)
 		: globject(gen_return(glGenVertexArrays))
@@ -39,7 +41,7 @@ public:
 		glDisableVertexAttribArray(_location.get_index());
 	}
 
-//private:
+private:
 	void bind()
 	{
 		glBindVertexArray(native_handle());

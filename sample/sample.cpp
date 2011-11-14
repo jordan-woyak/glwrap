@@ -96,7 +96,6 @@ int main()
 	};
 	indbuf.assign(indbufdata);
 
-	// TODO: vertex_array is very per-program, but they don't imply that
 	gl::vertex_array arr(glc);
 	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
 	arr.bind_vertex_attribute(texpos_loc, verbuf.get_component(&FooVertex::texpos));
@@ -108,17 +107,14 @@ int main()
 
 	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
 
-	// TODO: method of using vertex array is lame
-	arr.bind();
-
 	dsp.set_display_func([&]
 	{
 		glc.clear_color({1, 1, 1, 1});
 
 		prog.set_uniform(mvp_uni, modelview);
 
-		//glc.draw_arrays(prog, gl::primitive::triangle_fan, 0, 4);
-		glc.draw_elements(prog, gl::primitive::triangle_fan, indbuf, 0, 4);
+		//glc.draw_arrays(prog, gl::primitive::triangle_fan, arr, 0, 4);
+		glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
 
 		/*
 		glc.blit_pixels(

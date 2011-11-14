@@ -176,22 +176,24 @@ public:
 			_mask, static_cast<GLenum>(_filter));
 	}
 
-	void draw_arrays(program& _prog, primitive _mode, int_t _first, sizei_t _count)
+	void draw_arrays(program& _prog, primitive _mode, vertex_array& _arrays, int_t _first, sizei_t _count)
 	{
 		// TODO: kill
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		_prog.bind();
+		_arrays.bind();
 		glDrawArrays(static_cast<GLenum>(_mode), _first, _count);
 	}
 
 	template <typename T>
-	void draw_elements(program& _prog, primitive _mode, index_buffer<T>& _indices, int_t _first, sizei_t _count)
+	void draw_elements(program& _prog, primitive _mode, vertex_array& _arrays, index_buffer<T>& _indices, int_t _first, sizei_t _count)
 	{
 		// TODO: kill
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		_prog.bind();
+		_arrays.bind();
 		_indices.bind();
 		glDrawElements(static_cast<GLenum>(_mode), _count,
 			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T));
