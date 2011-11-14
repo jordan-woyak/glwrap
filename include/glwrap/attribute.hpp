@@ -10,6 +10,48 @@ namespace gl
 
 class program;
 
+class attribute_location_alloter;
+
+// TODO: rename attribute_location?
+template <typename T>
+class attribute_location
+{
+	friend class attribute_location_alloter;
+
+public:
+	uint_t get_index() const
+	{
+		return m_index;
+	}
+
+private:
+	attribute_location(uint_t _index)
+		: m_index(_index)
+	{}
+
+	uint_t m_index;
+};
+
+class attribute_location_alloter
+{
+public:
+	// TODO: really need context?
+	attribute_location_alloter(context& _context)
+		: m_current_index()
+	{}
+
+	template <typename T>
+	attribute_location<T> allot()
+	{
+		attribute_location<T> ind(m_current_index);
+		m_current_index += detail::variable::get_index_count<T>();
+		return ind;
+	}
+
+private:
+	uint_t m_current_index;
+};
+
 template <typename T>
 class attribute
 {
