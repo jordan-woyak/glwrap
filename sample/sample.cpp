@@ -25,6 +25,11 @@ int main()
 	gl::texture_2d tex(glc);
 	tex.assign(gl::unpack(texdata.data(), gl::pixel_format::red, {8, 8}));
 
+	gl::attribute_location_alloter locs(glc);
+	auto color_loc = locs.allot<gl::fvec3>();
+	auto pos_loc = locs.allot<gl::fvec2>();
+	auto texpos_loc = locs.allot<gl::fvec2>();
+
 	auto mvp_uni = prog.create_uniform<gl::matrix4>("mvp");
 	auto tex_uni = prog.create_uniform<gl::sampler_2d>("tex");
 
@@ -56,10 +61,9 @@ int main()
 
 	prog.compile();
 
-	gl::attribute_location_alloter locs(glc);
-	auto color_loc = locs.allot<gl::fvec3>();
-	auto pos_loc = locs.allot<gl::fvec2>();
-	auto texpos_loc = locs.allot<gl::fvec2>();
+	prog.set_attribute(color_attrib, color_loc);
+	prog.set_attribute(pos_attrib, pos_loc);
+	prog.set_attribute(texpos_attrib, texpos_loc);
 
 	prog.link();
 
@@ -87,9 +91,9 @@ int main()
 
 	// TODO: vertex_array is very per-program, but they don't imply that
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_attrib, verbuf.get_component(&FooVertex::pos));
-	arr.bind_vertex_attribute(texpos_attrib, verbuf.get_component(&FooVertex::texpos));
-	arr.bind_vertex_attribute(color_attrib, verbuf.get_component(&FooVertex::color));
+	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
+	arr.bind_vertex_attribute(texpos_loc, verbuf.get_component(&FooVertex::texpos));
+	arr.bind_vertex_attribute(color_loc, verbuf.get_component(&FooVertex::color));
 
 	//gl::texture_2d tex2(glc);
 	//gl::framebuffer framebuf(glc);
@@ -97,14 +101,15 @@ int main()
 
 	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
 
+	// TODO: method of using vertex array is lame
+	arr.bind();
+
 	dsp.set_display_func([&]
 	{
 		glc.clear_color({1, 1, 1, 1});
 
 		prog.set_uniform(mvp_uni, modelview);
 
-		// TODO: method of using vertex array is lame
-		arr.bind();
 		glc.draw_arrays(prog, gl::primitive::triangle_fan, 0, 4);
 
 		/*

@@ -23,9 +23,9 @@ public:
 	}
 
 	template <typename T>
-	void bind_vertex_attribute(const attribute<T>& _attrib, const array_buffer_component<T>& _comp)
+	void bind_vertex_attribute(const attribute_location<T>& _location, const array_buffer_component<T>& _comp)
 	{
-		auto const index = _attrib.get_location();
+		auto const index = _location.get_index();
 
 		bind();
 		glEnableVertexAttribArray(index);
@@ -33,10 +33,10 @@ public:
 	}
 
 	template <typename T>
-	void disable_vertex_attribute(const attribute<T>& _attrib)
+	void disable_vertex_attribute(const attribute_location<T>& _location)
 	{
 		bind();
-		glDisableVertexAttribArray(_attrib.get_location());
+		glDisableVertexAttribArray(_location.get_index());
 	}
 
 //private:

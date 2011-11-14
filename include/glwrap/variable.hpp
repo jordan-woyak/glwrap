@@ -22,7 +22,7 @@ public:
 	virtual std::string get_type_name() const = 0;
 	virtual std::size_t get_index_count() const = 0;
 
-	const std::string& get_name() const
+	std::string const& get_name() const
 	{
 		return m_name;
 	}

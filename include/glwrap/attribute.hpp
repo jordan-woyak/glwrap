@@ -69,6 +69,11 @@ public:
 		return (*m_iter)->get_location();
 	}
 
+	std::string const& get_name() const
+	{
+		return (*m_iter)->get_name();
+	}
+
 private:
 	typedef std::list<std::unique_ptr<variable_base>>::iterator iter_t;
 
