@@ -85,6 +85,11 @@ public:
 		glViewport(_pos.x, _pos.y, _size.x, _size.y);
 	}
 
+	void scissor(basic_vec<int_t, 2> _pos, basic_vec<int_t, 2> _size)
+	{
+		glScissor(_pos.x, _pos.y, _size.x, _size.y);
+	}
+
 	void blend_color(fvec4 _color)
 	{
 		glBlendColor(_color.x, _color.y, _color.z, _color.w);
