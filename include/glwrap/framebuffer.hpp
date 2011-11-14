@@ -57,17 +57,17 @@ attachment renderbuffer_attachment(renderbuffer& _rendbuf)
 	});
 };
 
-class framebuffer : public native_handle_base<GLuint>
+class framebuffer : public globject
 {
 	friend class context;
 
 	framebuffer(void*)
-		: native_handle_base<GLuint>()
+		: globject()
 	{}
 
 public:
 	framebuffer(context& _context)
-		: native_handle_base<GLuint>(gen_return(glGenFramebuffers))
+		: globject(gen_return(glGenFramebuffers))
 	{}
 
 	~framebuffer()

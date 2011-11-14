@@ -12,7 +12,7 @@ namespace gl
 class context;
 
 template <int D>
-class texture : public native_handle_base<GLuint>
+class texture : public globject
 {
 	friend class context;
 
@@ -24,7 +24,7 @@ public:
 	}
 
 	explicit texture(context& _context)
-		: native_handle_base<GLuint>(gen_return(glGenTextures))
+		: globject(gen_return(glGenTextures))
 	{}
 
 	template <typename T>

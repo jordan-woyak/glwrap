@@ -9,11 +9,11 @@ namespace gl
 
 class context;
 
-class vertex_array : public native_handle_base<GLuint>
+class vertex_array : public globject
 {
 public:
 	explicit vertex_array(context& _context)
-		: native_handle_base<GLuint>(gen_return(glGenVertexArrays))
+		: globject(gen_return(glGenVertexArrays))
 	{}
 
 	~vertex_array()

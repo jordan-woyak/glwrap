@@ -5,11 +5,11 @@ namespace gl
 
 class context;
 
-class renderbuffer : public native_handle_base<GLuint>
+class renderbuffer : public globject
 {
 public:
 	renderbuffer(context& _context)
-		: native_handle_base<GLuint>(gen_return(glGenRenderbuffers))
+		: globject(gen_return(glGenRenderbuffers))
 	{}
 
 	~renderbuffer()

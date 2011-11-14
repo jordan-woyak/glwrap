@@ -5,11 +5,11 @@ namespace gl
 {
 
 template <int D>
-class sampler : public native_handle_base<GLuint>
+class sampler : public globject
 {
 public:
 	sampler(context& _context)
-		: native_handle_base<GLuint>(gen_return(glGenSamplers))
+		: globject(gen_return(glGenSamplers))
 	{}
 
 	~sampler()

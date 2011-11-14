@@ -9,7 +9,7 @@ namespace gl
 class context;
 
 template <typename T>
-class index_buffer : public native_handle_base<GLuint>
+class index_buffer : public globject
 {
 	static_assert(std::is_same<T, ubyte_t>::value
 		|| std::is_same<T, ushort_t>::value
@@ -38,7 +38,7 @@ public:
 	}
 
 	explicit index_buffer(device& _context)
-		: native_handle_base<GLuint>(gen_return(glGenBuffers))
+		: globject(gen_return(glGenBuffers))
 	{}
 };
 

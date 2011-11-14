@@ -14,7 +14,7 @@ namespace gl
 
 class context;
 
-class program : public native_handle_base<GLuint>
+class program : public globject
 {
 	friend class context;
 
@@ -159,7 +159,7 @@ public:
 	}
 
 	explicit program(context& _context)
-		: native_handle_base<GLuint>(glCreateProgram())
+		: globject(glCreateProgram())
 	{}
 
 private:

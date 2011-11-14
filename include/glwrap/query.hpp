@@ -12,11 +12,11 @@ enum class query_type : GLenum
 	time_elapsed = GL_TIME_ELAPSED
 };
 
-class query : public native_handle_base<GLuint>
+class query : public globject
 {
 public:
 	query(context& _context)
-		: native_handle_base<GLuint>(gen_return(glGenQueries))
+		: globject(gen_return(glGenQueries))
 	{}
 
 	~query()

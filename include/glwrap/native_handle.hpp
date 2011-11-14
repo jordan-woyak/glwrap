@@ -2,6 +2,9 @@
 
 #include <GL/glew.h>
 
+namespace gl
+{
+
 template <typename N>
 class native_handle_base
 {
@@ -48,3 +51,6 @@ private:
 	native_handle_type m_native_handle;
 };
 
+typedef native_handle_base<GLuint> globject;
+
+}
