@@ -55,6 +55,9 @@ int main()
 	);
 
 	prog.compile();
+
+	prog.link();
+
 	//if (!prog.is_good())
 		std::cout << "program log:\n" << prog.get_log() << std::endl;
 

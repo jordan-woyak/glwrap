@@ -80,13 +80,19 @@ public:
 		glDeleteShader(vshad);
 		glDeleteShader(fshad);
 
-		glLinkProgram(native_handle());
+		// TODO: kill
+		link();
 
 		for (auto& var : m_uniforms)
 			var->set_location(glGetUniformLocation(native_handle(), var->get_name().c_str()));
 
 		for (auto& var : m_attributes)
 			var->set_location(glGetAttribLocation(native_handle(), var->get_name().c_str()));
+	}
+
+	void link()
+	{
+		glLinkProgram(native_handle());
 	}
 
 	std::string get_log() const
