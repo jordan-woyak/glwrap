@@ -9,7 +9,6 @@ namespace gl
 
 class program;
 
-// TODO: kill, location is only needed for uniforms
 class variable_base
 {
 	friend class program;
