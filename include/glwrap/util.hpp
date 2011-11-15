@@ -78,6 +78,36 @@ static_assert(is_contiguous<int[5]>::value, "fail");
 static_assert(is_contiguous<float(&)[1]>::value, "fail");
 static_assert(!is_contiguous<std::list<char>>::value, "fail");
 
+// TODO: boost provide something for this?
+template <typename T>
+struct range_traits
+{
+	// am I being stupid?
+	template <typename U>
+	static U return_t();
+
+	typedef decltype(*std::begin(return_t<T>())) value_type;
+};
+
+template <typename T, typename U>
+typename std::enable_if<is_contiguous<U>::value &&
+	is_same_ignore_reference_cv<T, typename range_traits<U>::value_type>::value, U>::type
+get_contiguous_range(U&& _range)
+{
+	return std::forward<U>(_range);
+}
+
+// TODO: should I really just copy to a vector if the data is of the wrong type?
+template <typename T, typename U>
+typename std::enable_if<!is_contiguous<U>::value ||
+	!is_same_ignore_reference_cv<T, typename range_traits<U>::value_type>::value, std::vector<T>>::type
+get_contiguous_range(U&& _range)
+{
+	return {std::begin(_range), std::end(_range)};
+
+	static_assert(sizeof(T) == 0, "using this guy");
+}
+
 }
 
 }

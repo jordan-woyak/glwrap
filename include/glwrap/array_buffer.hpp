@@ -101,18 +101,16 @@ public:
 	}
 
 	template <typename R>
-	typename std::enable_if<!detail::is_contiguous<R>::value, void>::type
-	assign(R&& _range)
+	void assign(R&& _range)
 	{
-		assign(std::vector<T>(std::begin(_range), std::end(_range)));
-	}
+		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
+		auto& contig_range = _range;
 
-	template <typename R>
-	typename std::enable_if<detail::is_contiguous<R>::value, void>::type
-	assign(R&& _range)
-	{
-		auto const begin = std::begin(_range);
-		auto const size = std::distance(begin, std::end(_range));
+		auto const begin = std::begin(contig_range);
+		auto const size = std::distance(begin, std::end(contig_range));
+
+		static_assert(detail::is_contiguous<R>::value,
+			"range must be contiguous");
 
 		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), element_type>::value,
 			"range must contain element_type");
