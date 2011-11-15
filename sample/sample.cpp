@@ -114,7 +114,8 @@ int main()
 		prog.set_uniform(mvp_uni, modelview);
 
 		//glc.draw_arrays(prog, gl::primitive::triangle_fan, arr, 0, 4);
-		glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
+		//glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
+		glc.draw_elements_offset(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4, 0);
 
 		/*
 		glc.blit_pixels(

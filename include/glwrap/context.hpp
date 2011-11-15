@@ -187,7 +187,8 @@ public:
 	}
 
 	template <typename T>
-	void draw_elements(program& _prog, primitive _mode, vertex_array& _arrays, index_buffer<T>& _indices, int_t _first, sizei_t _count)
+	void draw_elements(program& _prog, primitive _mode, vertex_array& _arrays,
+		index_buffer<T>& _indices, int_t _first, sizei_t _count)
 	{
 		// TODO: kill
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -197,6 +198,20 @@ public:
 		_indices.bind();
 		glDrawElements(static_cast<GLenum>(_mode), _count,
 			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T));
+	}
+
+	template <typename T>
+	void draw_elements_offset(program& _prog, primitive _mode, vertex_array& _arrays,
+		index_buffer<T>& _indices, int_t _first, sizei_t _count, int_t _offset)
+	{
+		// TODO: kill
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		_prog.bind();
+		_arrays.bind();
+		_indices.bind();
+		glDrawElementsBaseVertex(static_cast<GLenum>(_mode), _count,
+			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T), _offset);
 	}
 
 	framebuffer& default_framebuffer()
