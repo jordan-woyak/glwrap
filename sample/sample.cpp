@@ -90,7 +90,7 @@ int main()
 	verbuf.assign(verts);
 
 	gl::index_buffer<gl::ushort_t> indbuf(glc);
-	std::vector<gl::ushort_t> indbufdata =
+	auto indbufdata =
 	{
 		0, 1, 2, 3
 	};

@@ -31,18 +31,21 @@ public:
 	typename std::enable_if<!detail::is_contiguous<R>::value, void>::type
 	assign(R&& _range)
 	{
-		assign(std::vector<T>(_range.begin(), _range.end()));
+		assign(std::vector<T>(std::begin(_range), std::end(_range)));
 	}
 
 	template <typename R>
 	typename std::enable_if<detail::is_contiguous<R>::value, void>::type
 	assign(R&& _range)
 	{
-		static_assert(std::is_same<typename R::value_type, element_type>::value,
+		auto const begin = std::begin(_range);
+		auto const size = std::distance(begin, std::end(_range));
+
+		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), element_type>::value,
 			"range must contain element_type");
 
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glBufferData(GL_COPY_WRITE_BUFFER, _range.size() * sizeof(element_type), _range.data(), GL_STATIC_DRAW);
+		glBufferData(GL_COPY_WRITE_BUFFER, size * sizeof(element_type), &*begin, GL_STATIC_DRAW);
 	}
 
 	explicit index_buffer(context& _context)
