@@ -7,24 +7,74 @@
 namespace gl
 {
 
-template <int Row, int Col>
-class matrix
+template <typename T, int Row, int Col>
+class basic_matrix
 {
 public:
-	matrix()
+	basic_matrix()
 	{
 		m_matrix = m_matrix.Identity();
 	}
 
-	matrix(const std::array<std::array<float_t, Col>, Row>& arr)
+	basic_matrix(const std::array<std::array<T, Col>, Row>& arr)
 	{
 		std::copy_n(arr.data()->data(), Row * Col, m_matrix.data());
 	}
 
-	matrix& operator*=(const matrix& _rhs)
+	// TODO: assignment from another T?
+
+	// multiplication
+	// TODO: template the type?
+	basic_matrix& operator*=(const basic_matrix& _rhs)
 	{
 		m_matrix *= _rhs.m_matrix;
 		return *this;
+	}
+
+	template <typename TL, typename TR, int RowL, int ColLRowR, int ColR>
+	friend basic_matrix<typename std::common_type<TL, TR>::type, RowL, ColR>
+	operator*(basic_matrix<TL, RowL, ColLRowR> const& _lhs, basic_matrix<TR, ColLRowR, ColR> const& _rhs)
+	{
+		return {_lhs.m_matrix * _rhs.m_matrix};
+	}
+
+	// scalar
+	// TODO: template the type?
+	basic_matrix& operator*=(T const& _rhs)
+	{
+		m_matrix *= _rhs;
+		return *this;
+	}
+
+	/*
+	template <typename TL, typename TR, int RowL, int ColL>
+	friend basic_matrix<typename std::common_type<TL, TR>::type, RowL, ColL>
+	operator*(basic_matrix<TL, RowL, ColL> const& _lhs, TR const& _rhs)
+	{
+		return {_lhs.m_matrix * _rhs};
+	}
+
+	template <typename TL, typename TR, int RowR, int ColR>
+	friend basic_matrix<typename std::common_type<TL, TR>::type, RowR, ColR>
+	operator*(TR const& _lhs, basic_matrix<TL, RowR, ColR> const& _rhs)
+	{
+		return _rhs * _lhs;
+	}
+	*/
+
+	// addition
+	// TODO: template the type?
+	basic_matrix& operator+=(basic_matrix const& _rhs)
+	{
+		m_matrix += _rhs.m_matrix;
+		return *this;
+	}
+
+	template <typename TL, typename TR, int RowLR, int ColLR>
+	friend basic_matrix<typename std::common_type<TL, TR>::type, RowLR, ColLR>
+	operator+(basic_matrix<TL, RowLR, ColLR> const& _lhs, basic_matrix<TR, RowLR, ColLR> const& _rhs)
+	{
+		return {_lhs.m_matrix + _rhs.m_matrix};
 	}
 
 	const float_t* data() const
@@ -33,18 +83,22 @@ public:
 	}
 
 private:
-	Eigen::Matrix<float_t, Row, Col> m_matrix;
+	basic_matrix(Eigen::Matrix<T, Row, Col> const& _mat)
+		: m_matrix(_mat)
+	{}
+
+	Eigen::Matrix<T, Row, Col> m_matrix;
 };
 
-typedef matrix<2, 2> matrix2;
-typedef matrix<2, 3> matrix2x3;
-typedef matrix<2, 4> matrix2x4;
-typedef matrix<3, 3> matrix3;
-typedef matrix<3, 2> matrix3x2;
-typedef matrix<3, 4> matrix3x4;
-typedef matrix<4, 2> matrix4x2;
-typedef matrix<4, 3> matrix4x3;
-typedef matrix<4, 4> matrix4;
+typedef basic_matrix<float_t, 2, 2> matrix2;
+typedef basic_matrix<float_t, 2, 3> matrix2x3;
+typedef basic_matrix<float_t, 2, 4> matrix2x4;
+typedef basic_matrix<float_t, 3, 3> matrix3;
+typedef basic_matrix<float_t, 3, 2> matrix3x2;
+typedef basic_matrix<float_t, 3, 4> matrix3x4;
+typedef basic_matrix<float_t, 4, 2> matrix4x2;
+typedef basic_matrix<float_t, 4, 3> matrix4x3;
+typedef basic_matrix<float_t, 4, 4> matrix4;
 
 matrix4 rotate(float_t angle, float_t x, float_t y, float_t z)
 {
