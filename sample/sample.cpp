@@ -72,11 +72,11 @@ int main()
 	prog.compile();
 
 	// bind attribute and fragdata location before linking
-	prog.set_fragdata(fragdata, glc.draw_buffer(0));
+	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
 
-	prog.set_attribute(color_attrib, color_loc);
-	prog.set_attribute(pos_attrib, pos_loc);
-	prog.set_attribute(texpos_attrib, texpos_loc);
+	prog.bind_attribute(color_attrib, color_loc);
+	prog.bind_attribute(pos_attrib, pos_loc);
+	prog.bind_attribute(texpos_attrib, texpos_loc);
 
 	prog.link();
 
@@ -125,6 +125,8 @@ int main()
 
 	glc.bind_texture(texunit, tex);
 	prog.set_uniform(tex_uni, texunit);
+
+	// TODO: binding of framebuffers
 
 	dsp.set_display_func([&]
 	{
