@@ -10,10 +10,35 @@ namespace gl
 
 class program;
 
+// TODO: rename?
+class color_number
+{
+	friend class context;
+
+public:
+	uint_t get_index() const
+	{
+		return m_index;
+	}
+
+private:
+	color_number(uint_t _index)
+		: m_index(_index)
+	{}
+
+	uint_t m_index;
+};
+
 template <typename T>
 class fragdata
 {
 	friend class program;
+
+public:
+	std::string const& get_name() const
+	{
+		return (*m_iter)->get_name();
+	}
 
 private:
 	typedef std::list<std::unique_ptr<variable_base>>::iterator iter_t;

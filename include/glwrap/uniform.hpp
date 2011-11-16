@@ -24,7 +24,7 @@ struct uniform_value
 template <>
 struct uniform_value<sampler_2d>
 {
-	typedef bound_texture<2> type;
+	typedef texture_unit<texture_2d> type;
 };
 
 }
@@ -129,9 +129,9 @@ void uniform<matrix4>::set_value(const matrix4& _value)
 }
 
 template <>
-void uniform<sampler_2d>::set_value(const bound_texture<2>& _value)
+void uniform<sampler_2d>::set_value(const texture_unit<texture_2d>& _value)
 {
-	glUniform1i(get_location(), _value.get_unit());
+	glUniform1i(get_location(), _value.get_index());
 }
 
 // TODO: rest of matrix types

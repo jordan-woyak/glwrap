@@ -145,17 +145,25 @@ public:
 		return fragdata<T>(std::prev(m_fragdatas.end()));
 	}
 
-	template <typename T, typename T2>
-	void set_uniform(uniform<T>& _uniform, const T2& _value)
+	template <typename T>
+	void set_uniform(uniform<T>& _uniform, typename detail::uniform_value<T>::type const& _value)
 	{
 		bind();
 		_uniform.set_value(_value);
 	}
 
+	// TODO: rename this bind/link_attribute?
 	template <typename T>
 	void set_attribute(attribute<T>& _attrib, attribute_location<T> const& _location)
 	{
 		glBindAttribLocation(native_handle(), _location.get_index(), _attrib.get_name().c_str());
+	}
+
+	// TODO: rename this bind/link_fragdata?
+	template <typename T>
+	void set_fragdata(fragdata<T>& _fragdata, color_number const& _number)
+	{
+		glBindFragDataLocation(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
 	}
 
 	explicit program(context& _context)

@@ -8,6 +8,7 @@
 #include "attribute.hpp"
 #include "texture.hpp"
 #include "constants.hpp"
+#include "framebuffer.hpp"
 #include "program.hpp"
 
 namespace gl
@@ -18,9 +19,11 @@ class context;
 class context
 {
 public:
+/*
 	context()
 		: m_fb(nullptr)
 	{}
+*/
 
 	void clear_color(fvec4 const& _color)
 	{
@@ -116,7 +119,7 @@ public:
 		glBlendFuncSeparate(static_cast<GLenum>(_sfactor_rgb), static_cast<GLenum>(_dfactor_rgb),
 			static_cast<GLenum>(_sfactor_alpha), static_cast<GLenum>(_dfactor_alpha));
 	}
-
+/*
 	template <typename T>
 	void bind_vertex_attribute(const attribute<T>& _attrib, const array_buffer_component<T>& _comp)
 	{
@@ -126,7 +129,7 @@ public:
 		glEnableVertexAttribArray(index);
 		_comp.bind_to_attrib(index);
 	}
-
+*/
 	// TODO: rename?
 	/*
 	template <typename T>
@@ -154,12 +157,11 @@ public:
 		glDisable(static_cast<GLenum>(_cap));
 	}
 
-	template <int D>
-	bound_texture<D> bind_texture(size_t _unit, texture<D>& _texture)
+	template <typename T>
+	void bind_texture(texture_unit<T>& _unit, T const& _texture)
 	{
-		glActiveTexture(GL_TEXTURE0 + _unit);
+		glActiveTexture(GL_TEXTURE0 + _unit.get_index());
 		_texture.bind();
-		return bound_texture<D>(_unit);
 	}
 
 	void blit_pixels(pixel_block const& src, pixel_block const& dst, filter _filter)
@@ -214,6 +216,12 @@ public:
 			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T), _offset);
 	}
 
+	color_number draw_buffer(uint_t _index)
+	{
+		return {_index};
+	}
+
+/*
 	framebuffer& default_framebuffer()
 	{
 		return m_fb;
@@ -221,6 +229,7 @@ public:
 
 private:
 	framebuffer m_fb;
+*/
 };
 
 }

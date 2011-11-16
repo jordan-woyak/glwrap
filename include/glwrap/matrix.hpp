@@ -16,6 +16,8 @@ public:
 		m_matrix = m_matrix.Identity();
 	}
 
+	// TODO: I think this array is backwards, it is only working for NxN matrices
+	// will need to fix set_uniform functions when fixing this
 	basic_matrix(const std::array<std::array<T, Col>, Row>& arr)
 	{
 		std::copy_n(arr.data()->data(), Row * Col, m_matrix.data());

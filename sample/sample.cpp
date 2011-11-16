@@ -8,8 +8,8 @@ int main()
 	gl::context glc;
 	gl::display dsp(glc);
 
-	gl::program prog(glc);
-
+	// create a texture, load the data (this needs some work)
+	gl::texture_2d tex(glc);
 	std::vector<gl::ubyte_t> texdata =
 	{
 		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -21,15 +21,25 @@ int main()
 		0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,
 		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 	};
-
-	gl::texture_2d tex(glc);
 	tex.assign(gl::unpack(texdata.data(), gl::pixel_format::red, {8, 8}));
 
+	// used connect array_buffer vertex data and program attributes together
+	// via the typeless "generic vertex attributes" in a type-safe manner
 	gl::attribute_location_alloter locs(glc);
 	auto color_loc = locs.allot<gl::fvec3>();
 	auto pos_loc = locs.allot<gl::fvec2>();
 	auto texpos_loc = locs.allot<gl::fvec2>();
 
+	// used to connect texture objects and sampler uniforms together via texture unit.
+	// ensures the correct type of texture is used
+	gl::texture_unit_alloter tunits(glc);
+	auto texunit = tunits.allot<gl::texture_2d>();
+
+	// create a program
+	gl::program prog(glc);
+
+	// define some variables in the program,
+	// they are automatically added to the program source
 	auto mvp_uni = prog.create_uniform<gl::matrix4>("mvp");
 	auto tex_uni = prog.create_uniform<gl::sampler_2d>("tex");
 
@@ -61,6 +71,9 @@ int main()
 
 	prog.compile();
 
+	// bind attribute and fragdata location before linking
+	prog.set_fragdata(fragdata, glc.draw_buffer(0));
+
 	prog.set_attribute(color_attrib, color_loc);
 	prog.set_attribute(pos_attrib, pos_loc);
 	prog.set_attribute(texpos_attrib, texpos_loc);
@@ -70,8 +83,7 @@ int main()
 	//if (!prog.is_good())
 		std::cout << "program log:\n" << prog.get_log() << std::endl;
 
-	prog.set_uniform(tex_uni, glc.bind_texture(0, tex));
-
+	// custom vertex type
 	struct FooVertex
 	{
 		gl::fvec2 pos;
@@ -79,6 +91,7 @@ int main()
 		gl::fvec3 color;
 	};
 
+	// load vertex data
 	gl::array_buffer<FooVertex> verbuf(glc);
 	std::vector<FooVertex> verts =
 	{
@@ -89,6 +102,7 @@ int main()
 	};
 	verbuf.assign(verts);
 
+	// load index data
 	gl::index_buffer<gl::ushort_t> indbuf(glc);
 	std::vector<gl::ushort_t> indbufdata =
 	{
@@ -96,6 +110,7 @@ int main()
 	};
 	indbuf.assign(indbufdata);
 
+	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
 	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
 	arr.bind_vertex_attribute(texpos_loc, verbuf.get_component(&FooVertex::texpos));
@@ -105,7 +120,11 @@ int main()
 	//gl::framebuffer framebuf(glc);
 	//framebuf.attach_draw(gl::texture_attachment(tex2, 0));
 
+	// ortho projection
 	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
+
+	glc.bind_texture(texunit, tex);
+	prog.set_uniform(tex_uni, texunit);
 
 	dsp.set_display_func([&]
 	{

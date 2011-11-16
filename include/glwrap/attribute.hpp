@@ -32,6 +32,7 @@ private:
 	uint_t m_index;
 };
 
+// TODO: name?
 class attribute_location_alloter
 {
 public:

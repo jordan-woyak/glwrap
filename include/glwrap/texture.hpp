@@ -11,6 +11,45 @@ namespace gl
 
 class context;
 
+// TODO: rename attribute_location?
+template <typename T>
+class texture_unit
+{
+	friend class texture_unit_alloter;
+
+public:
+	uint_t get_index() const
+	{
+		return m_index;
+	}
+
+private:
+	texture_unit(uint_t _index)
+		: m_index(_index)
+	{}
+
+	uint_t m_index;
+};
+
+// TODO: name?
+class texture_unit_alloter
+{
+public:
+	// TODO: really need context?
+	texture_unit_alloter(context& _context)
+		: m_current_index()
+	{}
+
+	template <typename T>
+	texture_unit<T> allot()
+	{
+		return {m_current_index++};
+	}
+
+private:
+	uint_t m_current_index;
+};
+
 template <int D>
 class texture : public globject
 {
