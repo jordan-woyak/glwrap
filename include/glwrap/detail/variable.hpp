@@ -67,43 +67,40 @@ type_name_t get_type_name<sampler_3d>()
 }
 
 template <typename T>
-std::size_t get_index_count();
+struct index_count;
 
-template <>
-std::size_t get_index_count<float_t>()
+template <typename T>
+std::size_t get_index_count()
 {
-	return 1;
+	return index_count<T>::value;
 }
 
 template <>
-std::size_t get_index_count<fvec2>()
+struct index_count<float_t>
 {
-	return 2;
-}
+	static const std::size_t value = 1;
+};
 
 template <>
-std::size_t get_index_count<fvec3>()
+template <typename T, int D>
+struct index_count<basic_vec<T, D>>
 {
-	return 3;
-}
+	static const std::size_t value = D;
+};
 
 template <>
-std::size_t get_index_count<fvec4>()
+template <typename T, int R, int C>
+struct index_count<basic_matrix<T, R, C>>
 {
-	return 4;
-}
+	static const std::size_t value = R * C;
+};
 
+// TODO: make this not needed
 template <>
-std::size_t get_index_count<matrix4>()
+struct index_count<sampler_2d>
 {
-	return 4 * 4;
-}
-
-template <>
-std::size_t get_index_count<sampler_2d>()
-{
-	return 0;
-}
+	static const std::size_t value = 0;
+};
 
 }
 }

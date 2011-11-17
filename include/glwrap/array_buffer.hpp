@@ -3,6 +3,7 @@
 #include "native_handle.hpp"
 #include "vector.hpp"
 #include "util.hpp"
+#include "detail/attribute.hpp"
 
 #include <boost/format.hpp>
 
@@ -29,40 +30,16 @@ public:
 	void bind_to_attrib(uint_t _index) const
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
-		bind(_index);
+		detail::vertex_attrib_pointer<T>::bind(_index, m_stride, m_offset);
 	}
 
 private:
-	void bind(uint_t _index) const;
+	typedef T value_type;
 
 	GLsizei m_stride;
 	const GLvoid* m_offset;
 	GLuint m_buffer;
 };
-
-template <>
-void array_buffer_component<float_t>::bind(uint_t _index) const
-{
-	glVertexAttribPointer(_index, 1, GL_FLOAT, GL_FALSE, m_stride, m_offset);
-}
-
-template <>
-void array_buffer_component<fvec2>::bind(uint_t _index) const
-{
-	glVertexAttribPointer(_index, 2, GL_FLOAT, GL_FALSE, m_stride, m_offset);
-}
-
-template <>
-void array_buffer_component<fvec3>::bind(uint_t _index) const
-{
-	glVertexAttribPointer(_index, 3, GL_FLOAT, GL_FALSE, m_stride, m_offset);
-}
-
-template <>
-void array_buffer_component<fvec4>::bind(uint_t _index) const
-{
-	glVertexAttribPointer(_index, 4, GL_FLOAT, GL_FALSE, m_stride, m_offset);
-}
 
 template <typename T>
 class array_buffer : public globject

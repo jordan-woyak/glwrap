@@ -79,7 +79,7 @@ public:
 		return {_lhs.m_matrix + _rhs.m_matrix};
 	}
 
-	const float_t* data() const
+	const T* data() const
 	{
 		return m_matrix.data();
 	}

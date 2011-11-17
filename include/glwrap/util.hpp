@@ -33,6 +33,51 @@ namespace detail
 {
 
 template <typename T>
+GLenum data_type_enum();
+
+template <>
+GLenum data_type_enum<ubyte_t>()
+{
+	return GL_UNSIGNED_BYTE;
+}
+
+template <>
+GLenum data_type_enum<byte_t>()
+{
+	return GL_BYTE;
+}
+
+template <>
+GLenum data_type_enum<ushort_t>()
+{
+	return GL_UNSIGNED_SHORT;
+}
+
+template <>
+GLenum data_type_enum<short_t>()
+{
+	return GL_SHORT;
+}
+
+template <>
+GLenum data_type_enum<uint_t>()
+{
+	return GL_UNSIGNED_INT;
+}
+
+template <>
+GLenum data_type_enum<int_t>()
+{
+	return GL_INT;
+}
+
+template <>
+GLenum data_type_enum<float_t>()
+{
+	return GL_FLOAT;
+}
+
+template <typename T>
 struct remove_reference_cv : std::remove_cv<typename std::remove_reference<T>::type>
 {};
 
