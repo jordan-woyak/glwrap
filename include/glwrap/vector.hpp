@@ -87,27 +87,14 @@ public:
 	T w;
 };
 
-// template aliases
-//template <int D>
-//using vec = basic_vec<float_t, D>;
-//using ivec = basic_vec<int_t, D>;
-//using bvec = basic_vec<bool_t, D>;
-//
-//typedef vec<2> vec2;
-//typedef vec<3> vec3;
-//typedef vec<4> vec4;
-//
-//typedef ivec<2> ivec2;
-//typedef ivec<3> ivec3;
-//typedef ivec<4> ivec4;
-//
-//typedef bvec<2> bvec2;
-//typedef bvec<3> bvec3;
-//typedef bvec<4> bvec4;
-
+// TODO: need template aliases :(
 typedef basic_vec<float_t, 2> fvec2;
 typedef basic_vec<float_t, 3> fvec3;
 typedef basic_vec<float_t, 4> fvec4;
+
+typedef basic_vec<int_t, 2> ivec2;
+typedef basic_vec<int_t, 3> ivec3;
+typedef basic_vec<int_t, 4> ivec4;
 
 template <typename T, int D>
 basic_vec<T, D>& operator*=(const basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)

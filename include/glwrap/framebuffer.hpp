@@ -110,6 +110,26 @@ attachment renderbuffer_attachment(renderbuffer& _rendbuf)
 	});
 };
 
+struct read_color_buffer
+{
+	friend class framebuffer;
+	friend class context;
+
+private:
+	read_color_buffer(GLuint _fbo, GLenum _color_buffer)
+		: m_fbo(_fbo), m_color_buffer(_color_buffer)
+	{}
+
+	void bind()
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
+		glReadBuffer(m_color_buffer);
+	}
+
+	GLuint m_fbo;
+	GLenum m_color_buffer;
+};
+
 class framebuffer : public globject
 {
 	friend class context;
@@ -135,10 +155,9 @@ public:
 		_attach.m_func(GL_READ_FRAMEBUFFER, _point.get_value());
 	}
 
-	void set_read_buffer(color_attach_point const& _point)
+	read_color_buffer read_buffer(color_attach_point const& _point)
 	{
-		bind_read();
-		glReadBuffer(_point.get_value());
+		return {native_handle(), _point.get_value()};
 	}
 
 	template <typename T>

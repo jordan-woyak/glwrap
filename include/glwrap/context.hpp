@@ -147,21 +147,23 @@ public:
 		glActiveTexture(GL_TEXTURE0 + _unit.get_index());
 		_texture.bind();
 	}
-/*
-	void blit_pixels(pixel_block const& src, pixel_block const& dst, filter _filter)
+
+	void blit_pixels(read_color_buffer& _read, filter _filter)
 	{
 		// TODO: mask
 		auto _mask = GL_COLOR_BUFFER_BIT;
 
-		src.bind(GL_READ_FRAMEBUFFER);
-		dst.bind(GL_DRAW_FRAMEBUFFER);
+		_read.bind();
+		//dst.bind(GL_DRAW_FRAMEBUFFER);
 
+/*
 		glBlitFramebuffer(
 			src.m_lower.x, src.m_lower.y, src.m_lower.x, src.m_lower.y,
 			dst.m_lower.x, dst.m_lower.y, dst.m_upper.x, dst.m_upper.y,
 			_mask, static_cast<GLenum>(_filter));
-	}
 */
+	}
+
 	void draw_arrays(program& _prog, primitive _mode, vertex_array& _arrays, int_t _first, sizei_t _count)
 	{
 		_prog.bind();
@@ -211,7 +213,7 @@ public:
 		return {GL_DEPTH_ATTACHMENT};
 	}
 
-	framebuffer& bind_default_framebuffer()
+	void bind_default_framebuffer()
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}

@@ -5,8 +5,11 @@
 
 int main()
 {
+	gl::ivec2 window_size{240, 240};
+
 	gl::context glc;
-	gl::display dsp(glc);
+	gl::display dsp(glc, window_size);
+	dsp.set_caption("glwrap-sample");
 
 	// create a texture, load the data (this needs some work)
 	gl::texture_2d tex(glc);
@@ -95,10 +98,10 @@ int main()
 	gl::array_buffer<FooVertex> verbuf(glc);
 	std::vector<FooVertex> verts =
 	{
-		{{16, 16}, {0, 0}, {1, 0, 0}},
-		{{16, 464}, {0, 1}, {0, 1, 0}},
-		{{624, 464}, {1, 1}, {0, 0, 1}},
-		{{624, 16}, {1, 0}, {0, 0, 0}},
+		{{1, 1}, {0, 0}, {1, 0, 0}},
+		{{1, 19}, {0, 1}, {0, 1, 0}},
+		{{19, 19}, {1, 1}, {0, 0, 1}},
+		{{19, 1}, {1, 0}, {0, 0, 0}},
 	};
 	verbuf.assign(verts);
 
@@ -126,19 +129,22 @@ int main()
 	gl::texture_2d tex2(glc);
 	fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(tex2, 0));
 
-	// ortho projection
-	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
-
 	glc.bind_texture(texunit, tex);
 	prog.set_uniform(tex_uni, texunit);
 
-	// TODO: binding of framebuffers
+	gl::float_t rotate = 0;
 
 	dsp.set_display_func([&]
 	{
 		glc.clear_color({1, 1, 1, 1});
 
+		gl::matrix4 modelview = gl::ortho(0, 20, 0, 20, -1000, 1000);
+		modelview *= gl::rotate(rotate, 0, 0, 1);
+
 		prog.set_uniform(mvp_uni, modelview);
+
+		if ((rotate += 3.14 * 2 / 180) >= 3.14 * 2)
+			rotate -= 3.14 * 2;
 
 		// TODO: kill this method of framebuffer binding
 		//fbuf.bind_draw();
@@ -148,13 +154,18 @@ int main()
 		//glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
 		glc.draw_elements_offset(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4, 0);
 
+		glc.bind_default_framebuffer();
+
 		/*
 		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, {100, 100},
 			{100, 100}, {200, 200},
 			gl::filter::nearest);
 		*/
+	});
 
-		modelview *= gl::rotate(6.28f / 60 / 2, 0, 0, 1);
+	dsp.set_resize_func([&](gl::ivec2 const& _size)
+	{
+		glc.viewport({0, 0}, window_size = _size);
 	});
 
 	dsp.run_loop();
