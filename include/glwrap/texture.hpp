@@ -38,16 +38,25 @@ public:
 	// TODO: really need context?
 	texture_unit_alloter(context& _context)
 		: m_current_index()
-	{}
+		, m_max_combined_texture_image_units()
+	{
+		GLint max_tunits{};
+		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_tunits);
+		m_max_combined_texture_image_units = max_tunits;
+	}
 
 	template <typename T>
 	texture_unit<T> allot()
 	{
+		if (m_current_index == m_max_combined_texture_image_units)
+			throw exception();
+
 		return {m_current_index++};
 	}
 
 private:
 	uint_t m_current_index;
+	uint_t m_max_combined_texture_image_units;
 };
 
 template <int D>

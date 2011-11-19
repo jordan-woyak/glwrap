@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "exception.hpp"
 #include "uniform.hpp"
 #include "program.hpp"
 #include "context.hpp"
