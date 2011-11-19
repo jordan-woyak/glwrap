@@ -118,27 +118,5 @@ GLenum texture<3>::get_target()
 	return GL_TEXTURE_3D;
 }
 
-template <int D>
-struct bound_texture
-{
-public:
-	int_t get_unit() const
-	{
-		return m_unit;
-	}
-
-private:
-	friend class context;
-
-	explicit bound_texture(int_t _unit)
-		: m_unit(_unit)
-	{}
-
-	bound_texture(const bound_texture&) = default;
-	bound_texture& operator=(const bound_texture&) = delete;
-
-	int_t const m_unit;
-};
-
 }
 
