@@ -10,6 +10,34 @@ namespace gl
 
 class program;
 
+struct attach_point
+{
+	friend class context;
+
+public:
+	GLenum get_value() const
+	{
+		return m_attachment;
+	}
+
+protected:
+	attach_point(GLenum _attachment)
+		: m_attachment(_attachment)
+	{}
+
+	GLenum m_attachment;
+};
+
+struct color_attach_point : attach_point
+{
+	friend class context;
+
+private:
+	color_attach_point(GLenum _attachment)
+		: attach_point(_attachment)
+	{}
+};
+
 // TODO: rename?
 class color_number
 {
@@ -57,7 +85,7 @@ class attachment
 	friend class framebuffer;
 
 public:
-	// TODO: kinda lame
+	// TODO: lame, change
 	explicit attachment(std::function<void(GLenum, GLenum)> const& _func)
 		: m_func(_func)
 	{}
@@ -101,18 +129,34 @@ public:
 		glDeleteFramebuffers(1, &nh);
 	}
 
-	void attach_draw(attachment const& _attach)
-	{
-		bind_draw();
-		// TODO: attachment point
-		_attach.m_func(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
-	}
-
-	void attach_read(attachment const& _attach)
+	void bind_attachment(attach_point const& _point, attachment const& _attach)
 	{
 		bind_read();
-		// TODO: attachment point
-		_attach.m_func(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
+		_attach.m_func(GL_READ_FRAMEBUFFER, _point.get_value());
+	}
+
+	void set_read_buffer(color_attach_point const& _point)
+	{
+		bind_read();
+		glReadBuffer(_point.get_value());
+	}
+
+	template <typename T>
+	void set_draw_buffers(T&& _attach_points)
+	{
+		std::vector<GLenum> bufs;
+
+		for (color_attach_point const& pt : _attach_points)
+			bufs.push_back(pt.get_value());
+
+		bind_draw();
+		glDrawBuffers(bufs.size(), bufs.data());
+	}
+
+	// TODO: make private
+	void bind_draw() const
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, native_handle());
 	}
 
 private:
@@ -121,34 +165,12 @@ private:
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, native_handle());
 	}
 
-	void bind_draw() const
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, native_handle());
-	}
-
+/*
 	void bind_both() const
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, native_handle());
 	}
-};
-
-class pixel_block
-{
-	friend class context;
-
-public:
-	pixel_block(framebuffer& _fb, basic_vec<int_t, 2> _lower, basic_vec<int_t, 2> _upper)
-		: m_fb(_fb.native_handle()), m_lower(_lower), m_upper(_upper)
-	{}
-
-private:
-	void bind(GLenum _target) const
-	{
-		glBindFramebuffer(_target, m_fb);
-	}
-
-	framebuffer::native_handle_type m_fb;
-	basic_vec<int_t, 2> m_lower, m_upper;
+*/
 };
 
 }

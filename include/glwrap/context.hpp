@@ -19,12 +19,6 @@ class context;
 class context
 {
 public:
-/*
-	context()
-		: m_fb(nullptr)
-	{}
-*/
-
 	void clear_color(fvec4 const& _color)
 	{
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
@@ -119,17 +113,7 @@ public:
 		glBlendFuncSeparate(static_cast<GLenum>(_sfactor_rgb), static_cast<GLenum>(_dfactor_rgb),
 			static_cast<GLenum>(_sfactor_alpha), static_cast<GLenum>(_dfactor_alpha));
 	}
-/*
-	template <typename T>
-	void bind_vertex_attribute(const attribute<T>& _attrib, const array_buffer_component<T>& _comp)
-	{
-		// TODO: unbind VAO
-		auto const index = _attrib.get_location();
 
-		glEnableVertexAttribArray(index);
-		_comp.bind_to_attrib(index);
-	}
-*/
 	// TODO: rename?
 	/*
 	template <typename T>
@@ -163,7 +147,7 @@ public:
 		glActiveTexture(GL_TEXTURE0 + _unit.get_index());
 		_texture.bind();
 	}
-
+/*
 	void blit_pixels(pixel_block const& src, pixel_block const& dst, filter _filter)
 	{
 		// TODO: mask
@@ -177,12 +161,9 @@ public:
 			dst.m_lower.x, dst.m_lower.y, dst.m_upper.x, dst.m_upper.y,
 			_mask, static_cast<GLenum>(_filter));
 	}
-
+*/
 	void draw_arrays(program& _prog, primitive _mode, vertex_array& _arrays, int_t _first, sizei_t _count)
 	{
-		// TODO: kill
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		_prog.bind();
 		_arrays.bind();
 		glDrawArrays(static_cast<GLenum>(_mode), _first, _count);
@@ -192,9 +173,6 @@ public:
 	void draw_elements(program& _prog, primitive _mode, vertex_array& _arrays,
 		index_buffer<T>& _indices, int_t _first, sizei_t _count)
 	{
-		// TODO: kill
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		_prog.bind();
 		_arrays.bind();
 		_indices.bind();
@@ -206,9 +184,6 @@ public:
 	void draw_elements_offset(program& _prog, primitive _mode, vertex_array& _arrays,
 		index_buffer<T>& _indices, int_t _first, sizei_t _count, int_t _offset)
 	{
-		// TODO: kill
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		_prog.bind();
 		_arrays.bind();
 		_indices.bind();
@@ -221,15 +196,25 @@ public:
 		return {_index};
 	}
 
-/*
-	framebuffer& default_framebuffer()
+	color_attach_point color_buffer(uint_t _index)
 	{
-		return m_fb;
+		return {static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + _index)};
 	}
 
-private:
-	framebuffer m_fb;
-*/
+	attach_point stencil_buffer()
+	{
+		return {GL_STENCIL_ATTACHMENT};
+	}
+
+	attach_point depth_buffer()
+	{
+		return {GL_DEPTH_ATTACHMENT};
+	}
+
+	framebuffer& bind_default_framebuffer()
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	}
 };
 
 }

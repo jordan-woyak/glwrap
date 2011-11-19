@@ -116,9 +116,15 @@ int main()
 	arr.bind_vertex_attribute(texpos_loc, verbuf.get_component(&FooVertex::texpos));
 	arr.bind_vertex_attribute(color_loc, verbuf.get_component(&FooVertex::color));
 
-	//gl::texture_2d tex2(glc);
-	//gl::framebuffer framebuf(glc);
-	//framebuf.attach_draw(gl::texture_attachment(tex2, 0));
+	gl::framebuffer fbuf(glc);
+	//fbuf.set_read_buffer(glc.color_buffer(0));
+	fbuf.set_draw_buffers(
+	{
+		glc.color_buffer(0)
+	});
+
+	gl::texture_2d tex2(glc);
+	fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(tex2, 0));
 
 	// ortho projection
 	gl::matrix4 modelview = gl::ortho(0, 640, 0, 480, -1000, 1000);
@@ -134,14 +140,17 @@ int main()
 
 		prog.set_uniform(mvp_uni, modelview);
 
+		// TODO: kill this method of framebuffer binding
+		//fbuf.bind_draw();
+		glc.bind_default_framebuffer();
+
 		//glc.draw_arrays(prog, gl::primitive::triangle_fan, arr, 0, 4);
 		//glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
 		glc.draw_elements_offset(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4, 0);
 
 		/*
-		glc.blit_pixels(
-			gl::pixel_block(glc.default_framebuffer(), {0, 0}, {100, 100}),
-			gl::pixel_block(glc.default_framebuffer(), {100, 100}, {200, 200}),
+		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, {100, 100},
+			{100, 100}, {200, 200},
 			gl::filter::nearest);
 		*/
 
