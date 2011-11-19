@@ -68,7 +68,7 @@ public:
 			static_cast<GLenum>(_fail), static_cast<GLenum>(_pass_fail), static_cast<GLenum>(_pass));
 	}
 
-	void stencil_func(stencil_test _test, int_t _ref, uint_t _mask, face _face = face::both)
+	void stencil_func(comparison _test, int_t _ref, uint_t _mask, face _face = face::both)
 	{
 		glStencilFuncSeparate(static_cast<GLenum>(_face), static_cast<GLenum>(_test), _ref, _mask);
 	}
@@ -114,16 +114,20 @@ public:
 			static_cast<GLenum>(_sfactor_alpha), static_cast<GLenum>(_dfactor_alpha));
 	}
 
-	// TODO: rename?
-	/*
-	template <typename T>
-	void draw_buffers(fragdata<T>& _fragdata, color_buffer _cbuf)
+	void depth_func(comparison _compar)
 	{
-		std::array<GLenum,
-
-		glDrawBuffers
+		glDepthFunc(static_cast<GLenum>(_compar));
 	}
-	*/
+
+	void depth_range(depth_t _near, depth_t _far)
+	{
+		glDepthRange(_near, _far);
+	}
+
+	void depth_mask(bool_t _enable)
+	{
+		glDepthMask(_enable);
+	}
 
 	template <typename T>
 	void disable_vertex_attribute(const attribute<T>& _attrib)

@@ -56,7 +56,7 @@ enum class stencil_action : GLenum
 	invert = GL_INVERT
 };
 
-enum class stencil_test : GLenum
+enum class comparison : GLenum
 {
 	never = GL_NEVER,
 	less = GL_LESS,
