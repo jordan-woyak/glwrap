@@ -19,10 +19,10 @@ public:
 	}
 
 	// TODO: internal format
-	void storage(basic_vec<int_t, 2> const& _dims)
+	void storage(ivec2 const& _dims)
 	{
 		bind();
-		glRenderbufferStorage(GL_RENDERBUFFER, /* TODO */ 0, _dims.x, _dims.y);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, _dims.x, _dims.y);
 	}
 
 private:

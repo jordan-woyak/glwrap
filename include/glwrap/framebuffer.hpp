@@ -120,7 +120,7 @@ private:
 		: m_fbo(_fbo), m_color_buffer(_color_buffer)
 	{}
 
-	void bind()
+	void bind() const
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
 		glReadBuffer(m_color_buffer);

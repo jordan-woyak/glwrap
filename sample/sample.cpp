@@ -126,8 +126,11 @@ int main()
 		glc.color_buffer(0)
 	});
 
-	gl::texture_2d tex2(glc);
-	fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(tex2, 0));
+	//gl::texture_2d tex2(glc);
+	//fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(tex2, 0));
+	gl::renderbuffer rendbuf(glc);
+	rendbuf.storage(window_size);
+	fbuf.bind_attachment(glc.color_buffer(0), gl::renderbuffer_attachment(rendbuf));
 
 	glc.bind_texture(texunit, tex);
 	prog.set_uniform(tex_uni, texunit);
@@ -136,6 +139,9 @@ int main()
 
 	dsp.set_display_func([&]
 	{
+		// TODO: kill this method of framebuffer binding
+		fbuf.bind_draw();
+
 		glc.clear_color({1, 1, 1, 1});
 
 		gl::matrix4 modelview = gl::ortho(0, 20, 0, 20, -1000, 1000);
@@ -146,26 +152,22 @@ int main()
 		if ((rotate += 3.14 * 2 / 180) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		// TODO: kill this method of framebuffer binding
-		//fbuf.bind_draw();
-		glc.bind_default_framebuffer();
-
 		//glc.draw_arrays(prog, gl::primitive::triangle_fan, arr, 0, 4);
 		//glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
 		glc.draw_elements_offset(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4, 0);
 
+		// TODO: kill
 		glc.bind_default_framebuffer();
 
-		/*
-		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, {100, 100},
-			{100, 100}, {200, 200},
+		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, window_size,
+			{0, 0}, window_size,
 			gl::filter::nearest);
-		*/
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);
+		rendbuf.storage(window_size);
 	});
 
 	dsp.run_loop();

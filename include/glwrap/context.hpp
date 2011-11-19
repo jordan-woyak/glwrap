@@ -148,20 +148,18 @@ public:
 		_texture.bind();
 	}
 
-	void blit_pixels(read_color_buffer& _read, filter _filter)
+	void blit_pixels(read_color_buffer const& _read, ivec2 const& _src_begin, ivec2 const& _src_end,
+		ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
 	{
 		// TODO: mask
 		auto _mask = GL_COLOR_BUFFER_BIT;
 
 		_read.bind();
-		//dst.bind(GL_DRAW_FRAMEBUFFER);
 
-/*
 		glBlitFramebuffer(
-			src.m_lower.x, src.m_lower.y, src.m_lower.x, src.m_lower.y,
-			dst.m_lower.x, dst.m_lower.y, dst.m_upper.x, dst.m_upper.y,
+			_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
+			_dst_begin.x, _dst_begin.y, _dst_end.x, _dst_end.y,
 			_mask, static_cast<GLenum>(_filter));
-*/
 	}
 
 	void draw_arrays(program& _prog, primitive _mode, vertex_array& _arrays, int_t _first, sizei_t _count)
