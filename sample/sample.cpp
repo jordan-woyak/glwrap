@@ -123,7 +123,7 @@ int main()
 	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
 
 	gl::renderbuffer rendbuf(glc);
-	rendbuf.storage(window_size);
+	rendbuf.storage(window_size, 4);
 	fbuf.bind_attachment(glc.color_buffer(0), gl::renderbuffer_attachment(rendbuf));
 
 	glc.bind_texture(texunit, tex);
@@ -166,7 +166,7 @@ int main()
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);
-		rendbuf.storage(window_size);
+		rendbuf.resize(window_size);
 	});
 
 	dsp.run_loop();
