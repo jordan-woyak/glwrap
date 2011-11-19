@@ -44,7 +44,7 @@ int main()
 	// define some variables in the program,
 	// they are automatically added to the program source
 	auto mvp_uni = prog.create_uniform<gl::matrix4>("mvp");
-	auto tex_uni = prog.create_uniform<gl::sampler_2d>("tex");
+	auto tex_uni = prog.create_uniform<gl::texture_2d>("tex");
 
 	auto color_attrib = prog.create_attribute<gl::fvec3>("color");
 	auto pos_attrib = prog.create_attribute<gl::fvec2>("position");
@@ -128,6 +128,11 @@ int main()
 
 	glc.bind_texture(texunit, tex);
 	prog.set_uniform(tex_uni, texunit);
+
+	gl::sampler samp(glc);
+	glc.bind_sampler(texunit, samp);
+
+	samp.set_mag_filter(gl::filter::nearest);
 
 	gl::float_t rotate = 0;
 

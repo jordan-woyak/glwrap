@@ -4,7 +4,7 @@
 #include <functional>
 
 #include "../vector.hpp"
-#include "../sampler.hpp"
+#include "../texture.hpp"
 
 namespace gl
 {
@@ -49,19 +49,19 @@ type_name_t get_type_name<matrix4>()
 }
 
 template <>
-type_name_t get_type_name<sampler_1d>()
+type_name_t get_type_name<texture_1d>()
 {
 	return "sampler1D";
 }
 
 template <>
-type_name_t get_type_name<sampler_2d>()
+type_name_t get_type_name<texture_2d>()
 {
 	return "sampler2D";
 }
 
 template <>
-type_name_t get_type_name<sampler_3d>()
+type_name_t get_type_name<texture_3d>()
 {
 	return "sampler3D";
 }
@@ -97,7 +97,7 @@ struct index_count<basic_matrix<T, R, C>>
 
 // TODO: make this not needed
 template <>
-struct index_count<sampler_2d>
+struct index_count<texture_2d>
 {
 	static const std::size_t value = 0;
 };

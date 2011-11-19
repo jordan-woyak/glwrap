@@ -82,12 +82,9 @@ public:
 		// TODO: super lame
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _buffer.m_dims.x, _buffer.m_dims.y,
 			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
+
+		// TODO: lame
 		glGenerateMipmap(GL_TEXTURE_2D);
-
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 
 	static GLenum get_target();

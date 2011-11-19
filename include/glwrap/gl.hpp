@@ -8,6 +8,7 @@
 #include "display.hpp"
 #include "matrix.hpp"
 #include "query.hpp"
+#include "sampler.hpp"
 #include "renderbuffer.hpp"
 #include "vertex_array.hpp"
 #include "array_buffer.hpp"

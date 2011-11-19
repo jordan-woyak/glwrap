@@ -22,7 +22,7 @@ struct uniform_value
 
 // TODO: try to eliminate this
 template <>
-struct uniform_value<sampler_2d>
+struct uniform_value<texture_2d>
 {
 	typedef texture_unit<texture_2d> type;
 };
@@ -129,7 +129,7 @@ void uniform<matrix4>::set_value(const matrix4& _value)
 }
 
 template <>
-void uniform<sampler_2d>::set_value(const texture_unit<texture_2d>& _value)
+void uniform<texture_2d>::set_value(const texture_unit<texture_2d>& _value)
 {
 	glUniform1i(get_location(), _value.get_index());
 }

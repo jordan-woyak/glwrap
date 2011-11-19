@@ -6,6 +6,7 @@
 #include "index_buffer.hpp"
 #include "vertex_array.hpp"
 #include "attribute.hpp"
+#include "sampler.hpp"
 #include "texture.hpp"
 #include "constants.hpp"
 #include "framebuffer.hpp"
@@ -129,6 +130,11 @@ public:
 		glDepthMask(_enable);
 	}
 
+	void sample_coverage(float_t _value, bool_t _invert)
+	{
+		glSampleCoverage(_value, _invert);
+	}
+
 	template <typename T>
 	void disable_vertex_attribute(const attribute<T>& _attrib)
 	{
@@ -150,6 +156,12 @@ public:
 	{
 		glActiveTexture(GL_TEXTURE0 + _unit.get_index());
 		_texture.bind();
+	}
+
+	template <typename T>
+	void bind_sampler(texture_unit<T>& _unit, sampler const& _sampler)
+	{
+		_sampler.bind(_unit.get_index());
 	}
 
 	void blit_pixels(read_color_buffer const& _read, ivec2 const& _src_begin, ivec2 const& _src_end,
