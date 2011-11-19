@@ -160,16 +160,28 @@ public:
 		return {native_handle(), _point.get_value()};
 	}
 
-	template <typename T>
-	void set_draw_buffers(T&& _attach_points)
+	void bind_draw_buffer(color_number const& _number, color_attach_point const& _attach_point)
 	{
-		std::vector<GLenum> bufs;
+		auto const index = _number.get_index();
 
-		for (color_attach_point const& pt : _attach_points)
-			bufs.push_back(pt.get_value());
+		if (index >= m_draw_buffers.size())
+			m_draw_buffers.resize(index + 1, GL_NONE);
 
-		bind_draw();
-		glDrawBuffers(bufs.size(), bufs.data());
+		m_draw_buffers[index] = _attach_point.get_value();
+
+		// TODO: don't do always
+		update_draw_buffers();
+	}
+
+	void unbind_draw_buffer(color_number const& _number)
+	{
+		auto const index = _number.get_index();
+
+		if (index < m_draw_buffers.size())
+			m_draw_buffers[index] = GL_NONE;
+
+		// TODO: don't do always
+		update_draw_buffers();
 	}
 
 	// TODO: make private
@@ -184,12 +196,13 @@ private:
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, native_handle());
 	}
 
-/*
-	void bind_both() const
+	void update_draw_buffers()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, native_handle());
+		bind_draw();
+		glDrawBuffers(m_draw_buffers.size(), m_draw_buffers.data());
 	}
-*/
+
+	std::vector<GLenum> m_draw_buffers;
 };
 
 }

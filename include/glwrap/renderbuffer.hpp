@@ -19,10 +19,12 @@ public:
 	}
 
 	// TODO: internal format
+	// TODO: multisample
 	void storage(ivec2 const& _dims)
 	{
 		bind();
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, _dims.x, _dims.y);
+		//glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA, _dims.x, _dims.y);
 	}
 
 private:

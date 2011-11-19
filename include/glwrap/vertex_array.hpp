@@ -35,7 +35,7 @@ public:
 	}
 
 	template <typename T>
-	void disable_vertex_attribute(const attribute_location<T>& _location)
+	void unbind_vertex_attribute(const attribute_location<T>& _location)
 	{
 		bind();
 		glDisableVertexAttribArray(_location.get_index());

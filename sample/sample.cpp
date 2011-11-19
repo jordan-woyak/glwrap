@@ -120,14 +120,8 @@ int main()
 	arr.bind_vertex_attribute(color_loc, verbuf.get_component(&FooVertex::color));
 
 	gl::framebuffer fbuf(glc);
-	//fbuf.set_read_buffer(glc.color_buffer(0));
-	fbuf.set_draw_buffers(
-	{
-		glc.color_buffer(0)
-	});
+	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
 
-	//gl::texture_2d tex2(glc);
-	//fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(tex2, 0));
 	gl::renderbuffer rendbuf(glc);
 	rendbuf.storage(window_size);
 	fbuf.bind_attachment(glc.color_buffer(0), gl::renderbuffer_attachment(rendbuf));
@@ -149,7 +143,7 @@ int main()
 
 		prog.set_uniform(mvp_uni, modelview);
 
-		if ((rotate += 3.14 * 2 / 180) >= 3.14 * 2)
+		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
 		//glc.draw_arrays(prog, gl::primitive::triangle_fan, arr, 0, 4);
