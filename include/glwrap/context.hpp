@@ -20,7 +20,7 @@ class context;
 class context
 {
 public:
-	void clear_color(fvec4 const& _color)
+	void clear_color(vec4 const& _color)
 	{
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -89,7 +89,7 @@ public:
 		glScissor(_pos.x, _pos.y, _size.x, _size.y);
 	}
 
-	void blend_color(fvec4 _color)
+	void blend_color(vec4 _color)
 	{
 		glBlendColor(_color.x, _color.y, _color.z, _color.w);
 	}

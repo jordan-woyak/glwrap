@@ -29,9 +29,9 @@ int main()
 	// used connect array_buffer vertex data and program attributes together
 	// via the typeless "generic vertex attributes" in a type-safe manner
 	gl::attribute_location_alloter locs(glc);
-	auto color_loc = locs.allot<gl::fvec3>();
-	auto pos_loc = locs.allot<gl::fvec2>();
-	auto texpos_loc = locs.allot<gl::fvec2>();
+	auto color_loc = locs.allot<gl::vec3>();
+	auto pos_loc = locs.allot<gl::vec2>();
+	auto texpos_loc = locs.allot<gl::vec2>();
 
 	// used to connect texture objects and sampler uniforms together via texture unit.
 	// ensures the correct type of texture is used
@@ -46,11 +46,11 @@ int main()
 	auto mvp_uni = prog.create_uniform<gl::mat4>("mvp");
 	auto tex_uni = prog.create_uniform<gl::texture_2d>("tex");
 
-	auto color_attrib = prog.create_attribute<gl::fvec3>("color");
-	auto pos_attrib = prog.create_attribute<gl::fvec2>("position");
-	auto texpos_attrib = prog.create_attribute<gl::fvec2>("texpos");
+	auto color_attrib = prog.create_attribute<gl::vec3>("color");
+	auto pos_attrib = prog.create_attribute<gl::vec2>("position");
+	auto texpos_attrib = prog.create_attribute<gl::vec2>("texpos");
 
-	auto fragdata = prog.create_fragdata<gl::fvec4>("fragdata");
+	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
 
 	prog.set_vertex_shader_source(
 		"out vec3 col;"
@@ -89,9 +89,9 @@ int main()
 	// custom vertex type
 	struct FooVertex
 	{
-		gl::fvec2 pos;
-		gl::fvec2 texpos;
-		gl::fvec3 color;
+		gl::vec2 pos;
+		gl::vec2 texpos;
+		gl::vec3 color;
 	};
 
 	// load vertex data

@@ -88,9 +88,9 @@ public:
 };
 
 // TODO: need template aliases :(
-typedef basic_vec<float_t, 2> fvec2;
-typedef basic_vec<float_t, 3> fvec3;
-typedef basic_vec<float_t, 4> fvec4;
+typedef basic_vec<float_t, 2> vec2;
+typedef basic_vec<float_t, 3> vec3;
+typedef basic_vec<float_t, 4> vec4;
 
 typedef basic_vec<int_t, 2> ivec2;
 typedef basic_vec<int_t, 3> ivec3;

@@ -15,8 +15,8 @@ int main()
 	// custom vertex type
 	struct FooVertex
 	{
-		gl::fvec3 pos;
-		gl::fvec3 norm;
+		gl::vec3 pos;
+		gl::vec3 norm;
 	};
 
 	// nonsense to load ply
@@ -35,8 +35,8 @@ int main()
 
 	// allot generic vetex attrib locations
 	gl::attribute_location_alloter locs(glc);
-	auto pos_loc = locs.allot<gl::fvec3>();
-	auto norm_loc = locs.allot<gl::fvec3>();
+	auto pos_loc = locs.allot<gl::vec3>();
+	auto norm_loc = locs.allot<gl::vec3>();
 
 	// create program
 	gl::program prog(glc);
@@ -44,16 +44,16 @@ int main()
 	auto modelview_uni = prog.create_uniform<gl::mat4>("modelview");
 	auto projection_uni = prog.create_uniform<gl::mat4>("projection");
 
-	auto light_dir_uni = prog.create_uniform<gl::fvec3>("light_dir");
-	auto diff_color_uni = prog.create_uniform<gl::fvec4>("diff_color");
-	auto spec_color_uni = prog.create_uniform<gl::fvec4>("spec_color");
-	auto mat_color_uni = prog.create_uniform<gl::fvec4>("mat_color");
+	auto light_dir_uni = prog.create_uniform<gl::vec3>("light_dir");
+	auto diff_color_uni = prog.create_uniform<gl::vec4>("diff_color");
+	auto spec_color_uni = prog.create_uniform<gl::vec4>("spec_color");
+	auto mat_color_uni = prog.create_uniform<gl::vec4>("mat_color");
 	auto ambient_uni = prog.create_uniform<gl::float_t>("ambient");
 
-	auto pos_attrib = prog.create_attribute<gl::fvec3>("pos");
-	auto norm_attrib = prog.create_attribute<gl::fvec3>("norm");
+	auto pos_attrib = prog.create_attribute<gl::vec3>("pos");
+	auto norm_attrib = prog.create_attribute<gl::vec3>("norm");
 
-	auto fragdata = prog.create_fragdata<gl::fvec4>("fragdata");
+	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
 
 	prog.set_vertex_shader_source(
 		"out vec4 final_color;"

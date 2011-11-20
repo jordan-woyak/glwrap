@@ -25,19 +25,19 @@ type_name_t get_type_name<float>()
 }
 
 template <>
-type_name_t get_type_name<fvec2>()
+type_name_t get_type_name<vec2>()
 {
 	return "vec2";
 }
 
 template <>
-type_name_t get_type_name<fvec3>()
+type_name_t get_type_name<vec3>()
 {
 	return "vec3";
 }
 
 template <>
-type_name_t get_type_name<fvec4>()
+type_name_t get_type_name<vec4>()
 {
 	return "vec4";
 }
