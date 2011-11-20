@@ -114,12 +114,12 @@ int main()
 
 	gl::float_t rotate = 0;
 
-	prog.set_uniform(diff_color_uni, {0.2, 0.2, 1, 1});
+	prog.set_uniform(diff_color_uni, {1, 1, 0.75, 1});
 	prog.set_uniform(spec_color_uni, {1, 1, 1, 1});
 	prog.set_uniform(ambient_uni, 0.2);
 	prog.set_uniform(light_dir_uni, {-1, 1, -1});
 
-	prog.set_uniform(mat_color_uni, {1, 0.2, 1, 1});
+	prog.set_uniform(mat_color_uni, {0.5, 0.25, 0.125, 1});
 
 	prog.set_uniform(projection_uni, {});
 
