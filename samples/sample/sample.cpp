@@ -43,7 +43,7 @@ int main()
 
 	// define some variables in the program,
 	// they are automatically added to the program source
-	auto mvp_uni = prog.create_uniform<gl::matrix4>("mvp");
+	auto mvp_uni = prog.create_uniform<gl::mat4>("mvp");
 	auto tex_uni = prog.create_uniform<gl::texture_2d>("tex");
 
 	auto color_attrib = prog.create_attribute<gl::fvec3>("color");
@@ -147,7 +147,7 @@ int main()
 		glc.clear_color({1, 1, 1, 1});
 
 		// rotating ortho projection
-		gl::matrix4 modelview = gl::ortho(0, 20, 0, 20, -1000, 1000);
+		gl::mat4 modelview = gl::ortho(0, 20, 0, 20, -1000, 1000);
 		modelview *= gl::rotate(rotate, 0, 0, 1);
 
 		prog.set_uniform(mvp_uni, modelview);

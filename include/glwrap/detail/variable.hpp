@@ -43,13 +43,13 @@ type_name_t get_type_name<fvec4>()
 }
 
 template <>
-type_name_t get_type_name<matrix3>()
+type_name_t get_type_name<mat3>()
 {
 	return "mat3";
 }
 
 template <>
-type_name_t get_type_name<matrix4>()
+type_name_t get_type_name<mat4>()
 {
 	return "mat4";
 }
@@ -96,7 +96,7 @@ struct index_count<basic_vec<T, D>>
 
 template <>
 template <typename T, int R, int C>
-struct index_count<basic_matrix<T, R, C>>
+struct index_count<basic_mat<T, R, C>>
 {
 	static const std::size_t value = R * C;
 };

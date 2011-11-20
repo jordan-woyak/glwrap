@@ -41,8 +41,8 @@ int main()
 	// create program
 	gl::program prog(glc);
 
-	auto modelview_uni = prog.create_uniform<gl::matrix4>("modelview");
-	auto projection_uni = prog.create_uniform<gl::matrix4>("projection");
+	auto modelview_uni = prog.create_uniform<gl::mat4>("modelview");
+	auto projection_uni = prog.create_uniform<gl::mat4>("projection");
 
 	auto light_dir_uni = prog.create_uniform<gl::fvec3>("light_dir");
 	auto diff_color_uni = prog.create_uniform<gl::fvec4>("diff_color");
@@ -139,7 +139,7 @@ int main()
 		glc.clear_depth(1.0);
 
 		// rotating ortho projection
-		gl::matrix4 modelview = gl::scale(8, 8, 8) *
+		gl::mat4 modelview = gl::scale(8, 8, 8) *
 			gl::translate(0.2, -0.8, 0) *
 			gl::rotate(rotate, 0, 1, 0) *
 			gl::rotate(-0.2, 1, 0, 0);

@@ -123,13 +123,13 @@ void uniform<fvec4>::set_value(const fvec4& _value)
 
 // matrix
 template <>
-void uniform<matrix3>::set_value(const matrix3& _value)
+void uniform<mat3>::set_value(const mat3& _value)
 {
 	glUniformMatrix3fv(get_location(), 1, GL_TRUE, _value.data());
 }
 
 template <>
-void uniform<matrix4>::set_value(const matrix4& _value)
+void uniform<mat4>::set_value(const mat4& _value)
 {
 	glUniformMatrix4fv(get_location(), 1, GL_TRUE, _value.data());
 }

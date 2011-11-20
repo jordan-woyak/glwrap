@@ -8,17 +8,17 @@ namespace gl
 {
 
 template <typename T, int Row, int Col>
-class basic_matrix
+class basic_mat
 {
 public:
-	basic_matrix()
+	basic_mat()
 	{
 		m_matrix = m_matrix.Identity();
 	}
 
 	// TODO: I think this array is backwards, it is only working for NxN matrices
 	// will need to fix set_uniform functions when fixing this
-	basic_matrix(const std::array<std::array<T, Col>, Row>& _arr)
+	basic_mat(const std::array<std::array<T, Col>, Row>& _arr)
 	{
 		std::copy_n(_arr.data()->data(), Row * Col, m_matrix.data());
 	}
@@ -27,19 +27,19 @@ public:
 
 	// multiplication
 	// TODO: template the type?
-	basic_matrix& operator*=(const basic_matrix& _rhs)
+	basic_mat& operator*=(const basic_mat& _rhs)
 	{
 		m_matrix *= _rhs.m_matrix;
 		return *this;
 	}
 
 	template <typename TL, typename TR, int RowL, int ColLRowR, int ColR>
-	friend basic_matrix<typename std::common_type<TL, TR>::type, RowL, ColR>
-	operator*(basic_matrix<TL, RowL, ColLRowR> const& _lhs, basic_matrix<TR, ColLRowR, ColR> const& _rhs);
+	friend basic_mat<typename std::common_type<TL, TR>::type, RowL, ColR>
+	operator*(basic_mat<TL, RowL, ColLRowR> const& _lhs, basic_mat<TR, ColLRowR, ColR> const& _rhs);
 
 	// scalar
 	// TODO: template the type?
-	basic_matrix& operator*=(T const& _rhs)
+	basic_mat& operator*=(T const& _rhs)
 	{
 		m_matrix *= _rhs;
 		return *this;
@@ -47,15 +47,15 @@ public:
 
 	/*
 	template <typename TL, typename TR, int RowL, int ColL>
-	friend basic_matrix<typename std::common_type<TL, TR>::type, RowL, ColL>
-	operator*(basic_matrix<TL, RowL, ColL> const& _lhs, TR const& _rhs)
+	friend basic_mat<typename std::common_type<TL, TR>::type, RowL, ColL>
+	operator*(basic_mat<TL, RowL, ColL> const& _lhs, TR const& _rhs)
 	{
 		return {_lhs.m_matrix * _rhs};
 	}
 
 	template <typename TL, typename TR, int RowR, int ColR>
-	friend basic_matrix<typename std::common_type<TL, TR>::type, RowR, ColR>
-	operator*(TR const& _lhs, basic_matrix<TL, RowR, ColR> const& _rhs)
+	friend basic_mat<typename std::common_type<TL, TR>::type, RowR, ColR>
+	operator*(TR const& _lhs, basic_mat<TL, RowR, ColR> const& _rhs)
 	{
 		return _rhs * _lhs;
 	}
@@ -63,15 +63,15 @@ public:
 
 	// addition
 	// TODO: template the type?
-	basic_matrix& operator+=(basic_matrix const& _rhs)
+	basic_mat& operator+=(basic_mat const& _rhs)
 	{
 		m_matrix += _rhs.m_matrix;
 		return *this;
 	}
 
 	template <typename TL, typename TR, int RowLR, int ColLR>
-	friend basic_matrix<typename std::common_type<TL, TR>::type, RowLR, ColLR>
-	operator+(basic_matrix<TL, RowLR, ColLR> const& _lhs, basic_matrix<TR, RowLR, ColLR> const& _rhs);
+	friend basic_mat<typename std::common_type<TL, TR>::type, RowLR, ColLR>
+	operator+(basic_mat<TL, RowLR, ColLR> const& _lhs, basic_mat<TR, RowLR, ColLR> const& _rhs);
 
 	const T* data() const
 	{
@@ -79,7 +79,7 @@ public:
 	}
 
 private:
-	basic_matrix(Eigen::Matrix<T, Row, Col> const& _mat)
+	basic_mat(Eigen::Matrix<T, Row, Col> const& _mat)
 		: m_matrix(_mat)
 	{}
 
@@ -87,30 +87,30 @@ private:
 };
 
 template <typename TL, typename TR, int RowL, int ColLRowR, int ColR>
-basic_matrix<typename std::common_type<TL, TR>::type, RowL, ColR>
-operator*(basic_matrix<TL, RowL, ColLRowR> const& _lhs, basic_matrix<TR, ColLRowR, ColR> const& _rhs)
+basic_mat<typename std::common_type<TL, TR>::type, RowL, ColR>
+operator*(basic_mat<TL, RowL, ColLRowR> const& _lhs, basic_mat<TR, ColLRowR, ColR> const& _rhs)
 {
 	return {_lhs.m_matrix * _rhs.m_matrix};
 }
 
 template <typename TL, typename TR, int RowLR, int ColLR>
-basic_matrix<typename std::common_type<TL, TR>::type, RowLR, ColLR>
-operator+(basic_matrix<TL, RowLR, ColLR> const& _lhs, basic_matrix<TR, RowLR, ColLR> const& _rhs)
+basic_mat<typename std::common_type<TL, TR>::type, RowLR, ColLR>
+operator+(basic_mat<TL, RowLR, ColLR> const& _lhs, basic_mat<TR, RowLR, ColLR> const& _rhs)
 {
 	return {_lhs.m_matrix + _rhs.m_matrix};
 }
 
-typedef basic_matrix<float_t, 2, 2> matrix2;
-typedef basic_matrix<float_t, 2, 3> matrix2x3;
-typedef basic_matrix<float_t, 2, 4> matrix2x4;
-typedef basic_matrix<float_t, 3, 3> matrix3;
-typedef basic_matrix<float_t, 3, 2> matrix3x2;
-typedef basic_matrix<float_t, 3, 4> matrix3x4;
-typedef basic_matrix<float_t, 4, 2> matrix4x2;
-typedef basic_matrix<float_t, 4, 3> matrix4x3;
-typedef basic_matrix<float_t, 4, 4> matrix4;
+typedef basic_mat<float_t, 2, 2> mat2;
+typedef basic_mat<float_t, 2, 3> mat2x3;
+typedef basic_mat<float_t, 2, 4> mat2x4;
+typedef basic_mat<float_t, 3, 3> mat3;
+typedef basic_mat<float_t, 3, 2> mat3x2;
+typedef basic_mat<float_t, 3, 4> mat3x4;
+typedef basic_mat<float_t, 4, 2> mat4x2;
+typedef basic_mat<float_t, 4, 3> mat4x3;
+typedef basic_mat<float_t, 4, 4> mat4;
 
-matrix4 rotate(float_t angle, float_t x, float_t y, float_t z)
+mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
 {
 	auto const c = std::cos(angle);
 	auto const s = std::sin(angle);
@@ -124,7 +124,7 @@ matrix4 rotate(float_t angle, float_t x, float_t y, float_t z)
 	}}};
 }
 
-matrix4 scale(float_t x, float_t y, float_t z)
+mat4 scale(float_t x, float_t y, float_t z)
 {
 	return
 	{{{
@@ -135,7 +135,7 @@ matrix4 scale(float_t x, float_t y, float_t z)
 	}}};
 }
 
-matrix4 translate(float_t x, float_t y, float_t z)
+mat4 translate(float_t x, float_t y, float_t z)
 {
 	return
 	{{{
@@ -146,7 +146,7 @@ matrix4 translate(float_t x, float_t y, float_t z)
 	}}};
 }
 
-matrix4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
+mat4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
 {
 	return
 	{{{
@@ -157,7 +157,7 @@ matrix4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t 
 	}}};
 }
 
-matrix4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
+mat4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
 {
 	auto const a = (right + left) / (right - left);
 	auto const b = (top + bottom) / (top - bottom);
