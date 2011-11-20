@@ -56,7 +56,10 @@ int main()
 		"void main(void)"
 		"{"
 			"vec3 vertex_normal = normalize(mat3(modelview) * norm);"
-			"diffuse = max(dot(vertex_normal, light_dir), 0.0);"
+			"diffuse = max(dot(vertex_normal, normalize(light_dir)), 0.0);"
+
+			//"diffuse *= 0.5;"
+			//"diffuse += 0.25;"
 
 			"gl_Position = modelview * vec4(pos, 1);"
 		"}"
@@ -67,6 +70,7 @@ int main()
 
 		"void main(void)"
 		"{"
+			// don't need to multiply here
 			"fragdata = vec4(color.rgb * diffuse, color.a);"
 		"}"
 	);
