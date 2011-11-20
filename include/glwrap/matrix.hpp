@@ -18,9 +18,9 @@ public:
 
 	// TODO: I think this array is backwards, it is only working for NxN matrices
 	// will need to fix set_uniform functions when fixing this
-	basic_matrix(const std::array<std::array<T, Col>, Row>& arr)
+	basic_matrix(const std::array<std::array<T, Col>, Row>& _arr)
 	{
-		std::copy_n(arr.data()->data(), Row * Col, m_matrix.data());
+		std::copy_n(_arr.data()->data(), Row * Col, m_matrix.data());
 	}
 
 	// TODO: assignment from another T?
@@ -35,10 +35,7 @@ public:
 
 	template <typename TL, typename TR, int RowL, int ColLRowR, int ColR>
 	friend basic_matrix<typename std::common_type<TL, TR>::type, RowL, ColR>
-	operator*(basic_matrix<TL, RowL, ColLRowR> const& _lhs, basic_matrix<TR, ColLRowR, ColR> const& _rhs)
-	{
-		return {_lhs.m_matrix * _rhs.m_matrix};
-	}
+	operator*(basic_matrix<TL, RowL, ColLRowR> const& _lhs, basic_matrix<TR, ColLRowR, ColR> const& _rhs);
 
 	// scalar
 	// TODO: template the type?
@@ -74,10 +71,7 @@ public:
 
 	template <typename TL, typename TR, int RowLR, int ColLR>
 	friend basic_matrix<typename std::common_type<TL, TR>::type, RowLR, ColLR>
-	operator+(basic_matrix<TL, RowLR, ColLR> const& _lhs, basic_matrix<TR, RowLR, ColLR> const& _rhs)
-	{
-		return {_lhs.m_matrix + _rhs.m_matrix};
-	}
+	operator+(basic_matrix<TL, RowLR, ColLR> const& _lhs, basic_matrix<TR, RowLR, ColLR> const& _rhs);
 
 	const T* data() const
 	{
@@ -91,6 +85,20 @@ private:
 
 	Eigen::Matrix<T, Row, Col> m_matrix;
 };
+
+template <typename TL, typename TR, int RowL, int ColLRowR, int ColR>
+basic_matrix<typename std::common_type<TL, TR>::type, RowL, ColR>
+operator*(basic_matrix<TL, RowL, ColLRowR> const& _lhs, basic_matrix<TR, ColLRowR, ColR> const& _rhs)
+{
+	return {_lhs.m_matrix * _rhs.m_matrix};
+}
+
+template <typename TL, typename TR, int RowLR, int ColLR>
+basic_matrix<typename std::common_type<TL, TR>::type, RowLR, ColLR>
+operator+(basic_matrix<TL, RowLR, ColLR> const& _lhs, basic_matrix<TR, RowLR, ColLR> const& _rhs)
+{
+	return {_lhs.m_matrix + _rhs.m_matrix};
+}
 
 typedef basic_matrix<float_t, 2, 2> matrix2;
 typedef basic_matrix<float_t, 2, 3> matrix2x3;

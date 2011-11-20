@@ -41,7 +41,8 @@ int main()
 	// create program
 	gl::program prog(glc);
 
-	auto mvp_uni = prog.create_uniform<gl::matrix4>("mvp");
+	auto modelview_uni = prog.create_uniform<gl::matrix4>("modelview");
+	auto light_dir_uni = prog.create_uniform<gl::fvec3>("light_dir");
 	auto color_uni = prog.create_uniform<gl::fvec4>("color");
 
 	auto pos_attrib = prog.create_attribute<gl::fvec3>("pos");
@@ -50,16 +51,23 @@ int main()
 	auto fragdata = prog.create_fragdata<gl::fvec4>("fragdata");
 
 	prog.set_vertex_shader_source(
+		"out float diffuse;"
+
 		"void main(void)"
 		"{"
-			"gl_Position = mvp * vec4(pos, 1);"
+			"vec3 vertex_normal = normalize(mat3(modelview) * norm);"
+			"diffuse = max(dot(vertex_normal, light_dir), 0.0);"
+
+			"gl_Position = modelview * vec4(pos, 1);"
 		"}"
 	);
 
 	prog.set_fragment_shader_source(
+		"in float diffuse;"
+
 		"void main(void)"
 		"{"
-			"fragdata = color;"
+			"fragdata = vec4(color.rgb * diffuse, color.a);"
 		"}"
 	);
 
@@ -89,52 +97,43 @@ int main()
 	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
 	arr.bind_vertex_attribute(norm_loc, verbuf.get_component(&FooVertex::norm));
 
-	// an fbo
-	gl::framebuffer fbuf(glc);
-	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
-
-	// multisampled renderbuffer
-	gl::renderbuffer rendbuf(glc);
-	rendbuf.storage(window_size, 4);
-	// attach to fbo
-	fbuf.bind_attachment(glc.color_buffer(0), gl::renderbuffer_attachment(rendbuf));
-
 	gl::float_t rotate = 0;
 
 	prog.set_uniform(color_uni, {1, 1, 1, 1});
+	prog.set_uniform(light_dir_uni, {-1, 1, -1});
+
+	glc.enable(gl::capability::depth_test);
+	//glc.enable(gl::capability::cull_face);
+	//glc.front_face(gl::orientation::cw);
+
+	// TODO: kill
+	glc.bind_default_framebuffer();
 
 	dsp.set_display_func([&]
 	{
 		// TODO: kill this method of framebuffer binding
-		fbuf.bind_draw();
+		//fbuf.bind_draw();
 
 		glc.clear_color({0.2, 0.2, 0.2, 1});
+		glc.clear_depth(1.0);
 
 		// rotating ortho projection
-		gl::matrix4 modelview = gl::ortho(-1, 1, -1, 1, -1000, 1000);
-		modelview *= gl::scale(8, 8, 8);
-		modelview *= gl::translate(0, 0.75, 0);
-		modelview *= gl::rotate(rotate, 0, 0, 1);
+		gl::matrix4 modelview = gl::scale(8, 8, 8) *
+			gl::translate(0.2, -0.8, 0) *
+			gl::rotate(rotate, 0, 1, 0) *
+			gl::rotate(-0.2, 1, 0, 0);
 
-		prog.set_uniform(mvp_uni, modelview);
+		prog.set_uniform(modelview_uni, modelview);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
 		glc.draw_elements(prog, gl::primitive::triangles, arr, indbuf, 0, indices.size());
-
-		// TODO: kill
-		glc.bind_default_framebuffer();
-
-		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, window_size,
-			{0, 0}, window_size,
-			gl::filter::nearest);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);
-		rendbuf.resize(window_size);
 	});
 
 	dsp.run_loop();

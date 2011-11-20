@@ -43,6 +43,12 @@ type_name_t get_type_name<fvec4>()
 }
 
 template <>
+type_name_t get_type_name<matrix3>()
+{
+	return "mat3";
+}
+
+template <>
 type_name_t get_type_name<matrix4>()
 {
 	return "mat4";

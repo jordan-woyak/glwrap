@@ -121,7 +121,13 @@ void uniform<fvec4>::set_value(const fvec4& _value)
 	glUniform4fv(get_location(), 1, _value.data());
 }
 
-// matrix4
+// matrix
+template <>
+void uniform<matrix3>::set_value(const matrix3& _value)
+{
+	glUniformMatrix3fv(get_location(), 1, GL_TRUE, _value.data());
+}
+
 template <>
 void uniform<matrix4>::set_value(const matrix4& _value)
 {
