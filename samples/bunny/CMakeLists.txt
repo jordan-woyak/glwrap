@@ -1,0 +1,9 @@
+project(glwrap-bunny)
+
+include_directories(../../include)
+
+link_libraries(sfml-window sfml-graphics)
+
+set(CMAKE_CXX_FLAGS "-Wall -std=c++0x")
+
+add_executable(glwrap-bunny bunny.cpp)

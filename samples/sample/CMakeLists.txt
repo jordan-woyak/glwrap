@@ -1,6 +1,6 @@
 project(glwrap-sample)
 
-include_directories(../include)
+include_directories(../../include)
 
 link_libraries(sfml-window sfml-graphics)
 

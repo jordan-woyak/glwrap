@@ -119,11 +119,14 @@ int main()
 	arr.bind_vertex_attribute(texpos_loc, verbuf.get_component(&FooVertex::texpos));
 	arr.bind_vertex_attribute(color_loc, verbuf.get_component(&FooVertex::color));
 
+	// an fbo
 	gl::framebuffer fbuf(glc);
 	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
 
+	// multisampled renderbuffer
 	gl::renderbuffer rendbuf(glc);
 	rendbuf.storage(window_size, 4);
+	// attach to fbo
 	fbuf.bind_attachment(glc.color_buffer(0), gl::renderbuffer_attachment(rendbuf));
 
 	glc.bind_texture(texunit, tex);
@@ -143,6 +146,7 @@ int main()
 
 		glc.clear_color({1, 1, 1, 1});
 
+		// rotating ortho projection
 		gl::matrix4 modelview = gl::ortho(0, 20, 0, 20, -1000, 1000);
 		modelview *= gl::rotate(rotate, 0, 0, 1);
 
