@@ -16,31 +16,36 @@ int main()
 	struct FooVertex
 	{
 		gl::fvec3 pos;
-		gl::float_t intens;
+		gl::fvec3 norm;
 	};
 
+	// nonsense to load ply
 	ply::vertex_format<FooVertex> vert_fmt;
 	vert_fmt.bind("x", [](std::istream& s, FooVertex& v){ s >> v.pos.x; });
 	vert_fmt.bind("y", [](std::istream& s, FooVertex& v){ s >> v.pos.y; });
 	vert_fmt.bind("z", [](std::istream& s, FooVertex& v){ s >> v.pos.z; });
-	vert_fmt.bind("intensity", [](std::istream& s, FooVertex& v){ s >> v.intens; });
+	vert_fmt.bind("nx", [](std::istream& s, FooVertex& v){ s >> v.norm.x; });
+	vert_fmt.bind("ny", [](std::istream& s, FooVertex& v){ s >> v.norm.y; });
+	vert_fmt.bind("nz", [](std::istream& s, FooVertex& v){ s >> v.norm.z; });
 
 	std::vector<FooVertex> vertices;
 	std::vector<gl::uint_t> indices;
 
-	ply::load("../reconstruction/bun_zipper.ply", vert_fmt, vertices, indices);
+	ply::load("../bun.ply", vert_fmt, vertices, indices);
 
+	// allot generic vetex attrib locations
 	gl::attribute_location_alloter locs(glc);
 	auto pos_loc = locs.allot<gl::fvec3>();
-	auto intens_loc = locs.allot<gl::float_t>();
+	auto norm_loc = locs.allot<gl::fvec3>();
 
+	// create program
 	gl::program prog(glc);
 
 	auto mvp_uni = prog.create_uniform<gl::matrix4>("mvp");
 	auto color_uni = prog.create_uniform<gl::fvec4>("color");
 
 	auto pos_attrib = prog.create_attribute<gl::fvec3>("pos");
-	auto intens_attrib = prog.create_attribute<gl::float_t>("intens");
+	auto norm_attrib = prog.create_attribute<gl::fvec3>("norm");
 
 	auto fragdata = prog.create_fragdata<gl::fvec4>("fragdata");
 
@@ -64,7 +69,7 @@ int main()
 	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
 
 	prog.bind_attribute(pos_attrib, pos_loc);
-	prog.bind_attribute(intens_attrib, intens_loc);
+	prog.bind_attribute(norm_attrib, norm_loc);
 
 	prog.link();
 
@@ -82,7 +87,7 @@ int main()
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
 	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
-	arr.bind_vertex_attribute(intens_loc, verbuf.get_component(&FooVertex::intens));
+	arr.bind_vertex_attribute(norm_loc, verbuf.get_component(&FooVertex::norm));
 
 	// an fbo
 	gl::framebuffer fbuf(glc);
