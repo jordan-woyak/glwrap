@@ -42,6 +42,8 @@ int main()
 	gl::program prog(glc);
 
 	auto modelview_uni = prog.create_uniform<gl::matrix4>("modelview");
+	auto projection_uni = prog.create_uniform<gl::matrix4>("projection");
+
 	auto light_dir_uni = prog.create_uniform<gl::fvec3>("light_dir");
 	auto diff_color_uni = prog.create_uniform<gl::fvec4>("diff_color");
 	auto spec_color_uni = prog.create_uniform<gl::fvec4>("spec_color");
@@ -58,18 +60,20 @@ int main()
 
 		"void main(void)"
 		"{"
+			"vec3 norm_light_dir = normalize(light_dir);"
+
 			"vec3 vertex_normal = normalize(mat3(modelview) * norm);"
+			"vec3 diffuse = diff_color.rgb * max(dot(vertex_normal, norm_light_dir), 0.0);"
 
-			"vec3 diffuse = diff_color.rgb * max(dot(vertex_normal, normalize(light_dir)), 0.0);"
-
-			"vec3 spec = vertex_normal * spec_color.rgb;"
+			"vec3 eye = normalize(mat3(projection) * vec3(0, 0, -1));"
+			"vec3 spec = max(dot(vertex_normal, normalize(eye + norm_light_dir)) * 10 - 9.0, 0.0) * spec_color.rgb;"
 
 			"final_color = vec4(max(max("
 				"(mat_color.rgb * ambient),"
 				"spec),"
 				"diffuse * mat_color.rgb), mat_color.a);"
 
-			"gl_Position = modelview * vec4(pos, 1);"
+			"gl_Position = modelview * projection * vec4(pos, 1);"
 		"}"
 	);
 
@@ -116,6 +120,8 @@ int main()
 	prog.set_uniform(light_dir_uni, {-1, 1, -1});
 
 	prog.set_uniform(mat_color_uni, {1, 0.2, 1, 1});
+
+	prog.set_uniform(projection_uni, {});
 
 	glc.enable(gl::capability::depth_test);
 	//glc.enable(gl::capability::cull_face);
