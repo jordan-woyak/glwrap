@@ -101,14 +101,30 @@ operator+(basic_mat<TL, RowLR, ColLR> const& _lhs, basic_mat<TR, RowLR, ColLR> c
 }
 
 typedef basic_mat<float_t, 2, 2> mat2;
+typedef basic_mat<float_t, 2, 2> mat2x2;
 typedef basic_mat<float_t, 2, 3> mat2x3;
 typedef basic_mat<float_t, 2, 4> mat2x4;
 typedef basic_mat<float_t, 3, 3> mat3;
+typedef basic_mat<float_t, 3, 3> mat3x3;
 typedef basic_mat<float_t, 3, 2> mat3x2;
 typedef basic_mat<float_t, 3, 4> mat3x4;
 typedef basic_mat<float_t, 4, 2> mat4x2;
 typedef basic_mat<float_t, 4, 3> mat4x3;
 typedef basic_mat<float_t, 4, 4> mat4;
+typedef basic_mat<float_t, 4, 4> mat4x4;
+
+typedef basic_mat<double_t, 2, 2> dmat2;
+typedef basic_mat<double_t, 2, 2> dmat2x2;
+typedef basic_mat<double_t, 2, 3> dmat2x3;
+typedef basic_mat<double_t, 2, 4> dmat2x4;
+typedef basic_mat<double_t, 3, 3> dmat3;
+typedef basic_mat<double_t, 3, 3> dmat3x3;
+typedef basic_mat<double_t, 3, 2> dmat3x2;
+typedef basic_mat<double_t, 3, 4> dmat3x4;
+typedef basic_mat<double_t, 4, 2> dmat4x2;
+typedef basic_mat<double_t, 4, 3> dmat4x3;
+typedef basic_mat<double_t, 4, 4> dmat4;
+typedef basic_mat<double_t, 4, 4> dmat4x4;
 
 mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
 {

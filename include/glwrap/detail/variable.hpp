@@ -3,6 +3,8 @@
 #include <string>
 #include <functional>
 
+#include <boost/format.hpp>
+
 #include "../vector.hpp"
 #include "../texture.hpp"
 
@@ -13,64 +15,117 @@ namespace detail
 namespace variable
 {
 
-typedef const char* type_name_t;
+typedef std::string type_name_t;
 
 template <typename T>
-type_name_t get_type_name();
+struct glsl_var_type;
+
+template <typename T>
+type_name_t get_type_name()
+{
+	return glsl_var_type<T>::name();
+}
+
+// scalars
+template <>
+type_name_t get_type_name<bool_t>()
+{
+	return "bool";
+}
 
 template <>
-type_name_t get_type_name<float>()
+type_name_t get_type_name<int_t>()
+{
+	return "int";
+}
+
+template <>
+type_name_t get_type_name<uint_t>()
+{
+	return "uint";
+}
+
+template <>
+type_name_t get_type_name<float_t>()
 {
 	return "float";
 }
 
 template <>
-type_name_t get_type_name<vec2>()
+type_name_t get_type_name<double_t>()
 {
-	return "vec2";
+	return "double";
+}
+
+// vectors
+
+template <typename T>
+const char* vec_prefix();
+
+template <>
+const char* vec_prefix<bool_t>()
+{
+	return "b";
 }
 
 template <>
-type_name_t get_type_name<vec3>()
+const char* vec_prefix<int_t>()
 {
-	return "vec3";
+	return "i";
 }
 
 template <>
-type_name_t get_type_name<vec4>()
+const char* vec_prefix<uint_t>()
 {
-	return "vec4";
+	return "u";
 }
 
 template <>
-type_name_t get_type_name<mat3>()
+const char* vec_prefix<float_t>()
 {
-	return "mat3";
+	return "";
 }
 
 template <>
-type_name_t get_type_name<mat4>()
+const char* vec_prefix<double_t>()
 {
-	return "mat4";
+	return "d";
 }
 
 template <>
-type_name_t get_type_name<texture_1d>()
+template <typename T, int D>
+struct glsl_var_type<basic_vec<T, D>>
 {
-	return "sampler1D";
-}
+	static type_name_t name()
+	{
+		return (boost::format("%svec%d") % vec_prefix<T>() % D).str();
+	}
+};
+
+// matrix
+template <>
+template <typename T, int R, int C>
+struct glsl_var_type<basic_mat<T, R, C>>
+{
+	static_assert(std::is_same<T, float_t>::value ||
+		std::is_same<T, double_t>::value,
+		"only float and double matrices");
+
+	static type_name_t name()
+	{
+		return (boost::format("%smat%dx%d") % vec_prefix<T>() % R % C).str();
+	}
+};
 
 template <>
-type_name_t get_type_name<texture_2d>()
+template <int D>
+struct glsl_var_type<texture<D>>
 {
-	return "sampler2D";
-}
-
-template <>
-type_name_t get_type_name<texture_3d>()
-{
-	return "sampler3D";
-}
+	static type_name_t name()
+	{
+		return (boost::format("sampler%dD") % D).str();
+	}
+};
 
 template <typename T>
 struct index_count;
