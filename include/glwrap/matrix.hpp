@@ -173,4 +173,20 @@ mat4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t n
 	}}};
 }
 
+// TODO: should this be here?
+// TODO: I don't like fov being in degrees
+mat4 perspective(float_t fovy, float_t aspect, float_t znear, float_t zfar)
+{
+	auto const f = 1 / std::tan(fovy * std::atan(1.0f) / 90);
+	auto const nf = znear - zfar;
+
+	return
+	{{{
+		{{f / aspect, 0, 0, 0}},
+		{{0, f, 0, 0}},
+		{{0, 0, (zfar + znear) / nf, 2 * zfar * znear / nf}},
+		{{0, 0, -1, 0}}
+	}}};
+}
+
 }
