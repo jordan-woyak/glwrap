@@ -19,7 +19,6 @@ public:
 	{}
 
 	virtual std::string get_type_name() const = 0;
-	virtual std::size_t get_index_count() const = 0;
 
 	std::string const& get_name() const
 	{
@@ -41,11 +40,6 @@ public:
 	std::string get_type_name() const
 	{
 		return detail::variable::get_type_name<T>();
-	}
-
-	std::size_t get_index_count() const
-	{
-		return detail::variable::get_index_count<T>();
 	}
 };
 

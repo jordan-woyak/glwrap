@@ -101,13 +101,6 @@ struct index_count<basic_mat<T, R, C>>
 	static const std::size_t value = R * C;
 };
 
-// TODO: make this not needed
-template <>
-struct index_count<texture_2d>
-{
-	static const std::size_t value = 0;
-};
-
 }
 }
 }
