@@ -127,33 +127,43 @@ struct glsl_var_type<texture<D>>
 	}
 };
 
-template <typename T>
+template <typename T, typename Enable = void>
 struct index_count;
 
 template <typename T>
-std::size_t get_index_count()
+constexpr std::size_t get_index_count()
 {
 	return index_count<T>::value;
 }
 
-template <>
-struct index_count<float_t>
+template <typename T>
+struct index_count<T, typename std::enable_if<
+	std::is_same<T, int_t>::value ||
+	std::is_same<T, uint_t>::value ||
+	std::is_same<T, float_t>::value
+	, void>::type>
 {
 	static const std::size_t value = 1;
 };
 
 template <>
+std::size_t get_index_count<double_t>()
+{
+	return 2;	// TODO: correct?
+}
+
+template <>
 template <typename T, int D>
 struct index_count<basic_vec<T, D>>
 {
-	static const std::size_t value = D;
+	static const std::size_t value = get_index_count<T>() * D;
 };
 
 template <>
 template <typename T, int R, int C>
 struct index_count<basic_mat<T, R, C>>
 {
-	static const std::size_t value = R * C;
+	static const std::size_t value = get_index_count<T>() * R * C;
 };
 
 }
