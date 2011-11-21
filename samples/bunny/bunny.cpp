@@ -66,12 +66,18 @@ int main()
 			"vec3 diffuse = diff_color.rgb * max(dot(vertex_normal, norm_light_dir), 0.0);"
 
 			"vec3 eye = normalize(mat3(projection) * vec3(0, 0, -1));"
-			"vec3 spec = max(dot(vertex_normal, normalize(eye + norm_light_dir)) * 10 - 9.0, 0.0) * spec_color.rgb;"
+			"float spec_amt = dot(vertex_normal, normalize(eye + norm_light_dir));"
 
-			"final_color = vec4(max(max("
+			"if (spec_amt < 0.95)"
+				"spec_amt = 0.0;"
+			"else "
+				"spec_amt = mix(0.0, 1.0, (spec_amt - 0.95) / 0.05);"
+
+			"vec3 spec = spec_amt * spec_color.a * spec_color.rgb;"
+
+			"final_color = vec4(max("
 				"(mat_color.rgb * ambient),"
-				"spec),"
-				"diffuse * mat_color.rgb), mat_color.a);"
+				"diffuse * mat_color.rgb)+ spec, mat_color.a);"
 
 			"gl_Position = modelview * projection * vec4(pos, 1);"
 		"}"
@@ -115,7 +121,7 @@ int main()
 	gl::float_t rotate = 0;
 
 	prog.set_uniform(diff_color_uni, {1, 1, 0.75, 1});
-	prog.set_uniform(spec_color_uni, {1, 1, 1, 1});
+	prog.set_uniform(spec_color_uni, {1, 1, 1, 0.1});
 	prog.set_uniform(ambient_uni, 0.2);
 	prog.set_uniform(light_dir_uni, {-1, 1, -1});
 
