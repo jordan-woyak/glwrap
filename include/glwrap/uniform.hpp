@@ -5,29 +5,12 @@
 #include "array_buffer.hpp"
 #include "variable.hpp"
 #include "texture.hpp"
+#include "detail/uniform.hpp"
 
 namespace gl
 {
 
 class program;
-
-namespace detail
-{
-
-template <typename T>
-struct uniform_value
-{
-	typedef T type;
-};
-
-// TODO: try to eliminate this
-template <>
-struct uniform_value<texture_2d>
-{
-	typedef texture_unit<texture_2d> type;
-};
-
-}
 
 template <typename T>
 class uniform;
@@ -81,67 +64,13 @@ private:
 		return m_iter->get_location();
 	}
 
-	void set_value(typename detail::uniform_value<T>::type const&);
+	void set_value(typename detail::uniform_value<T>::type const& _value)
+	{
+		detail::set_uniform_value(get_location(), _value);
+	}
 
 	iter_t m_iter;
 };
-
-// float
-template <>
-void uniform<float_t>::set_value(const float_t& _value)
-{
-	glUniform1f(get_location(), _value);
-}
-
-// int
-template <>
-void uniform<int_t>::set_value(const int_t& _value)
-{
-	glUniform1i(get_location(), _value);
-}
-
-// vec2
-template <>
-void uniform<vec2>::set_value(const vec2& _value)
-{
-	glUniform2fv(get_location(), 1, _value.data());
-}
-
-// vec3
-template <>
-void uniform<vec3>::set_value(const vec3& _value)
-{
-	glUniform3fv(get_location(), 1, _value.data());
-}
-
-// vec4
-template <>
-void uniform<vec4>::set_value(const vec4& _value)
-{
-	glUniform4fv(get_location(), 1, _value.data());
-}
-
-// matrix
-template <>
-void uniform<mat3>::set_value(const mat3& _value)
-{
-	glUniformMatrix3fv(get_location(), 1, GL_TRUE, _value.data());
-}
-
-template <>
-void uniform<mat4>::set_value(const mat4& _value)
-{
-	glUniformMatrix4fv(get_location(), 1, GL_TRUE, _value.data());
-}
-
-template <>
-void uniform<texture_2d>::set_value(const texture_unit<texture_2d>& _value)
-{
-	glUniform1i(get_location(), _value.get_index());
-}
-
-// TODO: rest of matrix types
-// TODO: arrays
 
 }
 

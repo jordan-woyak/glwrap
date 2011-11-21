@@ -17,7 +17,27 @@ namespace variable
 
 typedef std::string type_name_t;
 
+// glsl variable name suffix
+template <typename T, typename Enable = void>
+struct glsl_var_suffix;
+
 template <typename T>
+type_name_t get_type_suffix()
+{
+	return glsl_var_suffix<T>::suffix();
+}
+
+template <typename T>
+struct glsl_var_suffix<T, std::enable_if<std::is_array<T>::value>>
+{
+	static type_name_t suffix()
+	{
+		return "";
+	}
+};
+
+// glsl variable type name
+template <typename T, typename Enable = void>
 struct glsl_var_type;
 
 template <typename T>
@@ -25,6 +45,15 @@ type_name_t get_type_name()
 {
 	return glsl_var_type<T>::name();
 }
+
+template <typename T>
+struct glsl_var_type<T, typename std::enable_if<std::is_array<T>::value>::type>
+{
+	static type_name_t name()
+	{
+		return get_type_name<typename std::remove_extent<T>::type>();
+	}
+};
 
 // scalars
 template <>
