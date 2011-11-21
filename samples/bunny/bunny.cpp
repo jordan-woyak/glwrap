@@ -138,13 +138,10 @@ int main()
 
 	dsp.set_display_func([&]
 	{
-		// TODO: kill this method of framebuffer binding
-		//fbuf.bind_draw();
-
 		glc.clear_color({0.2, 0.2, 0.2, 1});
 		glc.clear_depth(1.0);
 
-		// rotating ortho projection
+		// rotating projection
 		gl::mat4 modelview = gl::scale(8, 8, 8) *
 			gl::translate(0.2, -0.8, 0) *
 			gl::rotate(rotate, 0, 1, 0) *
