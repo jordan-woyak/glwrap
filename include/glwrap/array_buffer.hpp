@@ -16,21 +16,37 @@ class context;
 //class attribute;
 
 template <typename T>
-class array_buffer_component
+class vertex_attribute
 {
 	//friend class attribute<T>;
 
 public:
-	array_buffer_component(GLsizei _stride, const GLvoid* _offset, GLuint _buffer)
+	vertex_attribute(GLsizei _stride, const GLvoid* _offset, GLuint _buffer)
 		: m_stride(_stride)
 		, m_offset(_offset)
 		, m_buffer(_buffer)
 	{}
 
+	// TODO: ugg
 	void bind_to_attrib(uint_t _index) const
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
 		detail::vertex_attrib_pointer<T>::bind(_index, m_stride, m_offset);
+	}
+
+	const GLvoid* get_offset() const
+	{
+		return m_offset;
+	}
+
+	GLsizei get_stride() const
+	{
+		return m_stride;
+	}
+
+	GLuint get_buffer() const
+	{
+		return m_buffer;
 	}
 
 private:
@@ -40,6 +56,15 @@ private:
 	const GLvoid* m_offset;
 	GLuint m_buffer;
 };
+
+template <typename B, typename M>
+vertex_attribute<M> operator|(vertex_attribute<B> const& _attrib, M B::*_member)
+{
+	const B* const null_obj = nullptr;
+	auto const offset = reinterpret_cast<std::intptr_t>(&(null_obj->*_member));
+
+	return {_attrib.get_stride(), (char*)_attrib.get_offset() + offset, _attrib.get_buffer()};
+}
 
 template <typename T>
 class array_buffer : public globject
@@ -60,21 +85,9 @@ public:
 //		glBufferData(GL_buffer, _size * sizeof(element_type), NULL, GL_STATIC_DRAW);
 //	}
 
-	template <typename C>
-	array_buffer_component<C> get_component(C element_type::*_component)
+	vertex_attribute<T> attrib()
 	{
-		const T* const null_obj = nullptr;
-
-		GLsizei const stride = sizeof(T);
-		const GLvoid* offset = &(null_obj->*_component);
-
-		return array_buffer_component<C>(stride, offset, native_handle());
-	}
-
-	// TODO: only sane for funtypes
-	array_buffer_component<T> get_component()
-	{
-		return array_buffer_component<T>(0, 0, native_handle());
+		return {sizeof(T), 0, native_handle()};
 	}
 
 	template <typename R>

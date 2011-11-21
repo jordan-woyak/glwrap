@@ -115,8 +115,8 @@ int main()
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
-	arr.bind_vertex_attribute(norm_loc, verbuf.get_component(&FooVertex::norm));
+	arr.bind_vertex_attribute(pos_loc, verbuf.attrib() | &FooVertex::pos);
+	arr.bind_vertex_attribute(norm_loc, verbuf.attrib() | &FooVertex::norm);
 
 	gl::float_t rotate = 0;
 

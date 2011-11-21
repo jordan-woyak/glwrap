@@ -25,7 +25,7 @@ public:
 	}
 
 	template <typename T>
-	void bind_vertex_attribute(const attribute_location<T>& _location, const array_buffer_component<T>& _comp)
+	void bind_vertex_attribute(const attribute_location<T>& _location, const vertex_attribute<T>& _comp)
 	{
 		auto const index = _location.get_index();
 

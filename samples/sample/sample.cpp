@@ -115,9 +115,9 @@ int main()
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_loc, verbuf.get_component(&FooVertex::pos));
-	arr.bind_vertex_attribute(texpos_loc, verbuf.get_component(&FooVertex::texpos));
-	arr.bind_vertex_attribute(color_loc, verbuf.get_component(&FooVertex::color));
+	arr.bind_vertex_attribute(pos_loc, verbuf.attrib() | &FooVertex::pos);
+	arr.bind_vertex_attribute(texpos_loc, verbuf.attrib() | &FooVertex::texpos);
+	arr.bind_vertex_attribute(color_loc, verbuf.attrib() | &FooVertex::color);
 
 	// an fbo
 	gl::framebuffer fbuf(glc);

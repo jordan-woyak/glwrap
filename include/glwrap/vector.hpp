@@ -16,8 +16,6 @@ template <typename T>
 class basic_vec<T, 2>
 {
 public:
-	T x, y;
-
 	static const int dims = 2;
 
 	// TODO: silly
@@ -28,63 +26,62 @@ public:
 	{ return &x; }
 
 	basic_vec()
-		: x()
-		, y()
+		: x(), y()
 	{}
 
 	basic_vec(T _x, T _y)
-		: x(_x)
-		, y(_y)
+		: x(_x), y(_y)
 	{}
+
+	T x, y;
 };
 
 template <typename T>
-class basic_vec<T, 3> : private basic_vec<T, 2>
+class basic_vec<T, 3>
 {
 public:
-	using basic_vec<T, 2>::x;
-	using basic_vec<T, 2>::y;
-
 	static const int dims = 3;
 
+	// TODO: silly
+	T* data()
+	{ return &x; }
+
+	const T* data() const
+	{ return &x; }
+
 	basic_vec()
-		: basic_vec<T, 2>()
-		, z()
+		: x(), y(), z()
 	{}
 
 	basic_vec(T _x, T _y, T _z)
-		: basic_vec<T, 2>(_x, _y)
-		, z(_z)
+		: x(_x), y(_y), z(_z)
 	{}
 
-	using basic_vec<T, 2>::data;
-
-	T z;
+	T x, y, z;
 };
 
 template <typename T>
-class basic_vec<T, 4> : private basic_vec<T, 3>
+class basic_vec<T, 4>
 {
 public:
-	using basic_vec<T, 3>::x;
-	using basic_vec<T, 3>::y;
-	using basic_vec<T, 3>::z;
-
 	static const int dims = 4;
 
+	// TODO: silly
+	T* data()
+	{ return &x; }
+
+	const T* data() const
+	{ return &x; }
+
 	basic_vec()
-		: basic_vec<T, 3>()
-		, w()
+		: x(), y(), z(), w()
 	{}
 
 	basic_vec(T _x, T _y, T _z, T _w)
-		: basic_vec<T, 3>(_x, _y, _z)
-		, w(_w)
+		: x(_x), y(_y), z(_z), w(_w)
 	{}
 
-	using basic_vec<T, 3>::data;
-
-	T w;
+	T x, y, z, w;
 };
 
 // TODO: need template aliases :(
