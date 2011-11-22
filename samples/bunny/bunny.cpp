@@ -48,7 +48,8 @@ int main()
 	auto diff_color_uni = prog.create_uniform<gl::vec4>("diff_color");
 	auto spec_color_uni = prog.create_uniform<gl::vec4>("spec_color");
 	auto mat_color_uni = prog.create_uniform<gl::vec4>("mat_color");
-	auto ambient_uni = prog.create_uniform<gl::float_t>("ambient");
+	auto ambient_uni = prog.create_uniform<gl::vec4>("ambient");
+	auto shininess_uni = prog.create_uniform<gl::float_t>("shininess");
 
 	auto pos_attrib = prog.create_attribute<gl::vec3>("pos");
 	auto norm_attrib = prog.create_attribute<gl::vec3>("norm");
@@ -61,23 +62,18 @@ int main()
 		"void main(void)"
 		"{"
 			"vec3 norm_light_dir = normalize(light_dir);"
-
 			"vec3 vertex_normal = normalize(mat3(modelview) * norm);"
-			"vec3 diffuse = diff_color.rgb * max(dot(vertex_normal, norm_light_dir), 0.0);"
+			"vec3 E = normalize(mat3(projection) * vec3(0, 0, -1));"
 
-			"vec3 eye = normalize(mat3(projection) * vec3(0, 0, -1));"
-			"float spec_amt = dot(vertex_normal, normalize(eye + norm_light_dir));"
+			"vec3 Ia = ambient.rgb * mat_color.rgb * ambient.a;"
 
-			"if (spec_amt < 0.95)"
-				"spec_amt = 0.0;"
-			"else "
-				"spec_amt = mix(0.0, 1.0, (spec_amt - 0.95) / 0.05);"
+			"float LambertTerm = max(dot(vertex_normal, norm_light_dir), 0.0);"
+			"vec3 Id = diff_color.rgb * mat_color.rgb * diff_color.a * LambertTerm;"
 
-			"vec3 spec = spec_amt * spec_color.a * spec_color.rgb;"
+			"vec3 R = reflect(-norm_light_dir, vertex_normal);"
+			"vec3 Is = spec_color.rgb * spec_color.a * pow(max(dot(R, E), 0.0), shininess);"
 
-			"final_color = vec4(max("
-				"(mat_color.rgb * ambient),"
-				"diffuse * mat_color.rgb)+ spec, mat_color.a);"
+			"final_color = vec4(Ia + Id + Is, mat_color.a);"
 
 			"gl_Position = modelview * projection * vec4(pos, 1);"
 		"}"
@@ -122,8 +118,9 @@ int main()
 
 	prog.set_uniform(diff_color_uni, {1, 1, 0.75, 1});
 	prog.set_uniform(spec_color_uni, {1, 1, 1, 0.1});
-	prog.set_uniform(ambient_uni, 0.2);
+	prog.set_uniform(ambient_uni, {1, 1, 1, 0.2});
 	prog.set_uniform(light_dir_uni, {-1, 1, -1});
+	prog.set_uniform(shininess_uni, 5);
 
 	prog.set_uniform(mat_color_uni, {0.5, 0.25, 0.125, 1});
 
