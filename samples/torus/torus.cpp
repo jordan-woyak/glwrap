@@ -57,16 +57,25 @@ int main()
 	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
 
 	prog.set_vertex_shader_source(
-		"out vec4 final_color;"
+		"smooth out vec3 norm_light_dir, vertex_normal, Ia, E;"
 
 		"void main(void)"
 		"{"
-			"vec3 norm_light_dir = normalize(light_dir);"
-			"vec3 vertex_normal = normalize(mat3(modelview) * norm);"
-			"vec3 E = normalize(mat3(projection) * vec3(0, 0, -1));"
+			"norm_light_dir = normalize(light_dir);"
+			"vertex_normal = normalize(mat3(modelview) * norm);"
+			"E = normalize(mat3(projection) * vec3(0, 0, -1));"
 
-			"vec3 Ia = ambient.rgb * ambient.a;"
+			"Ia = ambient.rgb * ambient.a;"
 
+			"gl_Position = modelview * projection * vec4(pos, 1);"
+		"}"
+	);
+
+	prog.set_fragment_shader_source(
+		"in vec3 norm_light_dir, vertex_normal, Ia, E;"
+
+		"void main(void)"
+		"{"
 			"float LambertTerm = max(dot(vertex_normal, norm_light_dir), 0.0);"
 			"vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;"
 
@@ -75,17 +84,8 @@ int main()
 
 			"vec3 base = mat_color.rgb;"
 
-			"final_color = vec4((Ia + Id) * base + Is, mat_color.a);"
+			"vec4 final_color = vec4((Ia + Id) * base + Is, mat_color.a);"
 
-			"gl_Position = modelview * projection * vec4(pos, 1);"
-		"}"
-	);
-
-	prog.set_fragment_shader_source(
-		"in vec4 final_color;"
-
-		"void main(void)"
-		"{"
 			"fragdata = final_color;"
 		"}"
 	);
@@ -129,8 +129,8 @@ int main()
 	prog.set_uniform(projection_uni, {});
 
 	glc.enable(gl::capability::depth_test);
-	//glc.enable(gl::capability::cull_face);
-	//glc.front_face(gl::orientation::cw);
+	glc.enable(gl::capability::cull_face);
+	glc.front_face(gl::orientation::ccw);
 
 	// TODO: kill
 	glc.bind_default_framebuffer();
