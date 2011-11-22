@@ -92,8 +92,6 @@ void load(std::string const& _filename, vertex_format<T> const& _fmt,
 		}
 	}
 
-	std::string dummy;
-
 	while (vert_count--)
 	{
 		std::getline(file, line);
@@ -101,6 +99,7 @@ void load(std::string const& _filename, vertex_format<T> const& _fmt,
 
 		T vert{};
 
+		std::string dummy;
 		for (auto& handler : vert_handlers)
 			if (handler)
 				handler(line_stream, vert);
@@ -115,10 +114,22 @@ void load(std::string const& _filename, vertex_format<T> const& _fmt,
 		std::getline(file, line);
 		std::istringstream line_stream(std::move(line));
 
-		// TODO: not reading faces, just assuming triangles..
-		line_stream >> dummy;
+		// TODO: not reading faces properly, just assuming triangles..
+		int face_vert_count = 0;
+		line_stream >> face_vert_count;
 
-		std::copy_n(std::istream_iterator<int>(line_stream), 3, std::back_inserter(_index_data));
+		// TODO: hax for 3 and 4 vert faces
+		if (3 == face_vert_count)
+			std::copy_n(std::istream_iterator<I>(line_stream), 3, std::back_inserter(_index_data));
+		else if (4 == face_vert_count)
+		{
+			std::vector<I> tmp;
+			std::copy_n(std::istream_iterator<I>(line_stream), 4, std::back_inserter(tmp));
+
+			_index_data.insert(_index_data.end(), tmp.begin(), tmp.end());
+			_index_data.push_back(tmp[0]);
+			_index_data.push_back(tmp[2]);
+		}
 	}
 }
 
