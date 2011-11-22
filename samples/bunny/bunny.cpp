@@ -57,33 +57,37 @@ int main()
 	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
 
 	prog.set_vertex_shader_source(
-		"out vec4 final_color;"
+		"out vec3 vertex_normal, norm_light_dir, Ia, E;"
 
 		"void main(void)"
 		"{"
-			"vec3 norm_light_dir = normalize(light_dir);"
-			"vec3 vertex_normal = normalize(mat3(modelview) * norm);"
-			"vec3 E = normalize(mat3(projection) * vec3(0, 0, -1));"
+			"norm_light_dir = normalize(light_dir);"
+			"vertex_normal = mat3(modelview) * norm;"
+			"E = normalize(mat3(projection) * vec3(0, 0, -1));"
 
-			"vec3 Ia = ambient.rgb * mat_color.rgb * ambient.a;"
-
-			"float LambertTerm = max(dot(vertex_normal, norm_light_dir), 0.0);"
-			"vec3 Id = diff_color.rgb * mat_color.rgb * diff_color.a * LambertTerm;"
-
-			"vec3 R = reflect(-norm_light_dir, vertex_normal);"
-			"vec3 Is = spec_color.rgb * spec_color.a * pow(max(dot(R, E), 0.0), shininess);"
-
-			"final_color = vec4(Ia + Id + Is, mat_color.a);"
+			"Ia = ambient.rgb * ambient.a;"
 
 			"gl_Position = modelview * projection * vec4(pos, 1);"
 		"}"
 	);
 
 	prog.set_fragment_shader_source(
-		"in vec4 final_color;"
+		"in vec3 vertex_normal, norm_light_dir, Ia, E;"
 
 		"void main(void)"
 		"{"
+			"vec3 adjusted_normal = normalize(vertex_normal);"
+
+			"float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);"
+			"vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;"
+
+			"vec3 R = reflect(-norm_light_dir, adjusted_normal);"
+			"vec3 Is = spec_color.rgb * spec_color.a * pow(max(dot(R, E), 0.0), shininess);"
+
+			"vec3 base = mat_color.rgb;"
+
+			"vec4 final_color = vec4((Ia + Id) * base + Is, mat_color.a);"
+
 			"fragdata = final_color;"
 		"}"
 	);

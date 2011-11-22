@@ -92,14 +92,16 @@ int main()
 
 	prog.set_vertex_shader_source(
 		"out vec2 tpos;"
-		"out vec3 vertex_normal, norm_light_dir, E;"
+		"out vec3 vertex_normal, norm_light_dir, Ia, E;"
 
 		"void main(void)"
 		"{"
 			"tpos = texpos;"
 
 			"norm_light_dir = normalize(light_dir);"
-			"vertex_normal = normalize(mat3(modelview) * norm);"
+			"vertex_normal = mat3(modelview) * norm;"
+
+			"Ia = ambient.rgb * ambient.a;"
 
 			"E = normalize(mat3(projection) * vec3(0, 0, -1));"
 
@@ -109,24 +111,26 @@ int main()
 
 	prog.set_fragment_shader_source(
 		"in vec2 tpos;"
-		"in vec3 vertex_normal, norm_light_dir, E;"
+		"in vec3 vertex_normal, norm_light_dir, Ia, E;"
 
 		"void main(void)"
 		"{"
-			"vec3 adjusted_normal = vertex_normal;"
-			//"vec3 adjusted_normal = normalize(mat3(modelview) *  texture2D(tex_normal, tpos).rgb);"
+			"vec3 adjusted_normal = normalize(vertex_normal);"
+			//"vec3 adjusted_normal = normalize(vertex_normal + (texture2D(tex_normal, tpos).rgb * 2 - 1));"
 
 			"vec4 mat_color = texture2D(tex_color, tpos);"
 
-			"vec3 Ia = ambient.rgb * mat_color.rgb * ambient.a;"
+			"float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);"
+			"vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;"
 
-			"float LambertTerm = max(dot(vertex_normal, norm_light_dir), 0.0);"
-			"vec3 Id = diff_color.rgb * mat_color.rgb * diff_color.a * LambertTerm;"
+			"float mat_spec = texture2D(tex_spec, tpos).r;"
 
-			"vec3 R = reflect(-norm_light_dir, vertex_normal);"
-			"vec3 Is = spec_color.rgb * spec_color.a * pow(max(dot(R, E), 0.0), shininess);"
+			"vec3 R = reflect(-norm_light_dir, adjusted_normal);"
+			"vec3 Is = spec_color.rgb * spec_color.a * mat_spec * pow(max(dot(R, E), 0.0), shininess);"
 
-			"vec4 final_color = vec4(Ia + Id + Is, mat_color.a);"
+			"vec3 base = mat_color.rgb;"
+
+			"vec4 final_color = vec4((Ia + Id) * base + Is, mat_color.a);"
 
 			"fragdata = final_color;"
 		"}"

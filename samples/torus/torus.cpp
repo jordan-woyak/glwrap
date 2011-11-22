@@ -62,7 +62,7 @@ int main()
 		"void main(void)"
 		"{"
 			"norm_light_dir = normalize(light_dir);"
-			"vertex_normal = normalize(mat3(modelview) * norm);"
+			"vertex_normal = mat3(modelview) * norm;"
 			"E = normalize(mat3(projection) * vec3(0, 0, -1));"
 
 			"Ia = ambient.rgb * ambient.a;"
@@ -76,10 +76,12 @@ int main()
 
 		"void main(void)"
 		"{"
-			"float LambertTerm = max(dot(vertex_normal, norm_light_dir), 0.0);"
+			"vec3 adjusted_normal = normalize(vertex_normal);"
+
+			"float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);"
 			"vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;"
 
-			"vec3 R = reflect(-norm_light_dir, vertex_normal);"
+			"vec3 R = reflect(-norm_light_dir, adjusted_normal);"
 			"vec3 Is = spec_color.rgb * spec_color.a * pow(max(dot(R, E), 0.0), shininess);"
 
 			"vec3 base = mat_color.rgb;"
