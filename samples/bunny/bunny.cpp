@@ -136,17 +136,18 @@ int main()
 	// TODO: kill
 	glc.bind_default_framebuffer();
 
+	auto const pre_rotate = gl::scale(8, 8, 8) * gl::translate(0.2, -0.8, 0);
+	auto const post_rotate = gl::rotate(0.2, 1, 0, 0) *	gl::translate(0, 0, -2.5);
+
 	dsp.set_display_func([&]
 	{
 		glc.clear_color({0.2, 0.2, 0.2, 1});
 		glc.clear_depth(1.0);
 
 		// rotating projection
-		gl::mat4 modelview = gl::scale(8, 8, 8) *
-			gl::translate(0.2, -0.8, 0) *
+		gl::mat4 modelview = pre_rotate *
 			gl::rotate(rotate, 0, 1, 0) *
-			gl::rotate(0.2, 1, 0, 0) *
-			gl::translate(0, 0, -2.5) *
+			post_rotate *
 			gl::perspective(45, (float_t)window_size.x / window_size.y, 1, 100);
 
 		prog.set_uniform(modelview_uni, modelview);
