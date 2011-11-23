@@ -135,6 +135,11 @@ public:
 		glSampleCoverage(_value, _invert);
 	}
 
+	void hint(hint_target _target, hint_value _value)
+	{
+		glHint(static_cast<GLenum>(_target), static_cast<GLenum>(_value));
+	}
+
 	template <typename T>
 	void disable_vertex_attribute(const attribute<T>& _attrib)
 	{

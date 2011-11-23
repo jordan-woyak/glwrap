@@ -132,4 +132,19 @@ enum class primitive : GLenum
 	triangles_adjacency = GL_TRIANGLES_ADJACENCY
 };
 
+enum class hint_target : GLenum
+{
+	line_smooth = GL_LINE_SMOOTH_HINT,
+	polygon_smooth = GL_POLYGON_SMOOTH_HINT,
+	texture_compression = GL_TEXTURE_COMPRESSION_HINT,
+	fragment_shader_derivative = GL_FRAGMENT_SHADER_DERIVATIVE_HINT
+};
+
+enum class hint_value : GLenum
+{
+	fastest = GL_FASTEST,
+	nicest = GL_NICEST,
+	dont_care = GL_DONT_CARE
+};
+
 }
