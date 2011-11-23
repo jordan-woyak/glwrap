@@ -2,7 +2,6 @@
 #pragma once
 
 #include "vector.hpp"
-#include "array_buffer.hpp"
 #include "index_buffer.hpp"
 #include "vertex_array.hpp"
 #include "attribute.hpp"

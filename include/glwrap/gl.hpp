@@ -19,7 +19,6 @@
 
 #include "buffer.hpp"
 #include "uniform_buffer.hpp"
-#include "array_buffer.hpp"
 #include "index_buffer.hpp"
 #include "unpack_buffer.hpp"
 #include "texture_buffer.hpp"

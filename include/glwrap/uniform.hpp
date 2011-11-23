@@ -2,7 +2,6 @@
 
 #include <list>
 
-#include "array_buffer.hpp"
 #include "variable.hpp"
 #include "texture.hpp"
 #include "detail/uniform.hpp"

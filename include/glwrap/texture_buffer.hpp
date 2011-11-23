@@ -1,7 +1,6 @@
 #pragma once
 
 #include "native_handle.hpp"
-#include "array_buffer.hpp"
 
 namespace gl
 {
@@ -24,12 +23,14 @@ public:
 	}
 
 	// TODO: internal format
+	/*
 	template <typename T>
 	void bind_buffer(array_buffer<T> const& _buffer)
 	{
 		bind();
 		glTexBuffer(GL_TEXTURE_BUFFER, 0, _buffer.native_handle());
 	}
+	*/
 
 private:
 	void bind() const

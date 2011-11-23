@@ -4,6 +4,7 @@
 #include "native_handle.hpp"
 #include "attribute.hpp"
 #include "buffer.hpp"
+#include "detail/attribute.hpp"
 
 namespace gl
 {
