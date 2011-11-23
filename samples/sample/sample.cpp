@@ -95,7 +95,7 @@ int main()
 	};
 
 	// load vertex data
-	gl::array_buffer<FooVertex> verbuf(glc);
+	gl::buffer<FooVertex> verbuf(glc);
 	std::vector<FooVertex> verts =
 	{
 		{{-9, -9}, {0, 0}, {1, 0, 0}},
@@ -115,9 +115,9 @@ int main()
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_loc, verbuf.attrib() | &FooVertex::pos);
-	arr.bind_vertex_attribute(texpos_loc, verbuf.attrib() | &FooVertex::texpos);
-	arr.bind_vertex_attribute(color_loc, verbuf.attrib() | &FooVertex::color);
+	arr.bind_vertex_attribute(pos_loc, verbuf.begin() | &FooVertex::pos);
+	arr.bind_vertex_attribute(texpos_loc, verbuf.begin() | &FooVertex::texpos);
+	arr.bind_vertex_attribute(color_loc, verbuf.begin() | &FooVertex::color);
 
 	// an fbo
 	gl::framebuffer fbuf(glc);

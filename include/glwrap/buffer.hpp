@@ -4,6 +4,89 @@ namespace gl
 {
 
 template <typename T>
+class buffer;
+
+template <typename T>
+class buffer_iterator;
+
+template <typename T>
+class strided_buffer_iterator;
+
+class vertex_array;
+
+template <typename T, typename B, typename Enable = void>
+struct is_buffer_iterator : std::false_type {};
+
+template <typename T, typename B>
+struct is_buffer_iterator<T, B, typename std::enable_if<
+	std::is_same<buffer_iterator<T>, B>::value ||
+	std::is_same<strided_buffer_iterator<T>, B>::value
+	>::type> : std::true_type {};
+
+template <typename T>
+class buffer_iterator
+{
+	friend class buffer<T>;
+
+	friend class vertex_array;
+
+	template <typename P, typename M>
+	friend strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_member);
+
+public:
+
+private:
+	buffer_iterator(GLuint _buffer, const GLvoid* _offset)
+		: m_buffer(_buffer)
+		, m_offset(_offset)
+	{}
+
+	GLsizei stride() const
+	{
+		return sizeof(T);
+	}
+
+	GLuint m_buffer;
+	const GLvoid* m_offset;
+};
+
+template <typename T>
+class strided_buffer_iterator
+{
+	friend class vertex_array;
+
+	template <typename P, typename M>
+	friend strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_member);
+
+public:
+
+private:
+	strided_buffer_iterator(GLuint _buffer, const GLvoid* _offset, GLsizei _stride)
+		: m_buffer(_buffer)
+		, m_offset(_offset)
+		, m_stride(_stride)
+	{}
+
+	GLsizei stride() const
+	{
+		return m_stride;
+	}
+
+	GLuint m_buffer;
+	const GLvoid* m_offset;
+	GLsizei m_stride;
+};
+
+template <typename P, typename M>
+strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_member)
+{
+	const P* const null_obj = nullptr;
+	auto const offset = reinterpret_cast<std::intptr_t>(&(null_obj->*_member));
+
+	return {_attrib.m_buffer, static_cast<const char*>(_attrib.m_offset) + offset, _attrib.stride()};
+}
+
+template <typename T>
 class buffer : public globject
 {
 	friend class context;
@@ -22,9 +105,9 @@ public:
 //		glBufferData(GL_buffer, _size * sizeof(element_type), NULL, GL_STATIC_DRAW);
 //	}
 
-	vertex_attribute<T> attrib()
+	buffer_iterator<T> begin()
 	{
-		return {sizeof(T), 0, native_handle()};
+		return {native_handle(), 0};
 	}
 
 	template <typename R>
