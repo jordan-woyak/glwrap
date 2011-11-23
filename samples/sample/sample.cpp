@@ -98,15 +98,15 @@ int main()
 	gl::buffer<FooVertex> verbuf(glc);
 	std::vector<FooVertex> verts =
 	{
-		{{-9, -9}, {0, 0}, {1, 0, 0}},
-		{{-9, 9}, {0, 1}, {0, 1, 0}},
-		{{9, 9}, {1, 1}, {0, 0, 1}},
-		{{9, -9}, {1, 0}, {0, 0, 0}},
+		{{-9, 9}, {0, 0}, {1, 0, 0}},
+		{{-9, -9}, {0, 1}, {0, 1, 0}},
+		{{9, -9}, {1, 1}, {0, 0, 1}},
+		{{9, 9}, {1, 0}, {0, 0, 0}},
 	};
 	verbuf.assign(verts);
 
 	// load index data
-	gl::index_buffer<gl::ushort_t> indbuf(glc);
+	gl::buffer<gl::ushort_t> indbuf(glc);
 	std::vector<gl::ushort_t> indbufdata =
 	{
 		0, 1, 2, 3
@@ -154,9 +154,7 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		//glc.draw_arrays(prog, gl::primitive::triangle_fan, arr, 0, 4);
-		//glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
-		glc.draw_elements_offset(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4, 0);
+		glc.draw(prog, gl::primitive::triangle_fan, arr.begin() / indbuf.begin(), 4);
 
 		// TODO: kill
 		glc.bind_default_framebuffer();

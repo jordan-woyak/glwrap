@@ -211,6 +211,19 @@ public:
 			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T), _offset);
 	}
 
+	template <typename T>
+	void draw(program& _prog, primitive _mode, vertex_array::indexed_iterator<T> const& _vertices, sizei_t _count)
+	{
+		_prog.bind();
+		glBindVertexArray(_vertices.m_verts.m_vao); // vertex_array
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vertices.m_buffer); // index_buffer
+		glDrawElementsBaseVertex(static_cast<GLenum>(_mode),
+			_count,
+			detail::data_type_enum<T>(),
+			std::add_pointer<char>::type() + _vertices.m_offset * sizeof(T),
+			_vertices.m_verts.m_offset);
+	}
+
 	color_number draw_buffer(uint_t _index)
 	{
 		return {_index};

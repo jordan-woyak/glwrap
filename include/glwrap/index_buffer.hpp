@@ -11,11 +11,6 @@ class context;
 template <typename T>
 class index_buffer : public globject
 {
-	static_assert(std::is_same<T, ubyte_t>::value
-		|| std::is_same<T, ushort_t>::value
-		|| std::is_same<T, uint_t>::value
-		, "must be ubyte, uint, ushort");
-
 	friend class context;
 
 public:
