@@ -51,7 +51,7 @@ private:
 	uint_t m_max_uniform_buffer_bindings;
 };
 
-class uniform_buffer : globject
+class uniform_buffer : public globject
 {
 public:
 	explicit uniform_buffer(context& _context)
