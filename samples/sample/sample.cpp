@@ -98,10 +98,10 @@ int main()
 	gl::array_buffer<FooVertex> verbuf(glc);
 	std::vector<FooVertex> verts =
 	{
-		{{1, 1}, {0, 0}, {1, 0, 0}},
-		{{1, 19}, {0, 1}, {0, 1, 0}},
-		{{19, 19}, {1, 1}, {0, 0, 1}},
-		{{19, 1}, {1, 0}, {0, 0, 0}},
+		{{-9, -9}, {0, 0}, {1, 0, 0}},
+		{{-9, 9}, {0, 1}, {0, 1, 0}},
+		{{9, 9}, {1, 1}, {0, 0, 1}},
+		{{9, -9}, {1, 0}, {0, 0, 0}},
 	};
 	verbuf.assign(verts);
 
@@ -147,9 +147,8 @@ int main()
 		glc.clear_color({1, 1, 1, 1});
 
 		// rotating ortho projection
-		gl::mat4 modelview = gl::ortho(0, 20, 0, 20, -1000, 1000);
-		modelview *= gl::rotate(rotate, 0, 0, 1);
-
+		gl::mat4 const modelview = gl::rotate(rotate, 0, 0, 1) *
+			gl::scale(0.1 * window_size.y / window_size.x, 0.1, 1);
 		prog.set_uniform(mvp_uni, modelview);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
