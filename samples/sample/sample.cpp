@@ -154,6 +154,7 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
+		//glc.draw(prog, gl::primitive::triangle_fan, arr.begin(), 4);
 		glc.draw(prog, gl::primitive::triangle_fan, arr.begin() / indbuf.begin(), 4);
 
 		// TODO: kill

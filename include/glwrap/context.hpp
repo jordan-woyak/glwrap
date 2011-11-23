@@ -2,7 +2,6 @@
 #pragma once
 
 #include "vector.hpp"
-#include "index_buffer.hpp"
 #include "vertex_array.hpp"
 #include "attribute.hpp"
 #include "sampler.hpp"
@@ -182,33 +181,13 @@ public:
 			_mask, static_cast<GLenum>(_filter));
 	}
 
-	void draw_arrays(program& _prog, primitive _mode, vertex_array& _arrays, int_t _first, sizei_t _count)
+	void draw(program& _prog, primitive _mode, vertex_array::iterator const& _vertices, sizei_t _count)
 	{
 		_prog.bind();
-		_arrays.bind();
-		glDrawArrays(static_cast<GLenum>(_mode), _first, _count);
-	}
-
-	template <typename T>
-	void draw_elements(program& _prog, primitive _mode, vertex_array& _arrays,
-		index_buffer<T>& _indices, int_t _first, sizei_t _count)
-	{
-		_prog.bind();
-		_arrays.bind();
-		_indices.bind();
-		glDrawElements(static_cast<GLenum>(_mode), _count,
-			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T));
-	}
-
-	template <typename T>
-	void draw_elements_offset(program& _prog, primitive _mode, vertex_array& _arrays,
-		index_buffer<T>& _indices, int_t _first, sizei_t _count, int_t _offset)
-	{
-		_prog.bind();
-		_arrays.bind();
-		_indices.bind();
-		glDrawElementsBaseVertex(static_cast<GLenum>(_mode), _count,
-			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T), _offset);
+		glBindVertexArray(_vertices.m_vao); // vertex_array
+		glDrawArrays(static_cast<GLenum>(_mode),
+			_vertices.m_offset,
+			_count);
 	}
 
 	template <typename T>

@@ -71,6 +71,7 @@ public:
 		glDeleteVertexArrays(1, &nh);
 	}
 
+	// TODO: kill
 	iterator begin() const
 	{
 		return {native_handle(), 0};
