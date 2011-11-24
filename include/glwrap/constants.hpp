@@ -147,4 +147,9 @@ enum class hint_value : GLenum
 	dont_care = GL_DONT_CARE
 };
 
+enum class sync_condition : GLenum
+{
+	gpu_commands_complete = GL_SYNC_GPU_COMMANDS_COMPLETE
+};
+
 }

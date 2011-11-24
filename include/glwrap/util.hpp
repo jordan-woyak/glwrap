@@ -18,6 +18,7 @@ typedef GLfloat float_t;
 typedef GLdouble double_t;
 typedef GLboolean bool_t;
 typedef GLsizei sizei_t;
+typedef GLbitfield bitfield_t;
 typedef double_t depth_t;
 
 // TODO: move this
