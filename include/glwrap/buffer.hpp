@@ -23,11 +23,14 @@ struct is_buffer_iterator<T, B, typename std::enable_if<
 	std::is_same<strided_buffer_iterator<T>, B>::value
 	>::type> : std::true_type {};
 
+// TODO: make offset a sane type
+
+// TODO: rename iterator
 template <typename T>
 class buffer_iterator
 {
+	friend class context;
 	friend class buffer<T>;
-
 	friend class vertex_array;
 
 	template <typename P, typename M>
@@ -36,7 +39,7 @@ class buffer_iterator
 public:
 
 private:
-	buffer_iterator(GLuint _buffer, const GLvoid* _offset)
+	buffer_iterator(GLuint _buffer, GLvoid* _offset)
 		: m_buffer(_buffer)
 		, m_offset(_offset)
 	{}
@@ -47,7 +50,7 @@ private:
 	}
 
 	GLuint m_buffer;
-	const GLvoid* m_offset;
+	GLvoid* m_offset;
 };
 
 template <typename T>
@@ -61,7 +64,7 @@ class strided_buffer_iterator
 public:
 
 private:
-	strided_buffer_iterator(GLuint _buffer, const GLvoid* _offset, GLsizei _stride)
+	strided_buffer_iterator(GLuint _buffer, GLvoid* _offset, GLsizei _stride)
 		: m_buffer(_buffer)
 		, m_offset(_offset)
 		, m_stride(_stride)
@@ -73,7 +76,7 @@ private:
 	}
 
 	GLuint m_buffer;
-	const GLvoid* m_offset;
+	GLvoid* m_offset;
 	GLsizei m_stride;
 };
 
@@ -83,7 +86,7 @@ strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_m
 	const P* const null_obj = nullptr;
 	auto const offset = reinterpret_cast<std::intptr_t>(&(null_obj->*_member));
 
-	return {_attrib.m_buffer, static_cast<const char*>(_attrib.m_offset) + offset, _attrib.stride()};
+	return {_attrib.m_buffer, static_cast<char*>(_attrib.m_offset) + offset, _attrib.stride()};
 }
 
 template <typename T>
@@ -100,11 +103,24 @@ public:
 		glDeleteBuffers(1, &nh);
 	}
 
-//	void resize(std::size_t _size)
-//	{
-//		glBufferData(GL_buffer, _size * sizeof(element_type), NULL, GL_STATIC_DRAW);
-//	}
+	// TODO: don't hardcode GL_STATIC_DRAW everywhere
 
+	void storage(std::size_t _size)
+	{
+		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
+		glBufferData(GL_COPY_WRITE_BUFFER, _size * sizeof(element_type), nullptr, GL_STATIC_DRAW);
+	}
+
+	std::size_t size() const
+	{
+		sizei_t sz = 0;
+		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
+		glGetBufferParameteriv(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
+
+		return sz / sizeof(element_type);
+	}
+
+	// TODO: rename begin
 	buffer_iterator<T> begin()
 	{
 		return {native_handle(), 0};
@@ -134,11 +150,11 @@ public:
 		glBindBuffer(GL_COPY_READ_BUFFER, _other.native_handle());
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
 
-		sizei_t size = 0;
-		glGetBufferParameteriv(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &size);
+		sizei_t sz = 0;
+		glGetBufferParameteriv(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
 
 		glBufferData(GL_COPY_WRITE_BUFFER, size, nullptr, GL_STATIC_DRAW);
-		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size);
+		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
 	}
 
 	explicit buffer(context& _context)

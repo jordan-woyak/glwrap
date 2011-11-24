@@ -145,6 +145,15 @@ public:
 		return fragdata<T>(std::prev(m_fragdatas.end()));
 	}
 
+	// TODO: kill struct
+	template <typename T> struct vertex_out_varying {};
+
+	template <typename T>
+	vertex_out_varying<T> create_vertex_out_varying(const std::string& _name)
+	{
+		return {};
+	}
+
 	template <typename T>
 	void set_uniform(uniform<T>& _uniform, typename detail::uniform_value<T>::type const& _value)
 	{
