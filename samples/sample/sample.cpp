@@ -108,6 +108,7 @@ int main()
 
 	// load vertex data
 	gl::buffer<FooVertex> verbuf(glc);
+	{
 	std::vector<FooVertex> verts =
 	{
 		{{-9, 9}, {0, 0}, {1, 0, 0}},
@@ -115,7 +116,14 @@ int main()
 		{{9, -9}, {1, 1}, {0, 0, 1}},
 		{{9, 9}, {1, 0}, {0, 0, 0}},
 	};
-	verbuf.assign(verts);
+
+	// just to show it works
+	verbuf.storage(verts.size());
+	gl::mapped_buffer<FooVertex> vermap(verbuf);
+	std::copy(verts.begin(), verts.end(), vermap.begin());
+
+	//verbuf.assign(verts);
+	}
 
 	// load index data
 	gl::buffer<gl::ushort_t> indbuf(glc);
@@ -148,6 +156,8 @@ int main()
 	glc.bind_sampler(texunit, samp);
 
 	samp.set_mag_filter(gl::filter::nearest);
+
+	//glc.enable(gl::capability::multisample);
 
 	gl::float_t rotate = 0;
 

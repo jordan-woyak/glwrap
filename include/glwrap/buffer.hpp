@@ -90,6 +90,55 @@ strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_m
 }
 
 template <typename T>
+class mapped_buffer
+{
+public:
+	mapped_buffer(buffer<T>& _buffer)
+		: m_ptr()
+		, m_size()
+		, m_buffer(_buffer.native_handle())
+	{
+		glBindBuffer(GL_COPY_WRITE_BUFFER, m_buffer);
+
+		// TODO: allow range
+		// TODO: don't hardcode access mode
+		m_ptr = static_cast<T*>(glMapBuffer(GL_COPY_WRITE_BUFFER, GL_READ_WRITE));
+		m_size = _buffer.size();
+
+		// TODO: check for error
+
+		// TODO: use this guy
+		//glMapBufferRange(GL_COPY_WRITE_BUFFER, 0, length, access);
+	}
+
+	mapped_buffer(mapped_buffer const&) = delete;
+	mapped_buffer& operator=(mapped_buffer const&) = delete;
+
+	// TODO: movable
+
+	T* begin()
+	{
+		return m_ptr;
+	}
+
+	T* end()
+	{
+		return m_ptr + m_size;
+	}
+
+	~mapped_buffer()
+	{
+		glBindBuffer(GL_COPY_WRITE_BUFFER, m_buffer);
+		glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+	}
+
+private:
+	T* m_ptr;
+	std::size_t m_size;
+	GLuint m_buffer;
+};
+
+template <typename T>
 class buffer : public globject
 {
 	friend class context;
