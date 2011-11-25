@@ -11,6 +11,7 @@
 #include "constants.hpp"
 #include "framebuffer.hpp"
 #include "program.hpp"
+#include "sync.hpp"
 
 namespace gl
 {
@@ -193,9 +194,9 @@ public:
 		glFinish();
 	}
 
-	void fence_sync(sync_condition _cond, bitfield_t _flags)
+	sync fence_sync(sync_condition _cond, bitfield_t _flags)
 	{
-		glFenceSync(static_cast<GLenum>(_cond), _flags);
+		return {glFenceSync(static_cast<GLenum>(_cond), _flags)};
 	}
 
 	void draw_arrays(program& _prog, primitive _mode, vertex_array& _arrays, int_t _first, sizei_t _count)
