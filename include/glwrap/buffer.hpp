@@ -116,6 +116,8 @@ public:
 
 	// TODO: movable
 
+	// TODO: flush function
+
 	T* begin()
 	{
 		return m_ptr;

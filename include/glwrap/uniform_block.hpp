@@ -51,4 +51,23 @@ private:
 	uint_t m_max_uniform_buffer_bindings;
 };
 
+class uniform_block
+{
+public:
+	template <typename T>
+	class member
+	{
+
+	};
+
+	uniform_block(context&)
+	{}
+
+	template <typename T>
+	member<T> create_member()
+	{
+		return {};
+	}
+};
+
 }

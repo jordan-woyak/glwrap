@@ -161,6 +161,8 @@ int main()
 
 	gl::float_t rotate = 0;
 
+	gl::query que(glc, gl::query_type::samples_passed);
+
 	dsp.set_display_func([&]
 	{
 		// TODO: kill this method of framebuffer binding
@@ -193,5 +195,11 @@ int main()
 		rendbuf.resize(window_size);
 	});
 
+	que.start();
+
 	dsp.run_loop();
+
+	que.stop();
+
+	std::cout << "samples_passed: " << que.result() << std::endl;
 }

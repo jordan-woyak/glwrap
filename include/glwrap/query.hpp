@@ -15,8 +15,9 @@ enum class query_type : GLenum
 class query : public globject
 {
 public:
-	query(context& _context)
+	query(context& _context, query_type _type)
 		: globject(gen_return(glGenQueries))
+		, m_type(_type)
 	{}
 
 	~query()
@@ -25,22 +26,26 @@ public:
 		glDeleteQueries(1, &nh);
 	}
 
-	void begin(query_type _type)
+	void start()
 	{
-		glBeginQuery(static_cast<GLenum>(_type), native_handle());
+		glBeginQuery(static_cast<GLenum>(m_type), native_handle());
 	}
 
-	void end(query_type _type)
+	void stop()
 	{
-		glBeginQuery(static_cast<GLenum>(_type), native_handle());
+		// TODO: stupid stupid
+		glEndQuery(static_cast<GLenum>(m_type));
 	}
 
 	uint64_t result() const
 	{
-		uint64_t result = 0;
+		GLuint64 result = 0;
 		glGetQueryObjectui64v(native_handle(), GL_QUERY_RESULT, &result);
 		return result;
 	}
+
+private:
+	query_type m_type;
 };
 
 }
