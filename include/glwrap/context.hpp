@@ -196,6 +196,25 @@ public:
 			_mask, static_cast<GLenum>(_filter));
 	}
 
+	void draw_arrays(technique& _tech, std::size_t _offset, std::size_t _count)
+	{
+		_tech.bind();
+
+		glDrawArrays(_tech.get_mode(),
+			_offset,
+			_count);
+	}
+
+	void draw_arrays_instanced(technique& _tech, std::size_t _offset, std::size_t _count, std::size_t _instances)
+	{
+		_tech.bind();
+
+		glDrawArraysInstanced(_tech.get_mode(),
+			_offset,
+			_count,
+			_instances);
+	}
+
 	void draw_elements(technique& _tech, std::size_t _offset, std::size_t _count)
 	{
 		_tech.bind();
