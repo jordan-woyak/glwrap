@@ -161,20 +161,16 @@ int main()
 
 	gl::float_t rotate = 0;
 
-	// TODO: needs better name maybe
+	// TODO: needs better name maybe, or to be killed
 	gl::technique tech(glc);
 	tech.use_program(prog);
 	tech.use_vertex_array(arr);
 	tech.use_element_array(indbuf);
 	tech.use_primitive_mode(gl::primitive::triangle_fan);
+	tech.use_draw_framebuffer(fbuf);
 
 	dsp.set_display_func([&]
 	{
-		// TODO: kill this method of framebuffer binding
-		fbuf.bind_draw();
-
-		glc.clear_color({1, 1, 1, 1});
-
 		// rotating ortho projection
 		gl::mat4 const modelview = gl::rotate(rotate, 0, 0, 1) *
 			gl::scale(0.1 * window_size.y / window_size.x, 0.1, 1);
@@ -183,13 +179,11 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
+		glc.clear_color(fbuf, {1, 1, 1, 1});
 		glc.draw_elements(tech, 0, 4);
 
-		// TODO: kill
-		glc.bind_default_framebuffer();
-
 		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, window_size,
-			{0, 0}, window_size,
+			nullptr, {0, 0}, window_size,
 			gl::filter::nearest);
 	});
 

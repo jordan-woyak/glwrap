@@ -205,4 +205,31 @@ private:
 	std::vector<GLenum> m_draw_buffers;
 };
 
+class framebuffer_reference
+{
+	friend class context;
+
+public:
+	framebuffer_reference(framebuffer const& _fb)
+		: m_fb(_fb.native_handle())
+	{}
+
+	framebuffer_reference(std::nullptr_t)
+		: m_fb(0)
+	{}
+
+	GLuint native_handle() const
+	{
+		return m_fb;
+	}
+
+private:
+	void bind_draw()
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fb);
+	}
+
+	GLuint m_fb;
+};
+
 }

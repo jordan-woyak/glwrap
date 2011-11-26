@@ -19,20 +19,26 @@ class context;
 class context
 {
 public:
-	void clear_color(vec4 const& _color)
+	void clear_color(framebuffer_reference _write, vec4 const& _color)
 	{
+		_write.bind_draw();
+
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	void clear_stencil(int_t _index)
+	void clear_stencil(framebuffer_reference _write, int_t _index)
 	{
+		_write.bind_draw();
+
 		glClearStencil(_index);
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 
-	void clear_depth(depth_t _depth)
+	void clear_depth(framebuffer_reference _write, depth_t _depth)
 	{
+		_write.bind_draw();
+
 		glClearDepth(_depth);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
@@ -183,12 +189,13 @@ public:
 	}
 
 	void blit_pixels(read_color_buffer const& _read, ivec2 const& _src_begin, ivec2 const& _src_end,
-		ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
+		framebuffer_reference _write, ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
 	{
 		// TODO: mask
 		auto _mask = GL_COLOR_BUFFER_BIT;
 
 		_read.bind();
+		_write.bind_draw();
 
 		glBlitFramebuffer(
 			_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
@@ -254,11 +261,6 @@ public:
 	attach_point depth_buffer()
 	{
 		return {GL_DEPTH_ATTACHMENT};
-	}
-
-	void bind_default_framebuffer()
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 };
 

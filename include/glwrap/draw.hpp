@@ -15,6 +15,8 @@ public:
 		: m_program()
 		, m_vertex_array()
 		, m_element_array()
+		, m_element_type()
+		, m_draw_fb()
 		, m_mode()
 	{}
 
@@ -45,12 +47,18 @@ public:
 		m_mode = static_cast<GLenum>(_prim);
 	}
 
+	void use_draw_framebuffer(framebuffer_reference _fb)
+	{
+		m_draw_fb = _fb.native_handle();
+	}
+
 private:
 	void bind()
 	{
 		glUseProgram(m_program);
 		glBindVertexArray(m_vertex_array);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_array);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_draw_fb);
 	}
 
 	GLenum get_type() const
@@ -68,6 +76,8 @@ private:
 
 	GLuint m_element_array;
 	GLenum m_element_type;
+
+	GLuint m_draw_fb;
 
 	GLenum m_mode;
 };
