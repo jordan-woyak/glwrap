@@ -9,6 +9,7 @@
 #include "constants.hpp"
 #include "framebuffer.hpp"
 #include "program.hpp"
+#include "draw.hpp"
 
 namespace gl
 {
@@ -195,26 +196,25 @@ public:
 			_mask, static_cast<GLenum>(_filter));
 	}
 
-	void draw(program& _prog, primitive _mode, vertex_array::iterator const& _vertices, sizei_t _count)
+	void draw_elements(technique& _tech, std::size_t _offset, std::size_t _count)
 	{
-		_prog.bind();
-		glBindVertexArray(_vertices.m_vao); // vertex_array
-		glDrawArrays(static_cast<GLenum>(_mode),
-			_vertices.m_offset,
-			_count);
+		_tech.bind();
+
+		glDrawElements(_tech.get_mode(),
+			_count,
+			_tech.get_type(),
+			reinterpret_cast<void*>((intptr_t)_offset));
 	}
 
-	template <typename T>
-	void draw(program& _prog, primitive _mode, vertex_array::indexed_iterator<T> const& _vertices, sizei_t _count)
+	void draw_elements_instanced(technique& _tech, std::size_t _offset, std::size_t _count, std::size_t _instances)
 	{
-		_prog.bind();
-		glBindVertexArray(_vertices.m_verts.m_vao); // vertex_array
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vertices.m_buffer); // index_buffer
-		glDrawElementsBaseVertex(static_cast<GLenum>(_mode),
+		_tech.bind();
+
+		glDrawElementsInstanced(_tech.get_mode(),
 			_count,
-			detail::data_type_enum<T>(),
-			std::add_pointer<char>::type() + _vertices.m_offset * sizeof(T),
-			_vertices.m_verts.m_offset);
+			_tech.get_type(),
+			reinterpret_cast<void*>((intptr_t)_offset),
+			_instances);
 	}
 
 	color_number draw_buffer(uint_t _index)

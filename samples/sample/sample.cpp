@@ -161,7 +161,12 @@ int main()
 
 	gl::float_t rotate = 0;
 
-	gl::query que(glc, gl::query_type::samples_passed);
+	// TODO: needs better name maybe
+	gl::technique tech(glc);
+	tech.use_program(prog);
+	tech.use_vertex_array(arr);
+	tech.use_element_array(indbuf);
+	tech.use_primitive_mode(gl::primitive::triangle_fan);
 
 	dsp.set_display_func([&]
 	{
@@ -178,8 +183,7 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		//glc.draw(prog, gl::primitive::triangle_fan, arr.begin(), 4);
-		glc.draw(prog, gl::primitive::triangle_fan, arr.begin() / indbuf.begin(), 4);
+		glc.draw_elements(tech, 0, 4);
 
 		// TODO: kill
 		glc.bind_default_framebuffer();
@@ -195,11 +199,11 @@ int main()
 		rendbuf.resize(window_size);
 	});
 
+	gl::query que(glc, gl::query_type::primitives_generated);
 	que.start();
 
 	dsp.run_loop();
 
 	que.stop();
-
 	std::cout << "samples_passed: " << que.result() << std::endl;
 }

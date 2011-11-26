@@ -171,6 +171,8 @@ public:
 		return sz / sizeof(element_type);
 	}
 
+	// TODO: read capability
+
 	// TODO: rename begin
 	buffer_iterator<T> begin()
 	{
