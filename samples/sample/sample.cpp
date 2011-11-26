@@ -38,6 +38,15 @@ int main()
 	gl::texture_unit_alloter tunits(glc);
 	auto texunit = tunits.allot<gl::texture_2d>();
 
+	// transform feedback nonsense
+	gl::transform_feedback_binding_alloter tfbs(glc);
+	auto feedback_test = tfbs.allot<gl::vec3>();
+
+	gl::buffer<gl::vec3> feedback_storage(glc);
+	feedback_storage.storage(32);
+
+	glc.bind_buffer(feedback_test, feedback_storage.begin(), feedback_storage.size());
+
 	// create a program
 	gl::program prog(glc);
 
@@ -51,6 +60,9 @@ int main()
 	auto texpos_attrib = prog.create_attribute<gl::vec2>("texpos");
 
 	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
+
+	// TODO: function name :/
+	auto outtest_varying = prog.create_vertex_out_varying<gl::vec2>("outtest");
 
 	prog.set_vertex_shader_source(
 		"out vec3 col;"
@@ -95,29 +107,23 @@ int main()
 	};
 
 	// load vertex data
-	gl::array_buffer<FooVertex> verbuf(glc);
+	gl::buffer<FooVertex> verbuf(glc);
+	{
 	std::vector<FooVertex> verts =
 	{
-		{{-9, -9}, {0, 0}, {1, 0, 0}},
-		{{-9, 9}, {0, 1}, {0, 1, 0}},
-		{{9, 9}, {1, 1}, {0, 0, 1}},
-		{{9, -9}, {1, 0}, {0, 0, 0}},
+		{{-9, 9}, {0, 0}, {1, 0, 0}},
+		{{-9, -9}, {0, 1}, {0, 1, 0}},
+		{{9, -9}, {1, 1}, {0, 0, 1}},
+		{{9, 9}, {1, 0}, {0, 0, 0}},
 	};
 	verbuf.assign(verts);
-
-	// load index data
-	gl::index_buffer<gl::ushort_t> indbuf(glc);
-	std::vector<gl::ushort_t> indbufdata =
-	{
-		0, 1, 2, 3
-	};
-	indbuf.assign(indbufdata);
+	}
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_loc, verbuf.attrib() | &FooVertex::pos);
-	arr.bind_vertex_attribute(texpos_loc, verbuf.attrib() | &FooVertex::texpos);
-	arr.bind_vertex_attribute(color_loc, verbuf.attrib() | &FooVertex::color);
+	arr.bind_vertex_attribute(pos_loc, verbuf.begin() | &FooVertex::pos);
+	arr.bind_vertex_attribute(texpos_loc, verbuf.begin() | &FooVertex::texpos);
+	arr.bind_vertex_attribute(color_loc, verbuf.begin() | &FooVertex::color);
 
 	// an fbo
 	gl::framebuffer fbuf(glc);
@@ -137,15 +143,19 @@ int main()
 
 	samp.set_mag_filter(gl::filter::nearest);
 
+	//glc.enable(gl::capability::multisample);
+
 	gl::float_t rotate = 0;
+
+	// TODO: needs better name maybe, or to be killed
+	gl::technique tech(glc);
+	tech.use_program(prog);
+	tech.use_vertex_array(arr);
+	tech.use_primitive_mode(gl::primitive::triangle_fan);
+	tech.use_draw_framebuffer(fbuf);
 
 	dsp.set_display_func([&]
 	{
-		// TODO: kill this method of framebuffer binding
-		fbuf.bind_draw();
-
-		glc.clear_color({1, 1, 1, 1});
-
 		// rotating ortho projection
 		gl::mat4 const modelview = gl::rotate(rotate, 0, 0, 1) *
 			gl::scale(0.1 * window_size.y / window_size.x, 0.1, 1);
@@ -154,15 +164,11 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		//glc.draw_arrays(prog, gl::primitive::triangle_fan, arr, 0, 4);
-		//glc.draw_elements(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4);
-		glc.draw_elements_offset(prog, gl::primitive::triangle_fan, arr, indbuf, 0, 4, 0);
-
-		// TODO: kill
-		glc.bind_default_framebuffer();
+		glc.clear_color(fbuf, {1, 1, 1, 1});
+		glc.draw_arrays(tech, 0, 4);
 
 		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, window_size,
-			{0, 0}, window_size,
+			nullptr, {0, 0}, window_size,
 			gl::filter::nearest);
 	});
 
@@ -172,5 +178,11 @@ int main()
 		rendbuf.resize(window_size);
 	});
 
+	gl::query que(glc, gl::query_type::primitives_generated);
+	que.start();
+
 	dsp.run_loop();
+
+	que.stop();
+	std::cout << "samples_passed: " << que.result() << std::endl;
 }

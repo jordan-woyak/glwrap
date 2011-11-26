@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "vector.hpp"
 
 #include <eigen2/Eigen/Dense>

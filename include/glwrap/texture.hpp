@@ -3,7 +3,6 @@
 #include "vector.hpp"
 #include "native_handle.hpp"
 #include "util.hpp"
-#include "array_buffer.hpp"
 #include "unpack_buffer.hpp"
 
 namespace gl

@@ -2,8 +2,6 @@
 #pragma once
 
 #include "vector.hpp"
-#include "array_buffer.hpp"
-#include "index_buffer.hpp"
 #include "vertex_array.hpp"
 #include "attribute.hpp"
 #include "sampler.hpp"
@@ -12,6 +10,7 @@
 #include "framebuffer.hpp"
 #include "program.hpp"
 #include "sync.hpp"
+#include "draw.hpp"
 
 namespace gl
 {
@@ -21,20 +20,26 @@ class context;
 class context
 {
 public:
-	void clear_color(vec4 const& _color)
+	void clear_color(framebuffer_reference _write, vec4 const& _color)
 	{
+		_write.bind_draw();
+
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	void clear_stencil(int_t _index)
+	void clear_stencil(framebuffer_reference _write, int_t _index)
 	{
+		_write.bind_draw();
+
 		glClearStencil(_index);
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 
-	void clear_depth(depth_t _depth)
+	void clear_depth(framebuffer_reference _write, depth_t _depth)
 	{
+		_write.bind_draw();
+
 		glClearDepth(_depth);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
@@ -170,13 +175,28 @@ public:
 		_sampler.bind(_unit.get_index());
 	}
 
+	template <typename T>
+	void bind_buffer(uniform_binding<T>& _unit, buffer_iterator<T> const& _iter, uint_t _size)
+	{
+		glBindBufferRange(GL_UNIFORM_BUFFER, _unit.get_index(),
+			_iter.m_buffer,	reinterpret_cast<GLintptr>(_iter.m_offset), _size * sizeof(T));
+	}
+
+	template <typename T>
+	void bind_buffer(transform_feedback_binding<T>& _unit, buffer_iterator<T> const& _iter, uint_t _size)
+	{
+		glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, _unit.get_index(),
+			_iter.m_buffer, reinterpret_cast<GLintptr>(_iter.m_offset), _size * sizeof(T));
+	}
+
 	void blit_pixels(read_color_buffer const& _read, ivec2 const& _src_begin, ivec2 const& _src_end,
-		ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
+		framebuffer_reference _write, ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
 	{
 		// TODO: mask
 		auto _mask = GL_COLOR_BUFFER_BIT;
 
 		_read.bind();
+		_write.bind_draw();
 
 		glBlitFramebuffer(
 			_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
@@ -199,33 +219,58 @@ public:
 		return {glFenceSync(static_cast<GLenum>(_cond), _flags)};
 	}
 
-	void draw_arrays(program& _prog, primitive _mode, vertex_array& _arrays, int_t _first, sizei_t _count)
+	// TODO: multi draw needed?
+	// TODO: draw range elements [base vertex]
+
+	void draw_arrays(technique& _tech, std::size_t _offset, std::size_t _count)
 	{
-		_prog.bind();
-		_arrays.bind();
-		glDrawArrays(static_cast<GLenum>(_mode), _first, _count);
+		_tech.bind();
+
+		glDrawArrays(_tech.get_mode(),
+			_offset,
+			_count);
 	}
 
-	template <typename T>
-	void draw_elements(program& _prog, primitive _mode, vertex_array& _arrays,
-		index_buffer<T>& _indices, int_t _first, sizei_t _count)
+	void draw_arrays_instanced(technique& _tech, std::size_t _offset, std::size_t _count, std::size_t _instances)
 	{
-		_prog.bind();
-		_arrays.bind();
-		_indices.bind();
-		glDrawElements(static_cast<GLenum>(_mode), _count,
-			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T));
+		_tech.bind();
+
+		glDrawArraysInstanced(_tech.get_mode(),
+			_offset,
+			_count,
+			_instances);
 	}
 
-	template <typename T>
-	void draw_elements_offset(program& _prog, primitive _mode, vertex_array& _arrays,
-		index_buffer<T>& _indices, int_t _first, sizei_t _count, int_t _offset)
+	void draw_elements(technique& _tech, std::size_t _start, std::size_t _count)
 	{
-		_prog.bind();
-		_arrays.bind();
-		_indices.bind();
-		glDrawElementsBaseVertex(static_cast<GLenum>(_mode), _count,
-			detail::data_type_enum<T>(), std::add_pointer<char>::type() + _first * sizeof(T), _offset);
+		_tech.bind();
+
+		glDrawElements(_tech.get_mode(),
+			_count,
+			_tech.get_type(),
+			reinterpret_cast<void*>((intptr_t)_start));
+	}
+
+	void draw_elements_offset(technique& _tech, std::size_t _start, std::size_t _count, std::size_t _offset)
+	{
+		_tech.bind();
+
+		glDrawElementsBaseVertex(_tech.get_mode(),
+			_count,
+			_tech.get_type(),
+			reinterpret_cast<void*>((intptr_t)_start),
+			_offset);
+	}
+
+	void draw_elements_instanced(technique& _tech, std::size_t _start, std::size_t _count, std::size_t _instances)
+	{
+		_tech.bind();
+
+		glDrawElementsInstanced(_tech.get_mode(),
+			_count,
+			_tech.get_type(),
+			reinterpret_cast<void*>((intptr_t)_start),
+			_instances);
 	}
 
 	color_number draw_buffer(uint_t _index)
@@ -246,11 +291,6 @@ public:
 	attach_point depth_buffer()
 	{
 		return {GL_DEPTH_ATTACHMENT};
-	}
-
-	void bind_default_framebuffer()
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 };
 

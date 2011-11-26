@@ -51,17 +51,22 @@ private:
 	uint_t m_max_uniform_buffer_bindings;
 };
 
-class uniform_buffer : public globject
+class uniform_block
 {
 public:
-	explicit uniform_buffer(context& _context)
-		: globject(gen_return(glGenBuffers))
+	template <typename T>
+	class member
+	{
+
+	};
+
+	uniform_block(context&)
 	{}
 
-	~uniform_buffer()
+	template <typename T>
+	member<T> create_member()
 	{
-		auto const nh = native_handle();
-		glDeleteBuffers(1, &nh);
+		return {};
 	}
 };
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "array_buffer.hpp"
-
 #include <boost/multi_array.hpp>
 
 // this whole file is lame

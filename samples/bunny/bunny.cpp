@@ -106,17 +106,17 @@ int main()
 		std::cout << "program log:\n" << prog.get_log() << std::endl;
 
 	// load vertex data
-	gl::array_buffer<FooVertex> verbuf(glc);
+	gl::buffer<FooVertex> verbuf(glc);
 	verbuf.assign(vertices);
 
 	// load index data
-	gl::index_buffer<gl::uint_t> indbuf(glc);
+	gl::buffer<gl::uint_t> indbuf(glc);
 	indbuf.assign(indices);
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_loc, verbuf.attrib() | &FooVertex::pos);
-	arr.bind_vertex_attribute(norm_loc, verbuf.attrib() | &FooVertex::norm);
+	arr.bind_vertex_attribute(pos_loc, verbuf.begin() | &FooVertex::pos);
+	arr.bind_vertex_attribute(norm_loc, verbuf.begin() | &FooVertex::norm);
 
 	gl::float_t rotate = 0;
 
@@ -134,17 +134,18 @@ int main()
 	//glc.enable(gl::capability::cull_face);
 	//glc.front_face(gl::orientation::cw);
 
-	// TODO: kill
-	glc.bind_default_framebuffer();
+	gl::technique tech(glc);
+	tech.use_program(prog);
+	tech.use_vertex_array(arr);
+	tech.use_element_array(indbuf);
+	tech.use_primitive_mode(gl::primitive::triangles);
+	tech.use_draw_framebuffer(nullptr);
 
 	auto const pre_rotate = gl::scale(8, 8, 8) * gl::translate(0.2, -0.8, 0);
 	auto const post_rotate = gl::rotate(0.2, 1, 0, 0) *	gl::translate(0, 0, -2.5);
 
 	dsp.set_display_func([&]
 	{
-		glc.clear_color({0.2, 0.2, 0.2, 1});
-		glc.clear_depth(1.0);
-
 		// rotating projection
 		gl::mat4 modelview = pre_rotate *
 			gl::rotate(rotate, 0, 1, 0) *
@@ -156,7 +157,9 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		glc.draw_elements(prog, gl::primitive::triangles, arr, indbuf, 0, indices.size());
+		glc.clear_depth(nullptr, 1.0);
+		glc.clear_color(nullptr, {0.2, 0.2, 0.2, 1});
+		glc.draw_elements(tech, 0, indices.size());
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)

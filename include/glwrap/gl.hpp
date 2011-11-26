@@ -4,7 +4,6 @@
 #include "exception.hpp"
 #include "uniform.hpp"
 #include "program.hpp"
-#include "context.hpp"
 #include "display.hpp"
 #include "matrix.hpp"
 #include "query.hpp"
@@ -17,8 +16,11 @@
 
 #include "vertex_array.hpp"
 
-#include "uniform_buffer.hpp"
-#include "array_buffer.hpp"
-#include "index_buffer.hpp"
+#include "uniform_block.hpp"
+#include "transform_feedback.hpp"
+
+#include "buffer.hpp"
 #include "unpack_buffer.hpp"
 #include "texture_buffer.hpp"
+
+#include "context.hpp"

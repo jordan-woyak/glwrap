@@ -1,7 +1,6 @@
 #pragma once
 
 #include "variable.hpp"
-#include "array_buffer.hpp"
 
 #include <list>
 

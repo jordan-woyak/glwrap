@@ -3,6 +3,8 @@
 
 #include "native_handle.hpp"
 #include "attribute.hpp"
+#include "buffer.hpp"
+#include "detail/attribute.hpp"
 
 namespace gl
 {
@@ -24,14 +26,17 @@ public:
 		glDeleteVertexArrays(1, &nh);
 	}
 
-	template <typename T>
-	void bind_vertex_attribute(const attribute_location<T>& _location, const vertex_attribute<T>& _comp)
+	template <typename T, typename B>
+	typename std::enable_if<is_buffer_iterator<T, B>::value, void>::type
+	bind_vertex_attribute(const attribute_location<T>& _location, const B& _comp)
 	{
 		auto const index = _location.get_index();
 
 		bind();
 		glEnableVertexAttribArray(index);
-		_comp.bind_to_attrib(index);
+
+		glBindBuffer(GL_ARRAY_BUFFER, _comp.m_buffer);
+		detail::vertex_attrib_pointer<T>::bind(index, _comp.stride(), _comp.m_offset);
 	}
 
 	template <typename T>
