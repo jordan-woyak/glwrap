@@ -203,6 +203,9 @@ public:
 			_mask, static_cast<GLenum>(_filter));
 	}
 
+	// TODO: multi draw needed?
+	// TODO: draw range elements [base vertex]
+
 	void draw_arrays(technique& _tech, std::size_t _offset, std::size_t _count)
 	{
 		_tech.bind();
@@ -222,24 +225,35 @@ public:
 			_instances);
 	}
 
-	void draw_elements(technique& _tech, std::size_t _offset, std::size_t _count)
+	void draw_elements(technique& _tech, std::size_t _start, std::size_t _count)
 	{
 		_tech.bind();
 
 		glDrawElements(_tech.get_mode(),
 			_count,
 			_tech.get_type(),
-			reinterpret_cast<void*>((intptr_t)_offset));
+			reinterpret_cast<void*>((intptr_t)_start));
 	}
 
-	void draw_elements_instanced(technique& _tech, std::size_t _offset, std::size_t _count, std::size_t _instances)
+	void draw_elements_offset(technique& _tech, std::size_t _start, std::size_t _count, std::size_t _offset)
+	{
+		_tech.bind();
+
+		glDrawElementsBaseVertex(_tech.get_mode(),
+			_count,
+			_tech.get_type(),
+			reinterpret_cast<void*>((intptr_t)_start),
+			_offset);
+	}
+
+	void draw_elements_instanced(technique& _tech, std::size_t _start, std::size_t _count, std::size_t _instances)
 	{
 		_tech.bind();
 
 		glDrawElementsInstanced(_tech.get_mode(),
 			_count,
 			_tech.get_type(),
-			reinterpret_cast<void*>((intptr_t)_offset),
+			reinterpret_cast<void*>((intptr_t)_start),
 			_instances);
 	}
 

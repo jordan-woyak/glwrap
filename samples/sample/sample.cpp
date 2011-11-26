@@ -116,22 +116,8 @@ int main()
 		{{9, -9}, {1, 1}, {0, 0, 1}},
 		{{9, 9}, {1, 0}, {0, 0, 0}},
 	};
-
-	// just to show it works
-	verbuf.storage(verts.size());
-	gl::mapped_buffer<FooVertex> vermap(verbuf);
-	std::copy(verts.begin(), verts.end(), vermap.begin());
-
-	//verbuf.assign(verts);
+	verbuf.assign(verts);
 	}
-
-	// load index data
-	gl::buffer<gl::ushort_t> indbuf(glc);
-	std::vector<gl::ushort_t> indbufdata =
-	{
-		0, 1, 2, 3
-	};
-	indbuf.assign(indbufdata);
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
@@ -165,7 +151,6 @@ int main()
 	gl::technique tech(glc);
 	tech.use_program(prog);
 	tech.use_vertex_array(arr);
-	tech.use_element_array(indbuf);
 	tech.use_primitive_mode(gl::primitive::triangle_fan);
 	tech.use_draw_framebuffer(fbuf);
 
@@ -180,7 +165,7 @@ int main()
 			rotate -= 3.14 * 2;
 
 		glc.clear_color(fbuf, {1, 1, 1, 1});
-		glc.draw_elements(tech, 0, 4);
+		glc.draw_arrays(tech, 0, 4);
 
 		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, window_size,
 			nullptr, {0, 0}, window_size,
