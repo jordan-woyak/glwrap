@@ -97,10 +97,9 @@ int main()
 
 	//glc.stop_transform_feedback();
 
-	std::cout << "DONE" << std::endl
-		<< "\toutput contents:" << std::endl;
+	std::cout << "DONE" << std::endl << std::endl;
 
 	gl::mapped_buffer<gl::vec3> output_view(output_buffer);
 	for (auto& vert : output_view)
-		std::cout << boost::format("{%d, %d, %d} ") % vert.x % vert.y % vert.z;
+		std::cout << boost::format("{%d, %d, %d}\n") % vert.x % vert.y % vert.z;
 }
