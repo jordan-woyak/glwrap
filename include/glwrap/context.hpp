@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <SFML/Graphics.hpp>
+
 #include "vector.hpp"
 #include "vertex_array.hpp"
 #include "attribute.hpp"
@@ -9,15 +11,19 @@
 #include "constants.hpp"
 #include "framebuffer.hpp"
 #include "program.hpp"
+#include "uniform_block.hpp"
+#include "transform_feedback.hpp"
 #include "sync.hpp"
 
 namespace gl
 {
 
-class context;
+class display;
 
 class context
 {
+	friend class display;
+
 public:
 	context()
 		: m_program()
@@ -25,7 +31,13 @@ public:
 		, m_draw_fbo(), m_read_fbo()
 		, m_primitive_mode(static_cast<GLenum>(primitive::triangles))
 		, m_element_type()
-	{}
+		, m_sf_window(new sf::RenderWindow)
+	{
+		glewInit();
+	}
+
+	context(context const&) = delete;
+	context& operator=(context const&) = delete;
 
 	void clear_color(vec4 const& _color)
 	{
@@ -367,6 +379,11 @@ private:
 		return m_element_type;
 	}
 
+	sf::RenderWindow& get_window()
+	{
+		return *m_sf_window;
+	}
+
 	GLuint m_program;
 	GLuint m_vertex_array;
 
@@ -374,6 +391,8 @@ private:
 
 	GLenum m_primitive_mode;
 	GLenum m_element_type;
+
+	std::unique_ptr<sf::RenderWindow> m_sf_window;
 };
 
 }
