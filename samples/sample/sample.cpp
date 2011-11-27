@@ -128,11 +128,11 @@ int main()
 	// an fbo
 	gl::framebuffer fbuf(glc);
 	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
+	fbuf.bind_read_buffer(glc.color_buffer(0));
 
 	// multisampled renderbuffer
 	gl::renderbuffer rendbuf(glc);
 	rendbuf.storage(window_size, 4);
-	// attach to fbo
 	fbuf.bind_attachment(glc.color_buffer(0), gl::renderbuffer_attachment(rendbuf));
 
 	glc.bind_texture(texunit, tex);
@@ -150,6 +150,7 @@ int main()
 	glc.use_program(prog);
 	glc.use_vertex_array(arr);
 	glc.use_primitive_mode(gl::primitive::triangle_fan);
+	glc.use_read_framebuffer(fbuf);
 
 	dsp.set_display_func([&]
 	{
@@ -166,9 +167,7 @@ int main()
 		glc.draw_arrays(0, 4);
 
 		glc.use_draw_framebuffer(nullptr);
-		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, window_size,
-			{0, 0}, window_size,
-			gl::filter::nearest);
+		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)

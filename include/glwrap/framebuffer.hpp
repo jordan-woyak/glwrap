@@ -110,26 +110,6 @@ attachment renderbuffer_attachment(renderbuffer& _rendbuf)
 	});
 };
 
-struct read_color_buffer
-{
-	friend class framebuffer;
-	friend class context;
-
-private:
-	read_color_buffer(GLuint _fbo, GLenum _color_buffer)
-		: m_fbo(_fbo), m_color_buffer(_color_buffer)
-	{}
-
-	void bind() const
-	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
-		glReadBuffer(m_color_buffer);
-	}
-
-	GLuint m_fbo;
-	GLenum m_color_buffer;
-};
-
 class framebuffer : public globject
 {
 	friend class context;
@@ -155,11 +135,6 @@ public:
 		_attach.m_func(GL_READ_FRAMEBUFFER, _point.get_value());
 	}
 
-	read_color_buffer read_buffer(color_attach_point const& _point)
-	{
-		return {native_handle(), _point.get_value()};
-	}
-
 	void bind_draw_buffer(color_number const& _number, color_attach_point const& _attach_point)
 	{
 		auto const index = _number.get_index();
@@ -173,6 +148,12 @@ public:
 		update_draw_buffers();
 	}
 
+	void bind_read_buffer(color_attach_point const& _attach_point)
+	{
+		bind_read();
+		glReadBuffer(_attach_point.get_value());
+	}
+
 	void unbind_draw_buffer(color_number const& _number)
 	{
 		auto const index = _number.get_index();
@@ -184,13 +165,12 @@ public:
 		update_draw_buffers();
 	}
 
-	// TODO: make private
+private:
 	void bind_draw() const
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, native_handle());
 	}
 
-private:
 	void bind_read() const
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, native_handle());

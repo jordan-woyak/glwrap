@@ -22,24 +22,31 @@ public:
 	context()
 		: m_program()
 		, m_vertex_array()
+		, m_draw_fbo(), m_read_fbo()
 		, m_primitive_mode(static_cast<GLenum>(primitive::triangles))
 		, m_element_type()
 	{}
 
 	void clear_color(vec4 const& _color)
 	{
+		prepare_use_fb();
+
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	void clear_stencil(int_t _index)
 	{
+		prepare_use_fb();
+
 		glClearStencil(_index);
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 
 	void clear_depth(depth_t _depth)
 	{
+		prepare_use_fb();
+
 		glClearDepth(_depth);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
@@ -189,14 +196,13 @@ public:
 			_iter.m_buffer, reinterpret_cast<GLintptr>(_iter.m_offset), _size * sizeof(T));
 	}
 
-	void blit_pixels(read_color_buffer const& _read, ivec2 const& _src_begin, ivec2 const& _src_end,
-		framebuffer_reference _write, ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
+	void blit_pixels(ivec2 const& _src_begin, ivec2 const& _src_end,
+		ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
 	{
 		// TODO: mask
 		auto _mask = GL_COLOR_BUFFER_BIT;
 
-		_read.bind();
-		_write.bind_draw();
+		prepare_use_fb();
 
 		glBlitFramebuffer(
 			_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
@@ -306,7 +312,14 @@ public:
 
 	void use_draw_framebuffer(framebuffer_reference _fb)
 	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
+		m_draw_fbo = _fb.native_handle();
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
+	}
+
+	void use_read_framebuffer(framebuffer_reference _fb)
+	{
+		m_read_fbo = _fb.native_handle();
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, _fb.native_handle());
 	}
 
 	color_number draw_buffer(uint_t _index)
@@ -335,6 +348,13 @@ private:
 		// TODO: make this non necessary
 		glUseProgram(m_program);
 		glBindVertexArray(m_vertex_array);
+		prepare_use_fb();
+	}
+
+	void prepare_use_fb()
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_draw_fbo);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_read_fbo);
 	}
 
 	GLenum get_primitive_mode() const
@@ -349,6 +369,8 @@ private:
 
 	GLuint m_program;
 	GLuint m_vertex_array;
+
+	GLuint m_draw_fbo, m_read_fbo;
 
 	GLenum m_primitive_mode;
 	GLenum m_element_type;
