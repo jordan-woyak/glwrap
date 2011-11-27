@@ -38,15 +38,6 @@ int main()
 	gl::texture_unit_alloter tunits(glc);
 	auto texunit = tunits.allot<gl::texture_2d>();
 
-	// transform feedback nonsense
-	gl::transform_feedback_binding_alloter tfbs(glc);
-	auto feedback_test = tfbs.allot<gl::vec3>();
-
-	gl::buffer<gl::vec3> feedback_storage(glc);
-	feedback_storage.storage(32);
-
-	glc.bind_buffer(feedback_test, feedback_storage.begin(), feedback_storage.size());
-
 	// create a program
 	gl::program prog(glc);
 
@@ -60,9 +51,6 @@ int main()
 	auto texpos_attrib = prog.create_attribute<gl::vec2>("texpos");
 
 	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
-
-	// TODO: function name :/
-	auto outtest_varying = prog.create_vertex_out_varying<gl::vec2>("outtest");
 
 	prog.set_vertex_shader_source(
 		"out vec3 col;"
@@ -176,11 +164,5 @@ int main()
 		rendbuf.resize(window_size);
 	});
 
-	gl::query que(glc, gl::query_type::primitives_generated);
-	que.start();
-
 	dsp.run_loop();
-
-	que.stop();
-	std::cout << "samples_passed: " << que.result() << std::endl;
 }
