@@ -39,7 +39,8 @@ public:
 	context(context const&) = delete;
 	context& operator=(context const&) = delete;
 
-	void clear_color(vec4 const& _color)
+	// TODO: kill these 3, provide clear functionality like ogl
+	void clear_color(vec4 const& _color = vec4{})
 	{
 		prepare_use_fb();
 
@@ -47,7 +48,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	void clear_stencil(int_t _index)
+	void clear_stencil(int_t _index = 0)
 	{
 		prepare_use_fb();
 
@@ -55,7 +56,7 @@ public:
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 
-	void clear_depth(depth_t _depth)
+	void clear_depth(depth_t _depth = 1.0)
 	{
 		prepare_use_fb();
 
@@ -158,6 +159,13 @@ public:
 	void sample_coverage(float_t _value, bool_t _invert)
 	{
 		glSampleCoverage(_value, _invert);
+	}
+
+	void sample_mask(uint_t _mask_number, bitfield_t _mask)
+	{
+		// TODO: assert _mask_number < GL_MAX_SAMPLE_MASK_WORDS
+
+		glSampleMaski(_mask_number, _mask);
 	}
 
 	void hint(hint_target _target, hint_value _value)
