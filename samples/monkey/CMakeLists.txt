@@ -1,9 +1,21 @@
-project(glwrap-monkey)
+cmake_minimum_required(VERSION 2.6)
+
+set(project_name glwrap-monkey)
+project(${project_name})
+
+# why do I need this?!!
+set(CMAKE_MODULE_PATH /usr/share/apps/cmake/modules)
 
 include_directories(../../include)
 
-link_libraries(sfml-window sfml-graphics)
+find_package(Eigen2 REQUIRED)
+include_directories(${EIGEN2_INCLUDE_DIR})
+
+find_package(SFML 2.0 COMPONENTS window graphics REQUIRED)
+include_directories(${SFML_INCLUDE_DIR})
 
 set(CMAKE_CXX_FLAGS "-Wall -std=c++0x")
 
-add_executable(glwrap-monkey monkey.cpp)
+add_executable(${project_name} monkey.cpp)
+
+target_link_libraries(${project_name} ${SFML_LIBRARIES} GLEW)

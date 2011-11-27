@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <GL/glew.h>
+
 #include "vector.hpp"
 
 namespace gl

@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include "vector.hpp"
+#include <Eigen/Dense>
 
-#include <eigen2/Eigen/Dense>
+#include "vector.hpp"
 
 namespace gl
 {
