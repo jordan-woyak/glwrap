@@ -272,7 +272,41 @@ public:
 			reinterpret_cast<void*>((intptr_t)_start),
 			_instances);
 	}
+/*
+	void use_program(program& _prog)
+	{
+		glUseProgram(_prog.native_handle());
+	}
 
+	void use_vertex_array(vertex_array& _vert)
+	{
+		glBindVertexArray(_vert.native_handle());
+	}
+
+	template <typename T>
+	void use_element_array(buffer<T>& _buff)
+	{
+		static_assert(std::is_same<T, ubyte_t>::value
+			|| std::is_same<T, ushort_t>::value
+			|| std::is_same<T, uint_t>::value
+			, "must be ubyte, uint, ushort");
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buff.native_handle());
+
+		m_element_type = detail::data_type_enum<T>();
+	}
+
+	// TODO: probably kill this
+	void use_primitive_mode(primitive _prim)
+	{
+		m_primitive_mode = static_cast<GLenum>(_prim);
+	}
+
+	void use_draw_framebuffer(framebuffer_reference _fb)
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
+	}
+*/
 	color_number draw_buffer(uint_t _index)
 	{
 		return {_index};
