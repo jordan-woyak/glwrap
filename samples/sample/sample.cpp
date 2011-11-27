@@ -147,12 +147,9 @@ int main()
 
 	gl::float_t rotate = 0;
 
-	// TODO: needs better name maybe, or to be killed
-	gl::technique tech(glc);
-	tech.use_program(prog);
-	tech.use_vertex_array(arr);
-	tech.use_primitive_mode(gl::primitive::triangle_fan);
-	tech.use_draw_framebuffer(fbuf);
+	glc.use_program(prog);
+	glc.use_vertex_array(arr);
+	glc.use_primitive_mode(gl::primitive::triangle_fan);
 
 	dsp.set_display_func([&]
 	{
@@ -164,11 +161,13 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		glc.clear_color(fbuf, {1, 1, 1, 1});
-		glc.draw_arrays(tech, 0, 4);
+		glc.use_draw_framebuffer(fbuf);
+		glc.clear_color({1, 1, 1, 1});
+		glc.draw_arrays(0, 4);
 
+		glc.use_draw_framebuffer(nullptr);
 		glc.blit_pixels(fbuf.read_buffer(glc.color_buffer(0)), {0, 0}, window_size,
-			nullptr, {0, 0}, window_size,
+			{0, 0}, window_size,
 			gl::filter::nearest);
 	});
 

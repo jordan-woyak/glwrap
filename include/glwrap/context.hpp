@@ -10,7 +10,6 @@
 #include "framebuffer.hpp"
 #include "program.hpp"
 #include "sync.hpp"
-#include "draw.hpp"
 
 namespace gl
 {
@@ -20,26 +19,27 @@ class context;
 class context
 {
 public:
-	void clear_color(framebuffer_reference _write, vec4 const& _color)
-	{
-		_write.bind_draw();
+	context()
+		: m_program()
+		, m_vertex_array()
+		, m_primitive_mode(static_cast<GLenum>(primitive::triangles))
+		, m_element_type()
+	{}
 
+	void clear_color(vec4 const& _color)
+	{
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	void clear_stencil(framebuffer_reference _write, int_t _index)
+	void clear_stencil(int_t _index)
 	{
-		_write.bind_draw();
-
 		glClearStencil(_index);
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 
-	void clear_depth(framebuffer_reference _write, depth_t _depth)
+	void clear_depth(depth_t _depth)
 	{
-		_write.bind_draw();
-
 		glClearDepth(_depth);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
@@ -222,65 +222,67 @@ public:
 	// TODO: multi draw needed?
 	// TODO: draw range elements [base vertex]
 
-	void draw_arrays(technique& _tech, std::size_t _offset, std::size_t _count)
+	void draw_arrays(std::size_t _offset, std::size_t _count)
 	{
-		_tech.bind();
+		prepare_draw();
 
-		glDrawArrays(_tech.get_mode(),
+		glDrawArrays(get_primitive_mode(),
 			_offset,
 			_count);
 	}
 
-	void draw_arrays_instanced(technique& _tech, std::size_t _offset, std::size_t _count, std::size_t _instances)
+	void draw_arrays_instanced(std::size_t _offset, std::size_t _count, std::size_t _instances)
 	{
-		_tech.bind();
+		prepare_draw();
 
-		glDrawArraysInstanced(_tech.get_mode(),
+		glDrawArraysInstanced(get_primitive_mode(),
 			_offset,
 			_count,
 			_instances);
 	}
 
-	void draw_elements(technique& _tech, std::size_t _start, std::size_t _count)
+	void draw_elements(std::size_t _start, std::size_t _count)
 	{
-		_tech.bind();
+		prepare_draw();
 
-		glDrawElements(_tech.get_mode(),
+		glDrawElements(get_primitive_mode(),
 			_count,
-			_tech.get_type(),
+			get_element_type(),
 			reinterpret_cast<void*>((intptr_t)_start));
 	}
 
-	void draw_elements_offset(technique& _tech, std::size_t _start, std::size_t _count, std::size_t _offset)
+	void draw_elements_offset(std::size_t _start, std::size_t _count, std::size_t _offset)
 	{
-		_tech.bind();
+		prepare_draw();
 
-		glDrawElementsBaseVertex(_tech.get_mode(),
+		glDrawElementsBaseVertex(get_primitive_mode(),
 			_count,
-			_tech.get_type(),
+			get_element_type(),
 			reinterpret_cast<void*>((intptr_t)_start),
 			_offset);
 	}
 
-	void draw_elements_instanced(technique& _tech, std::size_t _start, std::size_t _count, std::size_t _instances)
+	void draw_elements_instanced(std::size_t _start, std::size_t _count, std::size_t _instances)
 	{
-		_tech.bind();
+		prepare_draw();
 
-		glDrawElementsInstanced(_tech.get_mode(),
+		glDrawElementsInstanced(get_primitive_mode(),
 			_count,
-			_tech.get_type(),
+			get_element_type(),
 			reinterpret_cast<void*>((intptr_t)_start),
 			_instances);
 	}
-/*
+
 	void use_program(program& _prog)
 	{
-		glUseProgram(_prog.native_handle());
+		m_program = _prog.native_handle();
+		//glUseProgram(_prog.native_handle());
 	}
 
 	void use_vertex_array(vertex_array& _vert)
 	{
-		glBindVertexArray(_vert.native_handle());
+		m_vertex_array = _vert.native_handle();
+		//glBindVertexArray(_vert.native_handle());
 	}
 
 	template <typename T>
@@ -296,7 +298,7 @@ public:
 		m_element_type = detail::data_type_enum<T>();
 	}
 
-	// TODO: probably kill this
+	// TODO: kill this?
 	void use_primitive_mode(primitive _prim)
 	{
 		m_primitive_mode = static_cast<GLenum>(_prim);
@@ -306,7 +308,7 @@ public:
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
 	}
-*/
+
 	color_number draw_buffer(uint_t _index)
 	{
 		return {_index};
@@ -326,6 +328,30 @@ public:
 	{
 		return {GL_DEPTH_ATTACHMENT};
 	}
+
+private:
+	void prepare_draw()
+	{
+		// TODO: make this non necessary
+		glUseProgram(m_program);
+		glBindVertexArray(m_vertex_array);
+	}
+
+	GLenum get_primitive_mode() const
+	{
+		return m_primitive_mode;
+	}
+
+	GLenum get_element_type() const
+	{
+		return m_element_type;
+	}
+
+	GLuint m_program;
+	GLuint m_vertex_array;
+
+	GLenum m_primitive_mode;
+	GLenum m_element_type;
 };
 
 }
