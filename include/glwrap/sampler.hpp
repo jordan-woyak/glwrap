@@ -79,6 +79,10 @@ public:
 		glSamplerParameterf(native_handle(), GL_TEXTURE_MAX_LOD, _lod);
 	}
 
+	// TODO: GL_TEXTURE_BORDER_COLOR
+	// TODO: GL_TEXTURE_COMPARE_MODE
+	// TODO: GL_TEXTURE_COMPARE_FUNC
+
 private:
 	void bind(GLuint _unit) const
 	{

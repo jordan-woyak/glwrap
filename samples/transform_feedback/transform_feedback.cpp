@@ -15,7 +15,7 @@ int main()
 
 	// transform feedback nonsense
 	gl::transform_feedback_binding_alloter tfbs(glc);
-	auto feedback_out = tfbs.allot<gl::vec3>();
+	auto feedback_out = tfbs.allot<gl::float_t>();
 
 	// create a program
 	gl::program prog(glc);
@@ -28,12 +28,12 @@ int main()
 	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
 
 	// TODO: function name :/
-	auto output1_varying = prog.create_vertex_out_varying<gl::vec3>("output1");
+	auto output1_varying = prog.create_vertex_out_varying<gl::float_t>("output1");
 
 	prog.set_vertex_shader_source(
 		"void main(void)"
 		"{"
-			"output1 = input1 * input2;"
+			"output1 = dot(input1, input2);"
 		"}"
 	);
 
@@ -82,7 +82,7 @@ int main()
 	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &FooVertex::input2);
 
 	// output buffer
-	gl::buffer<gl::vec3> output_buffer(glc);
+	gl::buffer<gl::float_t> output_buffer(glc);
 	output_buffer.storage(input_buffer.size());
 
 	glc.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
@@ -99,7 +99,7 @@ int main()
 
 	std::cout << "DONE" << std::endl << std::endl;
 
-	gl::mapped_buffer<gl::vec3> output_view(output_buffer);
+	gl::mapped_buffer<gl::float_t> output_view(output_buffer);
 	for (auto& vert : output_view)
-		std::cout << boost::format("{%d, %d, %d}\n") % vert.x % vert.y % vert.z;
+		std::cout << vert << std::endl;
 }

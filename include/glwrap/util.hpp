@@ -158,4 +158,19 @@ get_contiguous_range(U&& _range)
 
 }
 
+/*
+// TODO: do something when not contiguous?
+template <typename IterIn, typename IterOut>
+void copy(IterIn _begin, IterIn _end, IterOut _dest)
+{
+
+}
+*/
+
+template <typename T, typename Min, typename Max>
+auto clamp(T&& _val, Min&& _min, Max&& _max) -> typename std::remove_reference<T>::type
+{
+	return _val < _min ? _min : (_val < _max ? _val : _max);
+}
+
 }

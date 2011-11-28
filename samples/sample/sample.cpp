@@ -24,7 +24,7 @@ int main()
 		0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,
 		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 	};
-	tex.assign(gl::unpack(texdata.data(), gl::pixel_format::red, {8, 8}));
+	tex.assign(gl::unpack(texdata.data(), gl::pixel_format::r, {8, 8}), gl::base_format::r);
 
 	// used connect array_buffer vertex data and program attributes together
 	// via the typeless "generic vertex attributes" in a type-safe manner
@@ -130,6 +130,8 @@ int main()
 	glc.bind_sampler(texunit, samp);
 
 	samp.set_mag_filter(gl::filter::nearest);
+	samp.set_min_lod(0);
+	samp.set_max_lod(0);
 
 	//glc.enable(gl::capability::multisample);
 
@@ -142,9 +144,11 @@ int main()
 
 	dsp.set_display_func([&]
 	{
+		auto const ratio = (float)window_size.y / window_size.x;
+
 		// rotating ortho projection
 		gl::mat4 const modelview = gl::rotate(rotate, 0, 0, 1) *
-			gl::scale(0.1 * window_size.y / window_size.x, 0.1, 1);
+			gl::scale(0.1 * gl::clamp(ratio, ratio, 1), 0.1 / gl::clamp(ratio, 1, ratio), 1);
 		prog.set_uniform(mvp_uni, modelview);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)

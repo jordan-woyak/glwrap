@@ -4,6 +4,7 @@
 #include "native_handle.hpp"
 #include "util.hpp"
 #include "unpack_buffer.hpp"
+#include "image_format.hpp"
 
 namespace gl
 {
@@ -75,15 +76,23 @@ public:
 	{}
 
 	template <typename T>
-	void assign(unpack_buffer<T, D> const& _buffer)
+	void assign(unpack_buffer<T, D> const& _buffer, image_format _ifmt)
 	{
 		bind();
-		// TODO: super lame
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _buffer.m_dims.x, _buffer.m_dims.y,
+		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
 			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
 
 		// TODO: lame
 		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
+	// TODO: level
+
+	void storage(basic_vec<int_t, D> const& _dims, image_format _ifmt)
+	{
+		// TODO: for non 2d textures
+		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _dims.x, _dims.y,
+			0, GL_RED, GL_BYTE, nullptr);
 	}
 
 	static GLenum get_target();

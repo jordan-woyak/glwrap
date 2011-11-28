@@ -10,7 +10,7 @@ namespace gl
 // TODO: lame
 enum class pixel_format : GLenum
 {
-	red = GL_RED,
+	r = GL_RED,
 	rg = GL_RG,
 	rgb = GL_RGB,
 	bgr = GL_BGR,
