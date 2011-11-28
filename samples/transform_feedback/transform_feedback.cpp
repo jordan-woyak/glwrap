@@ -25,8 +25,6 @@ int main()
 	auto input1_attrib = prog.create_attribute<gl::vec3>("input1");
 	auto input2_attrib = prog.create_attribute<gl::vec3>("input2");
 
-	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
-
 	auto output1_varying = prog.create_vertex_out_varying<gl::float_t>("output1");
 
 	prog.set_vertex_shader_source(
@@ -38,9 +36,7 @@ int main()
 
 	prog.compile();
 
-	// bind attribute, fragdata, etc. before linking
-	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
-
+	// bind things before linking
 	prog.bind_transform_feedback(output1_varying, feedback_out);
 
 	prog.bind_attribute(input1_attrib, input1_loc);
@@ -71,6 +67,7 @@ int main()
 	input_buffer.assign(verts);
 	}
 
+	// set buffers, strides, data types, etc
 	gl::vertex_array input_vertices(glc);
 	input_vertices.bind_vertex_attribute(input1_loc, input_buffer.begin() | &FooVertex::input1);
 	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &FooVertex::input2);
@@ -81,6 +78,7 @@ int main()
 
 	glc.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
 
+	// TRANSFORM FEEEEDBAAACK!
 	glc.use_program(prog);
 	glc.use_vertex_array(input_vertices);
 	glc.use_primitive_mode(gl::primitive::points);
@@ -89,15 +87,10 @@ int main()
 	glc.draw_arrays(0, input_buffer.size());
 	glc.stop_transform_feedback();
 
-	/*
-	auto sync = glc.fence_sync(gl::sync_condition::gpu_commands_complete, 0);
-	sync.client_wait_for(std::chrono::seconds(5));
-	*/
-
 	glc.finish();
-
 	std::cout << "DONE" << std::endl << std::endl;
 
+	// print results
 	gl::mapped_buffer<gl::float_t> output_view(output_buffer);
 	for (auto& vert : output_view)
 		std::cout << vert << std::endl;
