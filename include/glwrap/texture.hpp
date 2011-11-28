@@ -81,9 +81,6 @@ public:
 		bind();
 		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
 			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
-
-		// TODO: lame
-		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	// TODO: level
@@ -93,6 +90,12 @@ public:
 		// TODO: for non 2d textures
 		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _dims.x, _dims.y,
 			0, GL_RED, GL_BYTE, nullptr);
+	}
+
+	// mipmap vs. mipmaps ?
+	void generate_mipmap()
+	{
+		glGenerateMipmap(get_target());
 	}
 
 	static GLenum get_target();
