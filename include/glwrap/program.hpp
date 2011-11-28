@@ -127,6 +127,8 @@ public:
 
 	std::string get_log() const
 	{
+		//glValidateProgram(native_handle());
+
 		GLint log_length;
 		glGetProgramiv(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
 

@@ -15,7 +15,7 @@ int main()
 
 	// connect buffers to varyings in a type-safe manner
 	gl::transform_feedback_binding_alloter tfbs(glc);
-	auto feedback_out = tfbs.allot<gl::float_t>();
+	auto feedback_out = tfbs.allot<gl::vec3>();
 
 	// create a program
 	gl::program prog(glc);
@@ -25,12 +25,12 @@ int main()
 	auto input1_attrib = prog.create_attribute<gl::vec3>("input1");
 	auto input2_attrib = prog.create_attribute<gl::vec3>("input2");
 
-	auto output1_varying = prog.create_vertex_out_varying<gl::float_t>("output1");
+	auto output1_varying = prog.create_vertex_out_varying<gl::vec3>("output1");
 
 	prog.set_vertex_shader_source(
 		"void main(void)"
 		"{"
-			"output1 = 2;"//dot(input1, input2);"
+			"output1 = cross(input1, input2);"
 		"}"
 	);
 
@@ -73,7 +73,7 @@ int main()
 	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &FooVertex::input2);
 
 	// output buffer
-	gl::buffer<gl::float_t> output_buffer(glc);
+	gl::buffer<gl::vec3> output_buffer(glc);
 	output_buffer.storage(input_buffer.size());
 
 	glc.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
@@ -81,9 +81,9 @@ int main()
 	// TRANSFORM FEEEEDBAAACK!
 	glc.use_program(prog);
 	glc.use_vertex_array(input_vertices);
-	glc.use_primitive_mode(gl::primitive::points);
+	glc.use_primitive_mode(gl::primitive::lines);
 
-	glc.start_transform_feedback(gl::primitive::points);
+	glc.start_transform_feedback(gl::primitive::lines);
 	glc.draw_arrays(0, input_buffer.size());
 	glc.stop_transform_feedback();
 
@@ -91,7 +91,7 @@ int main()
 	std::cout << "DONE" << std::endl << std::endl;
 
 	// print results
-	gl::mapped_buffer<gl::float_t> output_view(output_buffer);
+	gl::mapped_buffer<gl::vec3> output_view(output_buffer);
 	for (auto& vert : output_view)
-		std::cout << vert << std::endl;
+		std::cout << boost::format("{%d, %d, %d}\n") % vert.x % vert.y % vert.z;
 }

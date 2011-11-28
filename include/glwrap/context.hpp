@@ -312,7 +312,7 @@ public:
 	void use_program(program& _prog)
 	{
 		m_program = _prog.native_handle();
-		//glUseProgram(_prog.native_handle());
+		glUseProgram(m_program);
 	}
 
 	void use_vertex_array(vertex_array& _vert)
@@ -375,8 +375,14 @@ public:
 private:
 	void prepare_draw()
 	{
-		// TODO: make this non necessary
-		glUseProgram(m_program);
+		// TODO: make this not necessary
+
+		// silly
+		GLint prog{};
+		glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
+		if ((GLuint)prog != m_program)
+			glUseProgram(m_program);
+
 		glBindVertexArray(m_vertex_array);
 		prepare_use_fb();
 	}
