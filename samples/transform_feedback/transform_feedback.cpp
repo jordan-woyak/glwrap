@@ -33,7 +33,7 @@ int main()
 	prog.set_vertex_shader_source(
 		"void main(void)"
 		"{"
-			"output1 = dot(input1, input2);"
+			"output1 = 2;"//dot(input1, input2);"
 		"}"
 	);
 
@@ -48,6 +48,8 @@ int main()
 
 	// bind attribute and fragdata location before linking
 	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
+
+	prog.bind_transform_feedback(output1_varying, feedback_out);
 
 	prog.bind_attribute(input1_attrib, input1_loc);
 	prog.bind_attribute(input2_attrib, input2_loc);
@@ -91,11 +93,16 @@ int main()
 	glc.use_vertex_array(input_vertices);
 	glc.use_primitive_mode(gl::primitive::points);
 
-	//glc.start_transform_feedback();
-
+	glc.start_transform_feedback(gl::primitive::points);
 	glc.draw_arrays(0, input_buffer.size());
+	glc.stop_transform_feedback();
 
-	//glc.stop_transform_feedback();
+	/*
+	auto sync = glc.fence_sync(gl::sync_condition::gpu_commands_complete, 0);
+	sync.client_wait_for(std::chrono::seconds(5));
+	*/
+
+	glc.finish();
 
 	std::cout << "DONE" << std::endl << std::endl;
 

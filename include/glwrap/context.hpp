@@ -216,6 +216,16 @@ public:
 			_iter.m_buffer, reinterpret_cast<GLintptr>(_iter.m_offset), _size * sizeof(T));
 	}
 
+	void start_transform_feedback(primitive _mode)
+	{
+		glBeginTransformFeedback(static_cast<GLenum>(_mode));
+	}
+
+	void stop_transform_feedback()
+	{
+		glEndTransformFeedback();
+	}
+
 	void blit_pixels(ivec2 const& _src_begin, ivec2 const& _src_end,
 		ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
 	{

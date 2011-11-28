@@ -8,11 +8,34 @@
 #include "attribute.hpp"
 #include "framebuffer.hpp"
 #include "vertex_array.hpp"
+#include "transform_feedback.hpp"
 
 namespace gl
 {
 
 class context;
+
+// TODO: rename/put elsewhere
+template <typename T>
+struct vertex_out_varying
+{
+	friend class program;
+
+public:
+	std::string const& get_name() const
+	{
+		return (*m_iter)->get_name();
+	}
+
+private:
+	typedef std::list<std::unique_ptr<variable_base>>::iterator iter_t;
+
+	vertex_out_varying(iter_t _iter)
+		: m_iter(_iter)
+	{}
+
+	iter_t m_iter;
+};
 
 class program : public globject
 {
@@ -41,6 +64,12 @@ public:
 
 		{
 		std::string vshad_header("#version 330\n");
+
+		for (auto& var : m_vertex_out_varying)
+		{
+			vshad_header += (boost::format("out %s %s;\n")
+				% var->get_type_name() % var->get_name()).str();
+		}
 
 		for (auto& var : m_attributes)
 		{
@@ -75,9 +104,16 @@ public:
 
 	void link()
 	{
+		// TODO: allow use of GL_SEPARATE_ATTRIBS
+		// transform feedback bindings
+		std::vector<const char*> varyings(m_feedback_varyings.size());
+		std::transform(m_feedback_varyings.begin(), m_feedback_varyings.end(),
+			varyings.begin(), std::mem_fun_ref(&std::string::c_str));
+		glTransformFeedbackVaryings(native_handle(), varyings.size(), varyings.data(), GL_SEPARATE_ATTRIBS);
+
 		glLinkProgram(native_handle());
 
-		// TODO: is this really needed?
+		// update uniform locations
 		for (auto& uni : m_uniforms)
 			uni.set_location(glGetUniformLocation(native_handle(),
 				uni.get_variable().get_name().c_str()));
@@ -145,13 +181,11 @@ public:
 		return fragdata<T>(std::prev(m_fragdatas.end()));
 	}
 
-	// TODO: kill struct
-	template <typename T> struct vertex_out_varying {};
-
 	template <typename T>
 	vertex_out_varying<T> create_vertex_out_varying(const std::string& _name)
 	{
-		return {};
+		m_vertex_out_varying.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
+		return vertex_out_varying<T>(std::prev(m_vertex_out_varying.end()));
 	}
 
 	template <typename T>
@@ -173,6 +207,19 @@ public:
 		glBindFragDataLocation(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
 	}
 
+	template <typename T>
+	void bind_transform_feedback(vertex_out_varying<T>& _varying, transform_feedback_binding<T> const& _binding)
+	{
+		//glBindFragDataLocation(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
+
+		auto const index = _binding.get_index();
+
+		if (index >= m_feedback_varyings.size())
+			m_feedback_varyings.resize(index + 1);
+
+		m_feedback_varyings[index] = _varying.get_name();
+	}
+
 	explicit program(context& _context)
 		: globject(glCreateProgram())
 	{}
@@ -190,6 +237,10 @@ private:
 	// TODO: kill pointers
 	std::list<std::unique_ptr<variable_base>> m_attributes;
 	std::list<std::unique_ptr<variable_base>> m_fragdatas;
+	std::list<std::unique_ptr<variable_base>> m_vertex_out_varying;
+
+	std::vector<std::string> m_feedback_varyings;
+
 	std::list<uniform_variable> m_uniforms;
 };
 
