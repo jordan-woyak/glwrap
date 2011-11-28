@@ -56,36 +56,48 @@ int main()
 
 	// input buffer
 	gl::buffer<gl::float_t> input_buffer(glc);
-	input_buffer.assign((gl::float_t[]){45, 2, 7, 23, 42, 1, 89, 12, 3});
+	input_buffer.assign((gl::float_t[])
+	{
+		45, 2, 7, 23, 42, 1, 89, 12, 3
+	});
 
 	// set buffers, strides, data types, etc
 	gl::vertex_array input_vertices(glc);
 	input_vertices.bind_vertex_attribute(input1_loc, input_buffer.begin());
 
+	std::vector<gl::float_t> operands =
+	{
+		1000, 2000, 7, 500, -1000
+	};
+
 	// output buffer
 	gl::buffer<gl::float_t> output_buffer(glc);
-	output_buffer.storage(input_buffer.size());
+	output_buffer.storage(input_buffer.size() * operands.size());
 
 	glc.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
 
-	// TRANSFORM FEEEEDBAAACK!
 	glc.use_program(prog);
 	glc.use_vertex_array(input_vertices);
 	glc.use_primitive_mode(gl::primitive::points);
 
-	prog.set_uniform(operand1_uni, 1000);
-
+	// transform feedback
 	glc.start_transform_feedback(gl::primitive::points);
-	glc.draw_arrays(0, input_buffer.size());
+
+	for (auto operand : operands)
+	{
+		prog.set_uniform(operand1_uni, operand);
+		glc.draw_arrays(0, input_buffer.size());
+	}
+
 	glc.stop_transform_feedback();
 
 	glc.finish();
 	std::cout << "DONE" << std::endl << std::endl;
 
 	// print results
-	gl::mapped_buffer<gl::float_t> output_view(output_buffer);
-	for (auto& vert : output_view)
-		std::cout << vert << " ";
+	std::size_t i{};
+	for (auto& vert : gl::mapped_buffer<gl::float_t>(output_buffer))
+		std::cout << vert << "\t" << std::string(0 == (++i % input_buffer.size()), '\n');
 
 	std::cout << std::endl;
 }
