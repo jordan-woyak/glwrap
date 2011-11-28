@@ -81,9 +81,9 @@ int main()
 	// TRANSFORM FEEEEDBAAACK!
 	glc.use_program(prog);
 	glc.use_vertex_array(input_vertices);
-	glc.use_primitive_mode(gl::primitive::lines);
+	glc.use_primitive_mode(gl::primitive::points);
 
-	glc.start_transform_feedback(gl::primitive::lines);
+	glc.start_transform_feedback(gl::primitive::points);
 	glc.draw_arrays(0, input_buffer.size());
 	glc.stop_transform_feedback();
 
