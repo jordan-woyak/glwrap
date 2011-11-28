@@ -50,9 +50,8 @@ public:
 	void compile()
 	{
 		// TODO: error check
-		GLuint vshad = glCreateShader(GL_VERTEX_SHADER);
-		GLuint fshad = glCreateShader(GL_FRAGMENT_SHADER);
 
+		// uniforms
 		std::string uniform_header;
 		{
 		for (auto& uni : m_uniforms)
@@ -62,44 +61,51 @@ public:
 		}
 		}
 
+		// vertex shader
+		// TODO: lame
+		if (!m_vertex_src.empty())
 		{
-		std::string vshad_header("#version 330\n");
+			std::string vshad_header("#version 330\n");
 
-		for (auto& var : m_vertex_out_varying)
-		{
-			vshad_header += (boost::format("out %s %s;\n")
-				% var->get_type_name() % var->get_name()).str();
+			for (auto& var : m_vertex_out_varying)
+			{
+				vshad_header += (boost::format("out %s %s;\n")
+					% var->get_type_name() % var->get_name()).str();
+			}
+
+			for (auto& var : m_attributes)
+			{
+				vshad_header += (boost::format("in %s %s;\n")
+					% var->get_type_name() % var->get_name()).str();
+			}
+
+			std::array<const char*, 3> vshad_src = {{vshad_header.c_str(), uniform_header.c_str(), m_vertex_src.c_str()}};
+			GLuint vshad = glCreateShader(GL_VERTEX_SHADER);
+			glShaderSource(vshad, vshad_src.size(), vshad_src.data(), 0);
+
+			glAttachShader(native_handle(), vshad);
+			glDeleteShader(vshad);
 		}
 
-		for (auto& var : m_attributes)
+		// fragment shader
+		// TODO: lame
+		if (!m_fragment_src.empty())
 		{
-			vshad_header += (boost::format("in %s %s;\n")
-				% var->get_type_name() % var->get_name()).str();
+			std::string fshad_header("#version 330\n");
+
+			for (auto& var : m_fragdatas)
+			{
+				fshad_header += (boost::format("out %s %s;\n")
+					% var->get_type_name() % var->get_name()).str();
+			}
+
+			std::array<const char*, 3> fshad_src = {{fshad_header.c_str(), uniform_header.c_str(), m_fragment_src.c_str()}};
+			GLuint fshad = glCreateShader(GL_FRAGMENT_SHADER);
+			glShaderSource(fshad, fshad_src.size(), fshad_src.data(), 0);
+
+			glAttachShader(native_handle(), fshad);
+			glDeleteShader(fshad);
 		}
-
-		std::array<const char*, 3> vshad_src = {{vshad_header.c_str(), uniform_header.c_str(), m_vertex_src.c_str()}};
-		glShaderSource(vshad, vshad_src.size(), vshad_src.data(), 0);
-		}
-
-		{
-		std::string fshad_header("#version 330\n");
-
-		for (auto& var : m_fragdatas)
-		{
-			fshad_header += (boost::format("out %s %s;\n")
-				% var->get_type_name() % var->get_name()).str();
-		}
-
-		std::array<const char*, 3> fshad_src = {{fshad_header.c_str(), uniform_header.c_str(), m_fragment_src.c_str()}};
-		glShaderSource(fshad, fshad_src.size(), fshad_src.data(), 0);
-		}
-
-		glAttachShader(native_handle(), vshad);
-		glAttachShader(native_handle(), fshad);
-
-		// attached shaders will be deleted on program deletion
-		glDeleteShader(vshad);
-		glDeleteShader(fshad);
 	}
 
 	void link()
@@ -181,6 +187,7 @@ public:
 		return fragdata<T>(std::prev(m_fragdatas.end()));
 	}
 
+	// TODO: change function name?
 	template <typename T>
 	vertex_out_varying<T> create_vertex_out_varying(const std::string& _name)
 	{

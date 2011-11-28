@@ -13,7 +13,7 @@ int main()
 	auto input1_loc = locs.allot<gl::vec3>();
 	auto input2_loc = locs.allot<gl::vec3>();
 
-	// transform feedback nonsense
+	// connect buffers to varyings in a type-safe manner
 	gl::transform_feedback_binding_alloter tfbs(glc);
 	auto feedback_out = tfbs.allot<gl::float_t>();
 
@@ -27,7 +27,6 @@ int main()
 
 	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
 
-	// TODO: function name :/
 	auto output1_varying = prog.create_vertex_out_varying<gl::float_t>("output1");
 
 	prog.set_vertex_shader_source(
@@ -37,16 +36,9 @@ int main()
 		"}"
 	);
 
-	prog.set_fragment_shader_source(
-		"void main(void)"
-		"{"
-			"fragdata = vec4(0);"
-		"}"
-	);
-
 	prog.compile();
 
-	// bind attribute and fragdata location before linking
+	// bind attribute, fragdata, etc. before linking
 	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
 
 	prog.bind_transform_feedback(output1_varying, feedback_out);
