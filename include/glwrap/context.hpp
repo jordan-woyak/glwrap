@@ -168,6 +168,16 @@ public:
 		glSampleMaski(_mask_number, _mask);
 	}
 
+	void color_mask(basic_vec<bool, 4> const& _mask)
+	{
+		glColorMask(_mask.x, _mask.y, _mask.z, _mask.w);
+	}
+
+	void color_mask(color_number const& _buf, basic_vec<bool, 4> const& _mask)
+	{
+		glColorMaski(_buf.get_index(), _mask.x, _mask.y, _mask.z, _mask.w);
+	}
+
 	void hint(hint_target _target, hint_value _value)
 	{
 		glHint(static_cast<GLenum>(_target), static_cast<GLenum>(_value));
