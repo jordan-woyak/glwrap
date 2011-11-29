@@ -79,7 +79,7 @@ int main()
 	gl::buffer<gl::uniform_block_align<Params>> params_buffer(glc);
 	params_buffer.assign((Params[])
 	{
-		{45, 1000}, {2, 302}, {7.2, 7000}, {23, 200}, {42, 74}, {1.5, 499}, {89.999, 300}, {12.12, 7}, {3, 3}
+		{4, 1000}, {2, 302}, {7.2, 7000}, {2.3, 200}, {4.2, 74}, {1.5, 499}, {9.999, 300}, {12.12, 7}, {3, 3}
 	});
 
 	// output buffer
@@ -97,11 +97,8 @@ int main()
 
 	for (std::size_t i = 0; i != params_buffer.size(); ++i)
 	{
-		//std::cerr << glGetError() << std::endl;
-		glc.bind_buffer(params1_loc, params_buffer.begin() + 0, 1);
-		//std::cerr << glGetError() << std::endl;
+		glc.bind_buffer(params1_loc, params_buffer.begin() + i, 1);
 		glc.draw_arrays(0, input_buffer.size());
-		//std::cerr << glGetError() << std::endl;
 	}
 
 	glc.stop_transform_feedback();

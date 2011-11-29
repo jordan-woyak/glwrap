@@ -86,7 +86,7 @@ class buffer_iterator
 public:
 	buffer_iterator& operator+=(std::size_t _offset)
 	{
-		m_offset = static_cast<char*>(m_offset) + stride();
+		m_offset = static_cast<char*>(m_offset) + stride() * _offset;
 		return *this;
 	}
 
@@ -118,7 +118,7 @@ class strided_buffer_iterator
 public:
 	strided_buffer_iterator& operator+=(std::size_t _offset)
 	{
-		m_offset = static_cast<char*>(m_offset) + stride();
+		m_offset = static_cast<char*>(m_offset) + stride() * _offset;
 		return *this;
 	}
 
@@ -163,10 +163,13 @@ template <typename T>
 class mapped_buffer
 {
 public:
-	mapped_buffer(buffer<T>& _buffer)
+	template <typename B, typename Enable =
+		typename std::enable_if<std::is_same<T, typename detail::actual_buffer_type<B>::type>::value>::type>
+	mapped_buffer(buffer<B>& _buffer)
 		: m_ptr()
 		, m_size()
 		, m_buffer(_buffer.native_handle())
+		, m_stride(_buffer.m_element_size)
 	{
 		glBindBuffer(GL_COPY_WRITE_BUFFER, m_buffer);
 
@@ -188,14 +191,66 @@ public:
 
 	// TODO: flush function
 
-	T* begin()
+	class iterator : public std::iterator<std::random_access_iterator_tag, T>
 	{
-		return m_ptr;
+		friend class mapped_buffer;
+
+	public:
+		// TODO: silly
+		typedef T value_type;
+
+		iterator(iterator const& _rhs) = default;
+		iterator& operator=(iterator const& _rhs) = default;
+
+		iterator& operator++()
+		{
+			return *this += 1;
+		}
+
+		iterator& operator+=(std::size_t _offset)
+		{
+			m_ptr = reinterpret_cast<T*>(reinterpret_cast<char*>(m_ptr) + _offset * m_stride);
+			return *this;
+		}
+
+		value_type& operator*() const
+		{
+			return *m_ptr;
+		}
+
+		value_type* operator->() const
+		{
+			return m_ptr;
+		}
+
+		bool operator==(iterator const& _rhs) const
+		{
+			return m_ptr == _rhs.m_ptr;
+		}
+
+		bool operator!=(iterator const& _rhs) const
+		{
+			return !(*this == _rhs);
+		}
+
+	private:
+		iterator(T* _ptr, std::size_t _stride)
+			: m_ptr(_ptr)
+			, m_stride(_stride)
+		{}
+
+		T* m_ptr;
+		std::size_t m_stride;
+	};
+
+	iterator begin()
+	{
+		return {m_ptr, m_stride};
 	}
 
-	T* end()
+	iterator end()
 	{
-		return m_ptr + m_size;
+		return {reinterpret_cast<T*>(reinterpret_cast<char*>(m_ptr) + m_size * m_stride), m_stride};
 	}
 
 	~mapped_buffer()
@@ -208,6 +263,7 @@ private:
 	T* m_ptr;
 	std::size_t m_size;
 	GLuint m_buffer;
+	std::size_t m_stride;
 };
 
 template <typename T>
@@ -217,6 +273,8 @@ class buffer : public globject
 
 public:
 	typedef typename detail::actual_buffer_type<T>::type element_type;
+
+	friend class mapped_buffer<element_type>;
 
 	~buffer()
 	{
@@ -264,7 +322,12 @@ public:
 			"range must contain element_type");
 
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glBufferData(GL_COPY_WRITE_BUFFER, size * m_element_size, &*begin, GL_STATIC_DRAW);
+		//glBufferData(GL_COPY_WRITE_BUFFER, size * m_element_size, &*begin, GL_STATIC_DRAW);
+
+		// TODO: unoptimized to work with uniform_block_align<>
+		glBufferData(GL_COPY_WRITE_BUFFER, size * m_element_size, nullptr, GL_STATIC_DRAW);
+		mapped_buffer<element_type> mbuf(*this);
+		std::copy_n(begin, size, mbuf.begin());
 	}
 
 	void assign(buffer const& _other)

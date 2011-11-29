@@ -208,6 +208,7 @@ public:
 	template <typename T>
 	void bind_buffer(uniform_block_binding<T>& _unit, buffer_iterator<T> const& _iter, uint_t _size)
 	{
+		// TODO: use size not stride
 		glBindBufferRange(GL_UNIFORM_BUFFER, _unit.get_index(),
 			_iter.m_buffer,	reinterpret_cast<GLintptr>(_iter.m_offset), _iter.stride() * _size);
 	}
@@ -215,6 +216,7 @@ public:
 	template <typename T>
 	void bind_buffer(transform_feedback_binding<T>& _unit, buffer_iterator<T> const& _iter, uint_t _size)
 	{
+		// TODO: use size not stride
 		glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, _unit.get_index(),
 			_iter.m_buffer, reinterpret_cast<GLintptr>(_iter.m_offset), _iter.stride() * _size);
 	}
