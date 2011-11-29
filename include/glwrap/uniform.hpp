@@ -14,12 +14,15 @@ class program;
 template <typename T>
 class uniform;
 
+namespace detail
+{
+
 class uniform_variable
 {
-	friend class program;
+	friend class gl::program;
 
 	template <typename T>
-	friend class uniform;
+	friend class gl::uniform;
 
 private:
 	template <typename T>
@@ -46,13 +49,15 @@ private:
 	uint_t m_location;
 };
 
+}
+
 template <typename T>
 class uniform
 {
 	friend class program;
 
 private:
-	typedef std::list<uniform_variable>::iterator iter_t;
+	typedef std::list<detail::uniform_variable>::iterator iter_t;
 
 	uniform(iter_t _iter)
 		: m_iter(_iter)

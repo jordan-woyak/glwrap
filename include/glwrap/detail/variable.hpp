@@ -12,7 +12,7 @@ namespace gl
 {
 namespace detail
 {
-namespace variable
+namespace glslvar
 {
 
 typedef std::string type_name_t;

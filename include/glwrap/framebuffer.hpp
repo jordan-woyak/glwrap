@@ -69,7 +69,7 @@ public:
 	}
 
 private:
-	typedef std::list<std::unique_ptr<variable_base>>::iterator iter_t;
+	typedef std::list<std::unique_ptr<detail::variable_base>>::iterator iter_t;
 
 	fragdata(iter_t _iter)
 		: m_iter(_iter)

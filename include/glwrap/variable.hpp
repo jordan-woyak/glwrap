@@ -9,11 +9,12 @@ namespace gl
 
 class program;
 
-// TODO: namespace+directory detail
+namespace detail
+{
 
 class variable_base
 {
-	friend class program;
+	friend class gl::program;
 
 public:
 	variable_base(const std::string& _name)
@@ -41,9 +42,11 @@ public:
 
 	std::string get_type_name() const
 	{
-		return detail::variable::get_type_name<T>();
+		return detail::glslvar::get_type_name<T>();
 	}
 };
+
+}
 
 }
 

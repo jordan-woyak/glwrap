@@ -29,7 +29,7 @@ public:
 	}
 
 private:
-	typedef std::list<std::unique_ptr<variable_base>>::iterator iter_t;
+	typedef std::list<std::unique_ptr<detail::variable_base>>::iterator iter_t;
 
 	vertex_out_varying(iter_t _iter)
 		: m_iter(_iter)
@@ -187,21 +187,21 @@ public:
 	template <typename T>
 	uniform<T> create_uniform(const std::string& _name)
 	{
-		m_uniforms.push_back(uniform_variable(variable<T>(_name)));
+		m_uniforms.push_back(detail::uniform_variable(detail::variable<T>(_name)));
 		return uniform<T>(std::prev(m_uniforms.end()));
 	}
 
 	template <typename T>
 	attribute<T> create_attribute(const std::string& _name)
 	{
-		m_attributes.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
+		m_attributes.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<T>(_name)));
 		return attribute<T>(std::prev(m_attributes.end()));
 	}
 
 	template <typename T>
 	fragdata<T> create_fragdata(const std::string& _name)
 	{
-		m_fragdatas.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
+		m_fragdatas.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<T>(_name)));
 		return fragdata<T>(std::prev(m_fragdatas.end()));
 	}
 
@@ -209,7 +209,7 @@ public:
 	template <typename T>
 	vertex_out_varying<T> create_vertex_out_varying(const std::string& _name)
 	{
-		m_vertex_out_varying.push_back(std::unique_ptr<variable_base>(new variable<T>(_name)));
+		m_vertex_out_varying.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<T>(_name)));
 		return vertex_out_varying<T>(std::prev(m_vertex_out_varying.end()));
 	}
 
@@ -276,16 +276,16 @@ private:
 	std::string m_fragment_src;
 
 	// TODO: kill pointers
-	std::list<std::unique_ptr<variable_base>> m_attributes;
-	std::list<std::unique_ptr<variable_base>> m_fragdatas;
-	std::list<std::unique_ptr<variable_base>> m_vertex_out_varying;
+	std::list<std::unique_ptr<detail::variable_base>> m_attributes;
+	std::list<std::unique_ptr<detail::variable_base>> m_fragdatas;
+	std::list<std::unique_ptr<detail::variable_base>> m_vertex_out_varying;
 
 	std::vector<std::string> m_feedback_varyings;
 
 	// TODO: store ptr or copy?
 	std::list<detail::uniform_block_variable> m_uniform_blocks;
 
-	std::list<uniform_variable> m_uniforms;
+	std::list<detail::uniform_variable> m_uniforms;
 };
 
 }

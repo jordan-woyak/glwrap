@@ -103,12 +103,12 @@ public:
 	void register_member(A T::*_member, const std::string& _name)
 	{
 		m_members[detail::get_member_offset(_member)] =
-			std::unique_ptr<variable_base>(new variable<A>(_name));
+			std::unique_ptr<detail::variable_base>(new detail::variable<A>(_name));
 	}
 
 private:
 	// TODO: shared_ptr can be killed
-	std::map<std::size_t, std::shared_ptr<variable_base>> m_members;
+	std::map<std::size_t, std::shared_ptr<detail::variable_base>> m_members;
 };
 
 template <typename T>
