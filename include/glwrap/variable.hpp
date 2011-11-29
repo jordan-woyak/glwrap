@@ -9,6 +9,8 @@ namespace gl
 
 class program;
 
+// TODO: namespace+directory detail
+
 class variable_base
 {
 	friend class program;

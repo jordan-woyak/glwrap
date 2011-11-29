@@ -82,7 +82,6 @@ public:
 	T x, y, z, w;
 };
 
-// TODO: need template aliases :(
 typedef basic_vec<float_t, 2> vec2;
 typedef basic_vec<float_t, 3> vec3;
 typedef basic_vec<float_t, 4> vec4;
@@ -90,6 +89,10 @@ typedef basic_vec<float_t, 4> vec4;
 typedef basic_vec<int_t, 2> ivec2;
 typedef basic_vec<int_t, 3> ivec3;
 typedef basic_vec<int_t, 4> ivec4;
+
+typedef basic_vec<uint_t, 2> uvec2;
+typedef basic_vec<uint_t, 3> uvec3;
+typedef basic_vec<uint_t, 4> uvec4;
 
 template <typename T, int D>
 basic_vec<T, D>& operator*=(const basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)

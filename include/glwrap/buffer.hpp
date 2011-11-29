@@ -1,5 +1,7 @@
 #pragma once
 
+#include "uniform_block.hpp"
+
 namespace gl
 {
 
@@ -23,34 +25,86 @@ struct is_buffer_iterator<T, B, typename std::enable_if<
 	std::is_same<strided_buffer_iterator<T>, B>::value
 	>::type> : std::true_type {};
 
-// TODO: make offset a sane type
+namespace detail
+{
+
+// silly silly stuff
+template <typename T>
+struct actual_buffer_type
+{
+	typedef T type;
+};
+
+template <>
+template <typename T>
+struct actual_buffer_type<gl::uniform_block_align<T>>
+{
+	typedef T type;
+};
+
+// silly silly stuff
+template <typename T>
+struct actual_element_size
+{
+	static std::size_t value()
+	{
+		return sizeof(T);
+	}
+};
+
+template <>
+template <typename T>
+struct actual_element_size<gl::uniform_block_align<T>>
+{
+	static std::size_t value()
+	{
+		// TODO: fails if T is bigger than alignment value!
+
+		GLint offset{};
+		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &offset);
+		return offset;
+	}
+};
+
+}
 
 // TODO: rename iterator
 template <typename T>
 class buffer_iterator
 {
 	friend class context;
+
 	friend class buffer<T>;
+	// silly
+	friend class buffer<gl::uniform_block_align<T>>;
+
 	friend class vertex_array;
 
 	template <typename P, typename M>
 	friend strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_member);
 
 public:
+	buffer_iterator& operator+=(std::size_t _offset)
+	{
+		m_offset = static_cast<char*>(m_offset) + stride();
+		return *this;
+	}
 
 private:
-	buffer_iterator(GLuint _buffer, GLvoid* _offset)
+	buffer_iterator(GLuint _buffer, GLvoid* _offset, GLsizei _stride)
 		: m_buffer(_buffer)
 		, m_offset(_offset)
+		, m_stride(_stride)
 	{}
 
 	GLsizei stride() const
 	{
-		return sizeof(T);
+		return m_stride;
 	}
 
 	GLuint m_buffer;
 	GLvoid* m_offset;
+	GLsizei m_stride;
 };
 
 template <typename T>
@@ -62,6 +116,11 @@ class strided_buffer_iterator
 	friend strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_member);
 
 public:
+	strided_buffer_iterator& operator+=(std::size_t _offset)
+	{
+		m_offset = static_cast<char*>(m_offset) + stride();
+		return *this;
+	}
 
 private:
 	strided_buffer_iterator(GLuint _buffer, GLvoid* _offset, GLsizei _stride)
@@ -83,12 +142,23 @@ private:
 template <typename P, typename M>
 strided_buffer_iterator<M> operator|(buffer_iterator<P> const& _attrib, M P::*_member)
 {
-	const P* const null_obj = nullptr;
-	auto const offset = reinterpret_cast<std::intptr_t>(&(null_obj->*_member));
-
+	auto const offset = detail::get_member_offset(_member);
 	return {_attrib.m_buffer, static_cast<char*>(_attrib.m_offset) + offset, _attrib.stride()};
 }
 
+template <typename T>
+strided_buffer_iterator<T> operator+(strided_buffer_iterator<T> _lhs, std::size_t _offset)
+{
+	return _lhs += _offset;
+}
+
+template <typename T>
+buffer_iterator<T> operator+(buffer_iterator<T> _lhs, std::size_t _offset)
+{
+	return _lhs += _offset;
+}
+
+// TODO: fix for uniform_block_align<> :/
 template <typename T>
 class mapped_buffer
 {
@@ -146,7 +216,7 @@ class buffer : public globject
 	friend class context;
 
 public:
-	typedef T element_type;
+	typedef typename detail::actual_buffer_type<T>::type element_type;
 
 	~buffer()
 	{
@@ -159,7 +229,7 @@ public:
 	void storage(std::size_t _size)
 	{
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glBufferData(GL_COPY_WRITE_BUFFER, _size * sizeof(element_type), nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_COPY_WRITE_BUFFER, _size * m_element_size, nullptr, GL_STATIC_DRAW);
 	}
 
 	std::size_t size() const
@@ -168,15 +238,14 @@ public:
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
 		glGetBufferParameteriv(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
 
-		return sz / sizeof(element_type);
+		return sz / m_element_size;
 	}
 
 	// TODO: read capability
 
-	// TODO: rename begin
-	buffer_iterator<T> begin()
+	buffer_iterator<element_type> begin()
 	{
-		return {native_handle(), 0};
+		return buffer_iterator<element_type>(native_handle(), 0, m_element_size);
 	}
 
 	template <typename R>
@@ -195,7 +264,7 @@ public:
 			"range must contain element_type");
 
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glBufferData(GL_COPY_WRITE_BUFFER, size * sizeof(element_type), &*begin, GL_STATIC_DRAW);
+		glBufferData(GL_COPY_WRITE_BUFFER, size * m_element_size, &*begin, GL_STATIC_DRAW);
 	}
 
 	void assign(buffer const& _other)
@@ -212,7 +281,11 @@ public:
 
 	explicit buffer(context& _context)
 		: globject(gen_return(glGenBuffers))
+		, m_element_size(detail::actual_element_size<T>::value())
 	{}
+
+private:
+	std::size_t m_element_size;
 };
 
 }

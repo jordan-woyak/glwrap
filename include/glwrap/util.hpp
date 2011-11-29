@@ -156,6 +156,13 @@ get_contiguous_range(U&& _range)
 	static_assert(sizeof(T) == 0, "using this guy");
 }
 
+template <typename T, typename M>
+std::intptr_t get_member_offset(M T::*_member)
+{
+	const T* const null_obj = nullptr;
+	return reinterpret_cast<std::intptr_t>(&(null_obj->*_member));
+}
+
 }
 
 /*

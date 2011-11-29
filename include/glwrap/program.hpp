@@ -9,6 +9,7 @@
 #include "framebuffer.hpp"
 #include "vertex_array.hpp"
 #include "transform_feedback.hpp"
+#include "uniform_block.hpp"
 
 namespace gl
 {
@@ -53,12 +54,24 @@ public:
 
 		// uniforms
 		std::string uniform_header;
-		{
 		for (auto& uni : m_uniforms)
 		{
 			uniform_header += (boost::format("uniform %s %s;\n")
 				% uni.get_variable().get_type_name() % uni.get_variable().get_name()).str();
 		}
+
+		for (auto& block : m_uniform_blocks)
+		{
+			uniform_header += (boost::format("layout(std140) uniform %s {\n") % block.get_name()).str();
+
+			// TODO: actually look at the offset value!!!
+			// currently super broken, not handling padding for shit
+			for (auto& var : block.m_members)
+				uniform_header += (boost::format("uniform %s %s;\n")
+					% var.second->get_type_name() % var.second->get_name()).str();
+
+			// TODO: allow scoped block
+			uniform_header += "};\n";
 		}
 
 		// vertex shader
@@ -123,6 +136,9 @@ public:
 		for (auto& uni : m_uniforms)
 			uni.set_location(glGetUniformLocation(native_handle(),
 				uni.get_variable().get_name().c_str()));
+
+		for (auto& block : m_uniform_blocks)
+			block.m_location = glGetUniformBlockIndex(native_handle(), block.m_name.c_str());
 	}
 
 	std::string get_log() const
@@ -198,10 +214,26 @@ public:
 	}
 
 	template <typename T>
+	uniform_block<T> create_uniform_block(const std::string& _name, uniform_block_definition<T> const& _block_def)
+	{
+		m_uniform_blocks.push_back(detail::uniform_block_variable(_name));
+
+		// TODO: silly
+		m_uniform_blocks.back().m_members = _block_def.m_members;
+		return uniform_block<T>(std::prev(m_uniform_blocks.end()));
+	}
+
+	template <typename T>
 	void set_uniform(uniform<T>& _uniform, typename detail::uniform_value<T>::type const& _value)
 	{
 		bind();
 		_uniform.set_value(_value);
+	}
+
+	template <typename T>
+	void set_uniform_block(uniform_block<T>& _block, uniform_block_binding<T> const& _binding)
+	{
+		glUniformBlockBinding(native_handle(), _block.m_iter->m_location, _binding.get_index());
 	}
 
 	template <typename T>
@@ -249,6 +281,9 @@ private:
 	std::list<std::unique_ptr<variable_base>> m_vertex_out_varying;
 
 	std::vector<std::string> m_feedback_varyings;
+
+	// TODO: store ptr or copy?
+	std::list<detail::uniform_block_variable> m_uniform_blocks;
 
 	std::list<uniform_variable> m_uniforms;
 };
