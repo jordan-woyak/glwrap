@@ -144,7 +144,7 @@ int main()
 		// rotating projection
 		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) * gl::rotate(rotate * 2, 1, 0, 0) *
 			gl::translate(0, 0, -4) *
-			gl::perspective(45, (float_t)window_size.x / window_size.y, 1, 100);
+			gl::perspective(45, (gl::float_t)window_size.x / window_size.y, 1, 100);
 
 		prog.set_uniform(modelview_uni, modelview);
 

@@ -98,10 +98,12 @@ int main()
 	vertices.bind_vertex_attribute(pos_loc, vertex_data.begin() | &FooVertex::pos);
 	vertices.bind_vertex_attribute(texpos_loc, vertex_data.begin() | &FooVertex::texpos);
 
-	gl::framebuffer fbo(glc);
-	fbo.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
-	fbo.bind_read_buffer(glc.color_buffer(0));	// TODO: kill line
+	// an fbo
+	gl::framebuffer fbuf(glc);
+	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
+	fbuf.bind_read_buffer(glc.color_buffer(0));
 
+	// multisampled renderbuffer
 	gl::texture_2d
 		texture1(glc),
 		texture2(glc);
@@ -110,51 +112,43 @@ int main()
 
 	prog.set_uniform(texture_uni, texture_loc);
 
+	gl::sampler samp(glc);
+	glc.bind_sampler(texture_loc, samp);
+
+	samp.set_min_filter(gl::filter::linear);
+	samp.set_mag_filter(gl::filter::nearest);
+
+	glc.enable(gl::capability::cull_face);
+
+	gl::float_t rotate = 0;
+
 	glc.use_program(prog);
 	glc.use_vertex_array(vertices);
 	glc.use_element_array(indices);
 	glc.use_primitive_mode(gl::primitive::triangle_strip);
-	glc.use_draw_framebuffer(fbo);
-
-	glc.enable(gl::capability::cull_face);
-	glc.front_face(gl::orientation::ccw);
-
-	gl::float_t rotate = 0;
+	glc.use_read_framebuffer(fbuf);
 
 	dsp.set_display_func([&]
 	{
-		// rotating projection
+		// rotating ortho projection
 		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) * gl::rotate(rotate * 2, 1, 0, 0) *
 			gl::translate(0, 0, -6) *
-			gl::perspective(45, (float_t)window_size.x / window_size.y, 1, 100);
-
+			gl::perspective(45, (gl::float_t)window_size.x / window_size.y, 1, 100);
 		prog.set_uniform(mvp_uni, modelview);
 
-		if ((rotate += 3.14 / 360) >= 3.14 * 2)
+		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		fbo.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture1, 0));
-		glc.use_draw_framebuffer(fbo);
-		glc.clear_color({1, 0, 0, 1});
+		glc.use_draw_framebuffer(fbuf);
+
+		glc.bind_texture(texture_loc, texture2);
+		fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture1, 0));
+		glc.clear_color({1, 1, 1, 1});
 		glc.draw_elements(0, index_count);
 
-		//fbo.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture2, 0));
-		//glc.clear_color({1, 0, 0, 1});
-
-		// draw cube to texture
-		//fbo.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture1, 0));
-		//glc.bind_texture(texture_loc, texture2);
-		//glc.draw_elements(0, index_count);
-
-		// draw cube to main fb
-		/*
-		glc.use_draw_framebuffer(nullptr);
-		fbo.unbind_attachment(glc.color_buffer(0));
-
-		glc.clear_color({0.2, 0.2, 0.2, 1});
 		glc.bind_texture(texture_loc, texture1);
-		glc.bind_texture(texture_loc, texture2);
-		*/
+		fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture2, 0));
+		glc.draw_elements(0, index_count);
 
 		glc.use_draw_framebuffer(nullptr);
 		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);
@@ -163,8 +157,7 @@ int main()
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);
-		//texture1.storage(window_size, gl::base_format::rgba);
-		//texture2.storage(window_size, gl::base_format::rgba);
+		//rendbuf.resize(window_size);
 	});
 
 	dsp.run_loop();

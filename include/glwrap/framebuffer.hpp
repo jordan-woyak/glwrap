@@ -135,6 +135,15 @@ public:
 		_attach.m_func(GL_READ_FRAMEBUFFER, _point.get_value());
 	}
 
+/*
+	void unbind_attachment(attach_point const& _point)
+	{
+		bind_read();
+		// TODO: is this ok?
+		//glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, _point.get_value(), GL_RENDERBUFFER, 0);
+		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, _point.get_value(), GL_TEXTURE_2D, 0, 0);
+	}
+*/
 	void bind_draw_buffer(color_number const& _number, color_attach_point const& _attach_point)
 	{
 		auto const index = _number.get_index();

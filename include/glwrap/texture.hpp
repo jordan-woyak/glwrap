@@ -88,6 +88,7 @@ public:
 	void storage(basic_vec<int_t, D> const& _dims, image_format _ifmt)
 	{
 		// TODO: for non 2d textures
+		bind();
 		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _dims.x, _dims.y,
 			0, GL_RED, GL_BYTE, nullptr);
 	}

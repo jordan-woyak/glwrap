@@ -36,6 +36,7 @@ protected:
 	{
 		native_handle_base().swap(*this);
 		swap(_other);
+		return *this;
 	}
 
 	void swap(native_handle_base& _other)
