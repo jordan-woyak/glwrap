@@ -45,8 +45,7 @@ int main()
 
 		"void main(void)"
 		"{"
-			"fragdata = vec4(texture2D(texture, uv).rgb, 1.0);"
-			//"fragdata = vec4(uv, 1.0, 1.0);"
+			"fragdata = vec4(vec3(1.0, 1.0, 1.0) - texture2D(texture, uv).rgb, 1.0);"
 		"}"
 	);
 
@@ -123,12 +122,22 @@ int main()
 	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
 	fbuf.bind_read_buffer(glc.color_buffer(0));
 
+	auto calc_texture_size = [](gl::ivec2 const& window)
+	{
+		auto const m = std::min(window.x, window.y);
+		return gl::ivec2{m, m};
+	};
+
 	// multisampled renderbuffer
 	gl::texture_2d
 		texture1(glc),
 		texture2(glc);
-	texture1.storage(window_size, gl::base_format::rgba);
-	texture2.storage(window_size, gl::base_format::rgba);
+
+	{
+	auto const tex_size = calc_texture_size(window_size);
+	texture1.storage(tex_size, gl::base_format::rgba);
+	texture2.storage(tex_size, gl::base_format::rgba);
+	}
 
 	prog.set_uniform(texture_uni, texture_loc);
 
@@ -148,42 +157,43 @@ int main()
 	glc.use_primitive_mode(gl::primitive::triangles);
 	glc.use_read_framebuffer(fbuf);
 
+	glc.use_draw_framebuffer(fbuf);
+	fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture1, 0));
+	glc.clear_color({1, 1, 1, 1});
+
 	dsp.set_display_func([&]
 	{
-		// rotating ortho projection
-		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) * gl::rotate(rotate * 2, 1, 0, 0) *
-			gl::translate(0, 0, -5) *
-			gl::perspective(45, (gl::float_t)window_size.x / window_size.y, 1, 100);
+		// rotating projection
+		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) *
+			gl::rotate(rotate * 2, 1, 0, 0) *
+			gl::scale(1, 1, 1.f/5);
 		prog.set_uniform(mvp_uni, modelview);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
+		auto const tex_size = calc_texture_size(window_size);
+
 		glc.use_draw_framebuffer(fbuf);
-		fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture1, 0));
-		glc.clear_color({1, 1, 1, 1});
+		fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture2, 0));
+		glc.clear_color({0, 0, 0, 1});
 
-		for (int i = 0; i != 2; ++i)
-		{
-			fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture2, 0));
-			glc.clear_color({0, 0, 0, 1});
-
-			glc.bind_texture(texture_loc, texture1);
-			glc.draw_elements(0, index_count);
-
-			texture1.swap(texture2);
-		}
+		glc.bind_texture(texture_loc, texture1);
+		glc.viewport({0, 0}, tex_size);
+		glc.draw_elements(0, index_count);
 
 		glc.use_draw_framebuffer(nullptr);
-		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);
+		glc.viewport({0, 0}, window_size);
+		glc.blit_pixels({0, 0}, tex_size, {0, 0}, window_size, gl::filter::nearest);
 
-		//texture1.swap(texture2);
+		texture1.swap(texture2);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
-		glc.viewport({0, 0}, window_size = _size);
-		//rendbuf.resize(window_size);
+		auto const tex_size = calc_texture_size(window_size);
+		texture1.storage(tex_size, gl::base_format::rgba);
+		texture2.storage(tex_size, gl::base_format::rgba);
 	});
 
 	dsp.run_loop();
