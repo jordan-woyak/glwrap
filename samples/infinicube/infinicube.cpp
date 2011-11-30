@@ -183,8 +183,9 @@ int main()
 		glc.draw_elements(0, index_count);
 
 		glc.use_draw_framebuffer(nullptr);
-		glc.viewport({0, 0}, window_size);
+		glc.clear_color({0, 0, 0, 1});
 
+		glc.viewport({0, 0}, window_size);
 		gl::ivec2 const offset = (window_size - tex_size.x) / 2;
 		glc.blit_pixels({0, 0}, tex_size, offset, offset + tex_size, gl::filter::nearest);
 
