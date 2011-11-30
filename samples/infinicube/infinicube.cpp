@@ -185,8 +185,8 @@ int main()
 		glc.use_draw_framebuffer(nullptr);
 		glc.viewport({0, 0}, window_size);
 
-		gl::ivec2 const offset = {(window_size.x - tex_size.x) / 2, 0};
-		glc.blit_pixels({0, 0}, tex_size, offset, offset + gl::ivec2{tex_size.x, window_size.y}, gl::filter::nearest);
+		gl::ivec2 const offset = (window_size - tex_size.x) / 2;
+		glc.blit_pixels({0, 0}, tex_size, offset, offset + tex_size, gl::filter::nearest);
 
 		texture1.swap(texture2);
 	});

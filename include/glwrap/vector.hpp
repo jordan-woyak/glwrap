@@ -94,6 +94,7 @@ typedef basic_vec<uint_t, 2> uvec2;
 typedef basic_vec<uint_t, 3> uvec3;
 typedef basic_vec<uint_t, 4> uvec4;
 
+// mult
 template <typename T, int D>
 basic_vec<T, D>& operator*=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
 {
@@ -110,6 +111,7 @@ basic_vec<T, D> operator*(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
 	return _vec1 *= _vec2;
 }
 
+// add
 template <typename T, int D>
 basic_vec<T, D>& operator+=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
 {
@@ -124,6 +126,92 @@ template <typename T, int D>
 basic_vec<T, D> operator+(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
 {
 	return _vec1 += _vec2;
+}
+
+// sub
+template <typename T, int D>
+basic_vec<T, D>& operator-=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
+{
+	// TODO: recursive template magic
+	for (int i = 0; i != D; ++i)
+		_vec1.data()[i] -= _vec2.data()[i];
+
+	return _vec1;
+}
+
+template <typename T, int D>
+basic_vec<T, D> operator-(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
+{
+	return _vec1 -= _vec2;
+}
+
+// scalar
+// mult
+template <typename T, int D>
+basic_vec<T, D>& operator*=(basic_vec<T, D>& _vec1, T const& _val)
+{
+	// TODO: recursive template magic
+	for (int i = 0; i != D; ++i)
+		_vec1.data()[i] *= _val;
+
+	return _vec1;
+}
+
+template <typename T, int D>
+basic_vec<T, D> operator*(basic_vec<T, D> _vec1, T const& _val)
+{
+	return _vec1 *= _val;
+}
+
+// div
+template <typename T, int D>
+basic_vec<T, D>& operator/=(basic_vec<T, D>& _vec1, T const& _val)
+{
+	// TODO: recursive template magic
+	for (int i = 0; i != D; ++i)
+		_vec1.data()[i] /= _val;
+
+	return _vec1;
+}
+
+template <typename T, int D>
+basic_vec<T, D> operator/(basic_vec<T, D> _vec1, T const& _val)
+{
+	return _vec1 /= _val;
+}
+
+// add
+template <typename T, int D>
+basic_vec<T, D>& operator+=(basic_vec<T, D>& _vec1, T const& _val)
+{
+	// TODO: recursive template magic
+	for (int i = 0; i != D; ++i)
+		_vec1.data()[i] += _val;
+
+	return _vec1;
+}
+
+template <typename T, int D>
+basic_vec<T, D> operator+(basic_vec<T, D> _vec1, T const& _val)
+{
+	return _vec1 += _val;
+}
+
+// sub
+template <typename T, int D>
+basic_vec<T, D>& operator-=(basic_vec<T, D>& _vec1, T const& _val)
+{
+	// TODO: recursive template magic
+	for (int i = 0; i != D; ++i)
+		_vec1.data()[i] -= _val;
+
+	return _vec1;
+}
+
+template <typename T, int D>
+basic_vec<T, D> operator-(basic_vec<T, D> _vec1, T const& _val)
+{
+	return _vec1 -= _val;
 }
 
 template <int D>
