@@ -4,7 +4,11 @@
 #include "exception.hpp"
 #include "uniform.hpp"
 #include "program.hpp"
+
+#ifndef GLWRAP_NO_SFML
 #include "display.hpp"
+#endif
+
 #include "matrix.hpp"
 #include "query.hpp"
 

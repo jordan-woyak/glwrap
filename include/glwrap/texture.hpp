@@ -112,19 +112,19 @@ typedef texture<2> texture_2d;
 typedef texture<3> texture_3d;
 
 template <>
-GLenum texture<1>::get_target()
+inline GLenum texture<1>::get_target()
 {
 	return GL_TEXTURE_1D;
 }
 
 template <>
-GLenum texture<2>::get_target()
+inline GLenum texture<2>::get_target()
 {
 	return GL_TEXTURE_2D;
 }
 
 template <>
-GLenum texture<3>::get_target()
+inline GLenum texture<3>::get_target()
 {
 	return GL_TEXTURE_3D;
 }

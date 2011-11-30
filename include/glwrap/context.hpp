@@ -1,7 +1,9 @@
 
 #pragma once
 
+#ifndef GLWRAP_NO_SFML
 #include <SFML/Graphics.hpp>
+#endif
 
 #include "vector.hpp"
 #include "vertex_array.hpp"
@@ -31,9 +33,13 @@ public:
 		, m_draw_fbo(), m_read_fbo()
 		, m_primitive_mode(static_cast<GLenum>(primitive::triangles))
 		, m_element_type()
+#ifndef GLWRAP_NO_SFML
 		, m_sf_window(new sf::RenderWindow)
+#endif
 	{
+#ifndef GLWRAP_FAKE_CONTEXT
 		glewInit();
+#endif
 	}
 
 	context(context const&) = delete;
@@ -418,10 +424,12 @@ private:
 		return m_element_type;
 	}
 
+#ifndef GLWRAP_NO_SFML
 	sf::RenderWindow& get_window()
 	{
 		return *m_sf_window;
 	}
+#endif
 
 	GLuint m_program;
 	GLuint m_vertex_array;
@@ -431,7 +439,9 @@ private:
 	GLenum m_primitive_mode;
 	GLenum m_element_type;
 
+#ifndef GLWRAP_NO_SFML
 	std::unique_ptr<sf::RenderWindow> m_sf_window;
+#endif
 };
 
 }

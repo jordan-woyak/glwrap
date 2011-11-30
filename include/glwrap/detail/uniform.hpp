@@ -46,54 +46,54 @@ struct set_uniform<std::array<T, S>>
 
 // float
 template <>
-void set_uniform_value<float_t>(GLuint _location, const float_t& _value)
+inline void set_uniform_value<float_t>(GLuint _location, const float_t& _value)
 {
 	glUniform1f(_location, _value);
 }
 
 // int
 template <>
-void set_uniform_value<int_t>(GLuint _location, const int_t& _value)
+inline void set_uniform_value<int_t>(GLuint _location, const int_t& _value)
 {
 	glUniform1i(_location, _value);
 }
 
 // vec2
 template <>
-void set_uniform_value<vec2>(GLuint _location, const vec2& _value)
+inline void set_uniform_value<vec2>(GLuint _location, const vec2& _value)
 {
 	glUniform2fv(_location, 1, _value.data());
 }
 
 // vec3
 template <>
-void set_uniform_value<vec3>(GLuint _location, const vec3& _value)
+inline void set_uniform_value<vec3>(GLuint _location, const vec3& _value)
 {
 	glUniform3fv(_location, 1, _value.data());
 }
 
 // vec4
 template <>
-void set_uniform_value<vec4>(GLuint _location, const vec4& _value)
+inline void set_uniform_value<vec4>(GLuint _location, const vec4& _value)
 {
 	glUniform4fv(_location, 1, _value.data());
 }
 
 // matrix
 template <>
-void set_uniform_value<mat3>(GLuint _location, const mat3& _value)
+inline void set_uniform_value<mat3>(GLuint _location, const mat3& _value)
 {
 	glUniformMatrix3fv(_location, 1, GL_TRUE, _value.data());
 }
 
 template <>
-void set_uniform_value<mat4>(GLuint _location, const mat4& _value)
+inline void set_uniform_value<mat4>(GLuint _location, const mat4& _value)
 {
 	glUniformMatrix4fv(_location, 1, GL_TRUE, _value.data());
 }
 
 template <>
-void set_uniform_value<texture_unit<texture_2d>>(GLuint _location, const texture_unit<texture_2d>& _value)
+inline void set_uniform_value<texture_unit<texture_2d>>(GLuint _location, const texture_unit<texture_2d>& _value)
 {
 	glUniform1i(_location, _value.get_index());
 }

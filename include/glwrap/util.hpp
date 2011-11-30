@@ -25,7 +25,7 @@ typedef double_t depth_t;
 
 // TODO: move this
 typedef void(*glgenfunc)(GLsizei, GLuint*);
-GLuint gen_return(glgenfunc f)
+inline GLuint gen_return(glgenfunc f)
 {
 	GLuint name;
 	f(1, &name);
@@ -39,43 +39,43 @@ template <typename T>
 GLenum data_type_enum();
 
 template <>
-GLenum data_type_enum<ubyte_t>()
+inline GLenum data_type_enum<ubyte_t>()
 {
 	return GL_UNSIGNED_BYTE;
 }
 
 template <>
-GLenum data_type_enum<byte_t>()
+inline GLenum data_type_enum<byte_t>()
 {
 	return GL_BYTE;
 }
 
 template <>
-GLenum data_type_enum<ushort_t>()
+inline GLenum data_type_enum<ushort_t>()
 {
 	return GL_UNSIGNED_SHORT;
 }
 
 template <>
-GLenum data_type_enum<short_t>()
+inline GLenum data_type_enum<short_t>()
 {
 	return GL_SHORT;
 }
 
 template <>
-GLenum data_type_enum<uint_t>()
+inline GLenum data_type_enum<uint_t>()
 {
 	return GL_UNSIGNED_INT;
 }
 
 template <>
-GLenum data_type_enum<int_t>()
+inline GLenum data_type_enum<int_t>()
 {
 	return GL_INT;
 }
 
 template <>
-GLenum data_type_enum<float_t>()
+inline GLenum data_type_enum<float_t>()
 {
 	return GL_FLOAT;
 }

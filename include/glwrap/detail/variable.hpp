@@ -57,31 +57,31 @@ struct glsl_var_type<T, typename std::enable_if<std::is_array<T>::value>::type>
 
 // scalars
 template <>
-type_name_t get_type_name<bool_t>()
+inline type_name_t get_type_name<bool_t>()
 {
 	return "bool";
 }
 
 template <>
-type_name_t get_type_name<int_t>()
+inline type_name_t get_type_name<int_t>()
 {
 	return "int";
 }
 
 template <>
-type_name_t get_type_name<uint_t>()
+inline type_name_t get_type_name<uint_t>()
 {
 	return "uint";
 }
 
 template <>
-type_name_t get_type_name<float_t>()
+inline type_name_t get_type_name<float_t>()
 {
 	return "float";
 }
 
 template <>
-type_name_t get_type_name<double_t>()
+inline type_name_t get_type_name<double_t>()
 {
 	return "double";
 }
@@ -92,31 +92,31 @@ template <typename T>
 const char* vec_prefix();
 
 template <>
-const char* vec_prefix<bool_t>()
+inline const char* vec_prefix<bool_t>()
 {
 	return "b";
 }
 
 template <>
-const char* vec_prefix<int_t>()
+inline const char* vec_prefix<int_t>()
 {
 	return "i";
 }
 
 template <>
-const char* vec_prefix<uint_t>()
+inline const char* vec_prefix<uint_t>()
 {
 	return "u";
 }
 
 template <>
-const char* vec_prefix<float_t>()
+inline const char* vec_prefix<float_t>()
 {
 	return "";
 }
 
 template <>
-const char* vec_prefix<double_t>()
+inline const char* vec_prefix<double_t>()
 {
 	return "d";
 }
@@ -176,7 +176,7 @@ struct index_count<T, typename std::enable_if<
 };
 
 template <>
-std::size_t get_index_count<double_t>()
+inline std::size_t get_index_count<double_t>()
 {
 	return 2;	// TODO: correct?
 }

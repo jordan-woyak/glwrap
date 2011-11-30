@@ -36,20 +36,20 @@ struct image_format
 	GLenum value;
 };
 
-image_format base_image_format(base_format _bfmt)
+inline image_format base_image_format(base_format _bfmt)
 {
 	return {_bfmt};
 }
 
 /*
-image_format sized_image_format(base_format _bfmt, int _bits)
+inline image_format sized_image_format(base_format _bfmt, int _bits)
 {
 	return {};
 }
 */
 
 #if 0
-image_format specific_image_format(base_format _bfmt, data_type _dtype, int _bits)
+inline image_format specific_image_format(base_format _bfmt, data_type _dtype, int _bits)
 {
 	// TODO: initialize elsewhere?
 	struct fmt_params

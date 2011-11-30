@@ -122,7 +122,7 @@ typedef basic_mat<double_t, 4, 2> dmat4x2;
 typedef basic_mat<double_t, 4, 3> dmat4x3;
 typedef basic_mat<double_t, 4, 4> dmat4x4, dmat4;
 
-mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
+inline mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
 {
 	auto const c = std::cos(angle);
 	auto const s = std::sin(angle);
@@ -136,7 +136,7 @@ mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
 	}};
 }
 
-mat4 scale(float_t x, float_t y, float_t z)
+inline mat4 scale(float_t x, float_t y, float_t z)
 {
 	return
 	{{
@@ -147,7 +147,7 @@ mat4 scale(float_t x, float_t y, float_t z)
 	}};
 }
 
-mat4 translate(float_t x, float_t y, float_t z)
+inline mat4 translate(float_t x, float_t y, float_t z)
 {
 	return
 	{{
@@ -158,7 +158,7 @@ mat4 translate(float_t x, float_t y, float_t z)
 	}};
 }
 
-mat4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
+inline mat4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
 {
 	return
 	{{
@@ -169,7 +169,7 @@ mat4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t nea
 	}};
 }
 
-mat4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
+inline mat4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
 {
 	auto const a = (right + left) / (right - left);
 	auto const b = (top + bottom) / (top - bottom);
@@ -187,7 +187,7 @@ mat4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t n
 
 // TODO: should this be here?
 // TODO: I don't like fov being in degrees
-mat4 perspective(float_t fovy, float_t aspect, float_t znear, float_t zfar)
+inline mat4 perspective(float_t fovy, float_t aspect, float_t znear, float_t zfar)
 {
 	auto const f = 1 / std::tan(fovy * std::atan(1.0f) / 90);
 	auto const nf = znear - zfar;

@@ -94,7 +94,7 @@ private:
 	std::function<void(GLenum, GLenum)> m_func;
 };
 
-attachment texture_attachment(texture_2d& _tex, int _level)
+inline attachment texture_attachment(texture_2d& _tex, int _level)
 {
 	return attachment([&_tex, _level](GLenum _target, GLenum _attach_point)
 	{
@@ -102,7 +102,7 @@ attachment texture_attachment(texture_2d& _tex, int _level)
 	});
 };
 
-attachment renderbuffer_attachment(renderbuffer& _rendbuf)
+inline attachment renderbuffer_attachment(renderbuffer& _rendbuf)
 {
 	return attachment([&_rendbuf](GLenum _target, GLenum _attach_point)
 	{
