@@ -65,6 +65,11 @@ class texture : public globject
 	friend class context;
 
 public:
+	void swap(texture& _other)
+	{
+		globject::swap(_other);
+	}
+
 	~texture()
 	{
 		auto const nh = native_handle();

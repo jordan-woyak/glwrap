@@ -74,21 +74,41 @@ int main()
 	gl::buffer<FooVertex> vertex_data(glc);
 	vertex_data.assign((FooVertex[])
 	{
+		{{1, 1, 1}, {0, 1}},
+		{{1, 1, -1}, {1, 1}},
+		{{-1, 1, -1}, {1, 0}},
+		{{-1, 1, 1}, {0, 0}},
+		{{-1, -1, -1}, {0, 1}},
+		{{-1, -1, 1}, {1, 1}},
+		{{-1, 1, 1}, {1, 0}},
+		{{-1, 1, -1}, {0, 0}},
+		{{1, -1, -1}, {0, 1}},
+		{{1, -1, 1}, {1, 1}},
 		{{-1, -1, -1}, {0, 0}},
-		{{-1, -1, +1}, {1, 0}},
-		{{-1, +1, -1}, {0, 1}},
-		{{-1, +1, +1}, {1, 1}},
-		{{+1, -1, -1}, {0, 0}},
-		{{+1, -1, +1}, {1, 0}},
-		{{+1, +1, -1}, {0, 1}},
-		{{+1, +1, +1}, {1, 1}},
+		{{-1, -1, 1}, {1, 0}},
+		{{1, 1, -1}, {0, 1}},
+		{{1, 1, 1}, {1, 1}},
+		{{1, -1, -1}, {0, 0}},
+		{{1, 1, 1}, {1, 1}},
+		{{1, -1, 1}, {1, 0}},
+		{{1, -1, -1}, {0, 0}},
+		{{1, 1, 1}, {0, 1}},
+		{{-1, 1, 1}, {1, 1}},
+		{{1, -1, 1}, {0, 0}},
+		{{-1, -1, 1}, {1, 0}},
+		{{1, 1, -1}, {0, 1}},
+		{{1, -1, -1}, {1, 1}},
+		{{-1, -1, -1}, {1, 0}},
+		{{-1, 1, -1}, {0, 0}},
 	});
 
 	// load index data
 	gl::buffer<gl::uint_t> indices(glc);
 	indices.assign((gl::uint_t[])
 	{
-		0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1
+		0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9,
+		10, 9, 11, 10, 12, 13, 14, 15, 16, 17, 18,
+		19, 20, 19, 21, 20, 22, 23, 24, 22, 24, 25,
 	});
 
 	auto const index_count = indices.size();
@@ -125,14 +145,14 @@ int main()
 	glc.use_program(prog);
 	glc.use_vertex_array(vertices);
 	glc.use_element_array(indices);
-	glc.use_primitive_mode(gl::primitive::triangle_strip);
+	glc.use_primitive_mode(gl::primitive::triangles);
 	glc.use_read_framebuffer(fbuf);
 
 	dsp.set_display_func([&]
 	{
 		// rotating ortho projection
 		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) * gl::rotate(rotate * 2, 1, 0, 0) *
-			gl::translate(0, 0, -6) *
+			gl::translate(0, 0, -5) *
 			gl::perspective(45, (gl::float_t)window_size.x / window_size.y, 1, 100);
 		prog.set_uniform(mvp_uni, modelview);
 
@@ -140,18 +160,24 @@ int main()
 			rotate -= 3.14 * 2;
 
 		glc.use_draw_framebuffer(fbuf);
-
-		glc.bind_texture(texture_loc, texture2);
 		fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture1, 0));
 		glc.clear_color({1, 1, 1, 1});
-		glc.draw_elements(0, index_count);
 
-		glc.bind_texture(texture_loc, texture1);
-		fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture2, 0));
-		glc.draw_elements(0, index_count);
+		for (int i = 0; i != 2; ++i)
+		{
+			fbuf.bind_attachment(glc.color_buffer(0), gl::texture_attachment(texture2, 0));
+			glc.clear_color({0, 0, 0, 1});
+
+			glc.bind_texture(texture_loc, texture1);
+			glc.draw_elements(0, index_count);
+
+			texture1.swap(texture2);
+		}
 
 		glc.use_draw_framebuffer(nullptr);
 		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);
+
+		//texture1.swap(texture2);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
