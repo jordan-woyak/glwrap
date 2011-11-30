@@ -95,11 +95,11 @@ typedef basic_vec<uint_t, 3> uvec3;
 typedef basic_vec<uint_t, 4> uvec4;
 
 template <typename T, int D>
-basic_vec<T, D>& operator*=(const basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
+basic_vec<T, D>& operator*=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
 {
 	// TODO: recursive template magic
 	for (int i = 0; i != D; ++i)
-		_vec1[i] *= _vec2[i];
+		_vec1.data()[i] *= _vec2.data()[i];
 
 	return _vec1;
 }
@@ -108,6 +108,22 @@ template <typename T, int D>
 basic_vec<T, D> operator*(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
 {
 	return _vec1 *= _vec2;
+}
+
+template <typename T, int D>
+basic_vec<T, D>& operator+=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
+{
+	// TODO: recursive template magic
+	for (int i = 0; i != D; ++i)
+		_vec1.data()[i] += _vec2.data()[i];
+
+	return _vec1;
+}
+
+template <typename T, int D>
+basic_vec<T, D> operator+(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
+{
+	return _vec1 += _vec2;
 }
 
 template <int D>

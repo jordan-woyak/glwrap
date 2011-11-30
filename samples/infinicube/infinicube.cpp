@@ -164,9 +164,9 @@ int main()
 	dsp.set_display_func([&]
 	{
 		// rotating projection
-		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) *
-			gl::rotate(rotate * 2, 1, 0, 0) *
-			gl::scale(1, 1, 1.f/5);
+		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) * gl::rotate(rotate * 2, 1, 0, 0) *
+			gl::translate(0, 0, -5) *
+			gl::perspective(45, 1, 1, 100);
 		prog.set_uniform(mvp_uni, modelview);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
@@ -184,14 +184,16 @@ int main()
 
 		glc.use_draw_framebuffer(nullptr);
 		glc.viewport({0, 0}, window_size);
-		glc.blit_pixels({0, 0}, tex_size, {0, 0}, window_size, gl::filter::nearest);
+
+		gl::ivec2 const offset = {(window_size.x - tex_size.x) / 2, 0};
+		glc.blit_pixels({0, 0}, tex_size, offset, offset + gl::ivec2{tex_size.x, window_size.y}, gl::filter::nearest);
 
 		texture1.swap(texture2);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
-		auto const tex_size = calc_texture_size(window_size);
+		auto const tex_size = calc_texture_size(window_size = _size);
 		texture1.storage(tex_size, gl::base_format::rgba);
 		texture2.storage(tex_size, gl::base_format::rgba);
 	});
