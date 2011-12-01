@@ -70,7 +70,7 @@ public:
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
-	void line_width(int_t _width)
+	void line_width(float_t _width)
 	{
 		glLineWidth(_width);
 	}
