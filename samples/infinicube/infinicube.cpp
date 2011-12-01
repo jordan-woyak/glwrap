@@ -128,7 +128,6 @@ int main()
 		return gl::ivec2{m, m};
 	};
 
-	// multisampled renderbuffer
 	gl::texture_2d
 		texture1(glc),
 		texture2(glc);
