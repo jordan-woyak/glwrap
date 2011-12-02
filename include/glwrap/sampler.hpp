@@ -16,18 +16,15 @@ enum class wrap_mode : GLenum
 	repeat = GL_REPEAT
 };
 
-/*
-// TODO: make struct to combine pixel filter + mimmap filter, so only 2 enums
-enum class filter_mode : GLenum
+enum class texture_filter : GLenum
 {
 	nearest = GL_NEAREST,
 	linear = GL_LINEAR,
-	GL_NEAREST_MIPMAP_NEAREST,
-	GL_LINEAR_MIPMAP_NEAREST,
-	GL_NEAREST_MIPMAP_LINEAR,
-	GL_LINEAR_MIPMAP_LINEAR,
+	nearest_mipmap_nearest = GL_NEAREST_MIPMAP_NEAREST,
+	linear_mipmap_nearest = GL_LINEAR_MIPMAP_NEAREST,
+	nearest_mipmap_linear = GL_NEAREST_MIPMAP_LINEAR,
+	linear_mipmap_linear = GL_LINEAR_MIPMAP_LINEAR,
 };
-*/
 
 class sampler : public globject
 {
@@ -59,12 +56,12 @@ public:
 		glSamplerParameteri(native_handle(), GL_TEXTURE_WRAP_R, static_cast<int>(_mode));
 	}
 
-	void set_min_filter(filter _mode)
+	void set_min_filter(texture_filter _mode)
 	{
 		glSamplerParameteri(native_handle(), GL_TEXTURE_MIN_FILTER, static_cast<int>(_mode));
 	}
 
-	void set_mag_filter(filter _mode)
+	void set_mag_filter(texture_filter _mode)
 	{
 		glSamplerParameteri(native_handle(), GL_TEXTURE_MAG_FILTER, static_cast<int>(_mode));
 	}
@@ -77,6 +74,11 @@ public:
 	void set_max_lod(float_t _lod)
 	{
 		glSamplerParameterf(native_handle(), GL_TEXTURE_MAX_LOD, _lod);
+	}
+
+	void set_lod_bias(float_t _bias)
+	{
+		glSamplerParameterf(native_handle(), GL_TEXTURE_LOD_BIAS, _bias);
 	}
 
 	// TODO: GL_TEXTURE_BORDER_COLOR

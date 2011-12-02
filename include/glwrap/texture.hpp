@@ -9,6 +9,25 @@
 namespace gl
 {
 
+enum class swizzle_component : GLenum
+{
+	r = GL_TEXTURE_SWIZZLE_R,
+	g = GL_TEXTURE_SWIZZLE_G,
+	b = GL_TEXTURE_SWIZZLE_B,
+	a = GL_TEXTURE_SWIZZLE_A,
+	rgba = GL_TEXTURE_SWIZZLE_RGBA
+};
+
+enum class swizzle_value : GLenum
+{
+	r = GL_RED,
+	g = GL_GREEN,
+	b = GL_BLUE,
+	a = GL_ALPHA,
+	zero = GL_ZERO,
+	one = GL_ONE,
+};
+
 class context;
 
 // TODO: rename attribute_location?
@@ -102,6 +121,21 @@ public:
 	void generate_mipmap()
 	{
 		glGenerateMipmap(get_target());
+	}
+
+	void set_swizzle(swizzle_component _comp, swizzle_value _val)
+	{
+		bind();
+		glTexParameteri(get_target(), static_cast<GLenum>(_comp), static_cast<GLint>(_val));
+	}
+
+	void set_swizzle_rgba(swizzle_value _r, swizzle_value _g, swizzle_value _b, swizzle_value _a)
+	{
+		bind();
+		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_R, static_cast<GLint>(_r));
+		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_G, static_cast<GLint>(_g));
+		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_B, static_cast<GLint>(_b));
+		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_A, static_cast<GLint>(_a));
 	}
 
 	static GLenum get_target();
