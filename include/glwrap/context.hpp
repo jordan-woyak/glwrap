@@ -206,14 +206,14 @@ public:
 	}
 
 	template <typename T>
-	void bind_texture(texture_unit<T>& _unit, T const& _texture)
+	void bind_texture(texture_unit<T> const& _unit, T const& _texture)
 	{
 		glActiveTexture(GL_TEXTURE0 + _unit.get_index());
 		_texture.bind();
 	}
 
 	template <typename T>
-	void bind_sampler(texture_unit<T>& _unit, sampler const& _sampler)
+	void bind_sampler(texture_unit<T> const& _unit, sampler const& _sampler)
 	{
 		_sampler.bind(_unit.get_index());
 	}
@@ -222,7 +222,7 @@ public:
 	// range is probably not needed/wanted for uniform buffer
 	// TODO: require "uniform_block_align<T>"
 	template <typename T>
-	void bind_buffer(uniform_block_binding<T>& _unit, buffer_iterator<T> const& _iter, uint_t _size)
+	void bind_buffer(uniform_block_binding<T> const& _unit, buffer_iterator<T> const& _iter, uint_t _size)
 	{
 		// TODO: use size not stride
 		glBindBufferRange(GL_UNIFORM_BUFFER, _unit.get_index(),
@@ -230,7 +230,7 @@ public:
 	}
 
 	template <typename T>
-	void bind_buffer(transform_feedback_binding<T>& _unit, buffer_iterator<T> const& _iter, uint_t _size)
+	void bind_buffer(transform_feedback_binding<T> const& _unit, buffer_iterator<T> const& _iter, uint_t _size)
 	{
 		// TODO: use size not stride
 		glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, _unit.get_index(),
