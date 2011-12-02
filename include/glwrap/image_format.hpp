@@ -9,6 +9,7 @@ enum class base_format
 {
 	r = GL_RED,
 	rg = GL_RG,
+	rgb = GL_RGB,
 	rgba = GL_RGBA,
 	d = GL_DEPTH_COMPONENT
 };

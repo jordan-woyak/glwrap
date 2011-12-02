@@ -33,13 +33,16 @@ int main()
 
 	sf::Image texdata;
 	if (texdata.LoadFromFile("../color.png"))
-		tex_color.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba, {texdata.GetWidth(), texdata.GetHeight()}));
+		tex_color.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba,
+		{texdata.GetWidth(), texdata.GetHeight()}), gl::base_format::rgb);
 
 	if (texdata.LoadFromFile("../spec.png"))
-		tex_spec.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba, {texdata.GetWidth(), texdata.GetHeight()}));
+		tex_spec.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba,
+		{texdata.GetWidth(), texdata.GetHeight()}), gl::base_format::r);
 
 	if (texdata.LoadFromFile("../normal.png"))
-		tex_normal.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba, {texdata.GetWidth(), texdata.GetHeight()}));
+		tex_normal.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba,
+		{texdata.GetWidth(), texdata.GetHeight()}), gl::base_format::rgb);
 
 	// nonsense to load ply
 	ply::vertex_format<FooVertex> vert_fmt;

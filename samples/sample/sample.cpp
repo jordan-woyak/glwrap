@@ -129,8 +129,8 @@ int main()
 	gl::sampler samp(glc);
 	glc.bind_sampler(texunit, samp);
 
-	samp.set_min_filter(gl::filter::linear);
-	samp.set_mag_filter(gl::filter::nearest);
+	samp.set_min_filter(gl::texture_filter::linear);
+	samp.set_mag_filter(gl::texture_filter::nearest);
 
 	//glc.enable(gl::capability::multisample);
 

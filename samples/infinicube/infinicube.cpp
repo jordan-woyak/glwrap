@@ -143,8 +143,8 @@ int main()
 	gl::sampler samp(glc);
 	glc.bind_sampler(texture_loc, samp);
 
-	samp.set_min_filter(gl::filter::linear);
-	samp.set_mag_filter(gl::filter::nearest);
+	samp.set_min_filter(gl::texture_filter::linear);
+	samp.set_mag_filter(gl::texture_filter::nearest);
 
 	glc.enable(gl::capability::cull_face);
 
