@@ -218,6 +218,12 @@ public:
 		_sampler.bind(_unit.get_index());
 	}
 
+	template <typename T>
+	void unbind_sampler(texture_unit<T> const& _unit)
+	{
+		glBindSampler(_unit.get_index(), 0);
+	}
+
 	// TODO: should allow reference to buffer element as well
 	// range is probably not needed/wanted for uniform buffer
 	// TODO: require "uniform_block_align<T>"
@@ -364,13 +370,13 @@ public:
 	void use_draw_framebuffer(framebuffer_reference _fb)
 	{
 		m_draw_fbo = _fb.native_handle();
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
 	}
 
 	void use_read_framebuffer(framebuffer_reference _fb)
 	{
 		m_read_fbo = _fb.native_handle();
-		//glBindFramebuffer(GL_READ_FRAMEBUFFER, _fb.native_handle());
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _fb.native_handle());
 	}
 
 	color_number draw_buffer(uint_t _index)

@@ -138,6 +138,13 @@ public:
 		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_A, static_cast<GLint>(_a));
 	}
 
+	// TODO: this should be automatic?
+	void set_max_level(int_t _level)
+	{
+		bind();
+		glTexParameteri(get_target(), GL_TEXTURE_MAX_LEVEL, _level);
+	}
+
 	static GLenum get_target();
 
 private:
