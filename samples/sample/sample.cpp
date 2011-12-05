@@ -65,7 +65,7 @@ int main()
 
 	gl::fragment_shader frag_shader(glc);
 
-	auto fragdata = prog.create_output<gl::vec4>("fragdata");
+	auto fragdata = frag_shader.create_output<gl::vec4>("fragdata");
 
 	frag_shader.set_source(
 		"in vec3 col;"
