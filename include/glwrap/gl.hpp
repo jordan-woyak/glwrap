@@ -3,6 +3,7 @@
 
 #include "exception.hpp"
 #include "uniform.hpp"
+#include "shader.hpp"
 #include "program.hpp"
 
 #ifndef GLWRAP_NO_SFML

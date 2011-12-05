@@ -280,6 +280,10 @@ private:
 	std::list<std::unique_ptr<detail::variable_base>> m_fragdatas;
 	std::list<std::unique_ptr<detail::variable_base>> m_vertex_out_varying;
 
+	vertex_shader* m_vshad;
+	geometry_shader* m_gshad;
+	fragment_shader* m_fshad;
+
 	std::vector<std::string> m_feedback_varyings;
 
 	// TODO: store ptr or copy?

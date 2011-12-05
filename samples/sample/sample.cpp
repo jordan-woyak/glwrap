@@ -46,13 +46,13 @@ int main()
 	auto mvp_uni = prog.create_uniform<gl::mat4>("mvp");
 	auto tex_uni = prog.create_uniform<gl::texture_2d>("tex");
 
-	auto color_attrib = prog.create_attribute<gl::vec3>("color");
-	auto pos_attrib = prog.create_attribute<gl::vec2>("position");
-	auto texpos_attrib = prog.create_attribute<gl::vec2>("texpos");
+	gl::vertex_shader vert_shader(glc);
 
-	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
+	auto color_attrib = vert_shader.create_input<gl::vec3>("color");
+	auto pos_attrib = vert_shader.create_input<gl::vec2>("position");
+	auto texpos_attrib = vert_shader.create_input<gl::vec2>("texpos");
 
-	prog.set_vertex_shader_source(
+	vert_shader.set_source(
 		"out vec3 col;"
 		"out vec2 uv;"
 		"void main(void)"
@@ -63,7 +63,11 @@ int main()
 		"}"
 	);
 
-	prog.set_fragment_shader_source(
+	gl::fragment_shader frag_shader(glc);
+
+	auto fragdata = prog.create_output<gl::vec4>("fragdata");
+
+	frag_shader.set_source(
 		"in vec3 col;"
 		"in vec2 uv;"
 		"void main(void)"
@@ -72,6 +76,8 @@ int main()
 		"}"
 	);
 
+	prog.attach(vert_shader);
+	prog.attach(frag_shader);
 	prog.compile();
 
 	// bind attribute and fragdata location before linking
