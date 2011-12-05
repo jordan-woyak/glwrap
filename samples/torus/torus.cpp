@@ -53,10 +53,16 @@ int main()
 
 	gl::vertex_shader vshad(glc);
 	auto pos_attrib = vshad.create_input<gl::vec3>("pos");
-	auto norm_attrib = vshad.create_input<gl::vec3>("norm");
+	//auto norm_attrib = vshad.create_input<gl::vec3>("norm");
+
+	// requires manually adding input to source
+	auto norm_attrib = vshad.assume_input<gl::vec3>("norm");
 
 	vshad.set_source(
 		"smooth out vec3 norm_light_dir, vertex_normal, Ia, E;"
+
+		// manually added to demonstrate "assume_input"
+		"in vec3 norm;"
 
 		"void main(void)"
 		"{"

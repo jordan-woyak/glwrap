@@ -89,6 +89,22 @@ public:
 		return {std::prev(m_outputs.end())};
 	}
 
+	template <typename P>
+	typename detail::shader_io_type<T, P>::input_type
+	assume_input(std::string const& _name)
+	{
+		m_assumed_vars.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<P>(_name)));
+		return {std::prev(m_assumed_vars.end())};
+	}
+
+	template <typename P>
+	typename detail::shader_io_type<T, P>::output_type
+	assume_output(std::string const& _name)
+	{
+		m_assumed_vars.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<P>(_name)));
+		return {std::prev(m_assumed_vars.end())};
+	}
+
 private:
 	std::string get_header() const
 	{
@@ -115,6 +131,8 @@ private:
 	// TODO: don't need to store all this here
 	std::list<std::unique_ptr<detail::variable_base>> m_inputs;
 	std::list<std::unique_ptr<detail::variable_base>> m_outputs;
+
+	std::list<std::unique_ptr<detail::variable_base>> m_assumed_vars;
 };
 
 }
