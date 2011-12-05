@@ -87,13 +87,11 @@ int main()
 	auto ambient_uni = prog.create_uniform<gl::vec4>("ambient");
 	auto shininess_uni = prog.create_uniform<gl::float_t>("shininess");
 
-	auto pos_attrib = prog.create_attribute<gl::vec3>("pos");
-	auto norm_attrib = prog.create_attribute<gl::vec3>("norm");
-	auto texpos_attrib = prog.create_attribute<gl::vec2>("texpos");
-
-	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
-
-	prog.set_vertex_shader_source(
+	gl::vertex_shader vshad(glc);
+	auto pos_attrib = vshad.create_input<gl::vec3>("pos");
+	auto norm_attrib = vshad.create_input<gl::vec3>("norm");
+	auto texpos_attrib = vshad.create_input<gl::vec2>("texpos");
+	vshad.set_source(
 		"out vec2 tpos;"
 		"out vec3 vertex_normal, norm_light_dir, Ia, E;"
 
@@ -112,7 +110,9 @@ int main()
 		"}"
 	);
 
-	prog.set_fragment_shader_source(
+	gl::fragment_shader fshad(glc);
+	auto fragdata = fshad.create_output<gl::vec4>("fragdata");
+	fshad.set_source(
 		"in vec2 tpos;"
 		"in vec3 vertex_normal, norm_light_dir, Ia, E;"
 
@@ -139,6 +139,8 @@ int main()
 		"}"
 	);
 
+	prog.attach(vshad);
+	prog.attach(fshad);
 	prog.compile();
 
 	// bind attribute and fragdata location before linking

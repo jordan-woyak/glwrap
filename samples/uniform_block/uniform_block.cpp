@@ -35,21 +35,23 @@ int main()
 	// create a program
 	gl::program prog(glc);
 
-	// define some variables in the program,
+	// define some variables in the shader,
 	// they are automatically added to the program source
-	auto input1_attrib = prog.create_attribute<gl::int_t>("input1");
+	gl::vertex_shader vshad(glc);
+	auto input1_attrib = vshad.create_input<gl::int_t>("input1");
 
-	auto output1_varying = prog.create_vertex_out_varying<gl::float_t>("output1");
+	auto output1_varying = vshad.create_output<gl::float_t>("output1");
 
 	auto params1_block = prog.create_uniform_block<Params>("params1", params_def);
 
-	prog.set_vertex_shader_source(
+	vshad.set_source(
 		"void main(void)"
 		"{"
 			"output1 = input1 * scale + bias;"
 		"}"
 	);
 
+	prog.attach(vshad);
 	prog.compile();
 
 	// bind things before linking

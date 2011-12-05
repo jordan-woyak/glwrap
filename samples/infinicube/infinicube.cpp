@@ -25,12 +25,10 @@ int main()
 	auto mvp_uni = prog.create_uniform<gl::mat4>("mvp");
 	auto texture_uni = prog.create_uniform<gl::texture_2d>("texture");
 
-	auto pos_attrib = prog.create_attribute<gl::vec3>("pos");
-	auto texpos_attrib = prog.create_attribute<gl::vec2>("texpos");
-
-	auto fragdata = prog.create_fragdata<gl::vec4>("fragdata");
-
-	prog.set_vertex_shader_source(
+	gl::vertex_shader vshad(glc);
+	auto pos_attrib = vshad.create_input<gl::vec3>("pos");
+	auto texpos_attrib = vshad.create_input<gl::vec2>("texpos");
+	vshad.set_source(
 		"out vec2 uv;"
 
 		"void main(void)"
@@ -40,7 +38,9 @@ int main()
 		"}"
 	);
 
-	prog.set_fragment_shader_source(
+	gl::fragment_shader fshad(glc);
+	auto fragdata = fshad.create_output<gl::vec4>("fragdata");
+	fshad.set_source(
 		"in vec2 uv;"
 
 		"void main(void)"
@@ -49,6 +49,8 @@ int main()
 		"}"
 	);
 
+	prog.attach(vshad);
+	prog.attach(fshad);
 	prog.compile();
 
 	// bind stuff linking
