@@ -60,7 +60,7 @@ private:
 template <typename T>
 class fragdata
 {
-	friend class program;
+	friend class shader<shader_type::fragment>;
 
 public:
 	std::string const& get_name() const
@@ -96,6 +96,7 @@ private:
 
 inline attachment texture_attachment(texture_2d& _tex, int _level)
 {
+	// TODO: don't capture globject reference
 	return attachment([&_tex, _level](GLenum _target, GLenum _attach_point)
 	{
 		glFramebufferTexture2D(_target, _attach_point, _tex.get_target(), _tex.native_handle(), _level);
@@ -104,6 +105,7 @@ inline attachment texture_attachment(texture_2d& _tex, int _level)
 
 inline attachment renderbuffer_attachment(renderbuffer& _rendbuf)
 {
+	// TODO: don't capture globject reference
 	return attachment([&_rendbuf](GLenum _target, GLenum _attach_point)
 	{
 		glFramebufferRenderbuffer(_target, _attach_point, GL_RENDERBUFFER, _rendbuf.native_handle());

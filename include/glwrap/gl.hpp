@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "declarations.hpp"
+
 #include "exception.hpp"
 #include "uniform.hpp"
 #include "shader.hpp"

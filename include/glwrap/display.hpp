@@ -6,10 +6,6 @@
 
 #include <SFML/Graphics.hpp>
 
-//#include <GL/glut.h>
-#include <GL/glew.h>
-#include <GL/gl.h>
-
 #include "context.hpp"
 #include "vector.hpp"
 

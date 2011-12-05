@@ -5,8 +5,7 @@
 #include <boost/format.hpp>
 
 #include "uniform.hpp"
-#include "attribute.hpp"
-#include "framebuffer.hpp"
+#include "shader.hpp"
 #include "vertex_array.hpp"
 #include "transform_feedback.hpp"
 #include "uniform_block.hpp"
@@ -15,28 +14,6 @@ namespace gl
 {
 
 class context;
-
-// TODO: rename/put elsewhere
-template <typename T>
-struct vertex_out_varying
-{
-	friend class program;
-
-public:
-	std::string const& get_name() const
-	{
-		return (*m_iter)->get_name();
-	}
-
-private:
-	typedef std::list<std::unique_ptr<detail::variable_base>>::iterator iter_t;
-
-	vertex_out_varying(iter_t _iter)
-		: m_iter(_iter)
-	{}
-
-	iter_t m_iter;
-};
 
 class program : public globject
 {
@@ -75,49 +52,23 @@ public:
 		}
 
 		// vertex shader
-		// TODO: lame
-		if (!m_vertex_src.empty())
+		if (m_vshad)
 		{
-			std::string vshad_header("#version 330\n");
+			std::string const& shad_header = m_vshad->get_header();
+			std::string const& shad_src = m_vshad->get_source();
 
-			for (auto& var : m_vertex_out_varying)
-			{
-				vshad_header += (boost::format("out %s %s;\n")
-					% var->get_type_name() % var->get_name()).str();
-			}
-
-			for (auto& var : m_attributes)
-			{
-				vshad_header += (boost::format("in %s %s;\n")
-					% var->get_type_name() % var->get_name()).str();
-			}
-
-			std::array<const char*, 3> vshad_src = {{vshad_header.c_str(), uniform_header.c_str(), m_vertex_src.c_str()}};
-			GLuint vshad = glCreateShader(GL_VERTEX_SHADER);
-			glShaderSource(vshad, vshad_src.size(), vshad_src.data(), 0);
-
-			glAttachShader(native_handle(), vshad);
-			glDeleteShader(vshad);
+			std::array<const char*, 3> shad_full = {{shad_header.c_str(), uniform_header.c_str(), shad_src.c_str()}};
+			glShaderSource(m_vshad->native_handle(), shad_full.size(), shad_full.data(), 0);
 		}
 
 		// fragment shader
-		// TODO: lame
-		if (!m_fragment_src.empty())
+		if (m_fshad)
 		{
-			std::string fshad_header("#version 330\n");
+			std::string const& shad_header = m_fshad->get_header();
+			std::string const& shad_src = m_fshad->get_source();
 
-			for (auto& var : m_fragdatas)
-			{
-				fshad_header += (boost::format("out %s %s;\n")
-					% var->get_type_name() % var->get_name()).str();
-			}
-
-			std::array<const char*, 3> fshad_src = {{fshad_header.c_str(), uniform_header.c_str(), m_fragment_src.c_str()}};
-			GLuint fshad = glCreateShader(GL_FRAGMENT_SHADER);
-			glShaderSource(fshad, fshad_src.size(), fshad_src.data(), 0);
-
-			glAttachShader(native_handle(), fshad);
-			glDeleteShader(fshad);
+			std::array<const char*, 3> shad_full = {{shad_header.c_str(), uniform_header.c_str(), shad_src.c_str()}};
+			glShaderSource(m_fshad->native_handle(), shad_full.size(), shad_full.data(), 0);
 		}
 	}
 
@@ -173,44 +124,11 @@ public:
 //		return is_good();
 //	}
 
-	// TODO: kill
-	void set_vertex_shader_source(const std::string& _src)
-	{
-		m_vertex_src = _src;
-	}
-
-	void set_fragment_shader_source(const std::string& _src)
-	{
-		m_fragment_src = _src;
-	}
-
 	template <typename T>
 	uniform<T> create_uniform(const std::string& _name)
 	{
 		m_uniforms.push_back(detail::uniform_variable(detail::variable<T>(_name)));
 		return uniform<T>(std::prev(m_uniforms.end()));
-	}
-
-	template <typename T>
-	attribute<T> create_attribute(const std::string& _name)
-	{
-		m_attributes.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<T>(_name)));
-		return attribute<T>(std::prev(m_attributes.end()));
-	}
-
-	template <typename T>
-	fragdata<T> create_fragdata(const std::string& _name)
-	{
-		m_fragdatas.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<T>(_name)));
-		return fragdata<T>(std::prev(m_fragdatas.end()));
-	}
-
-	// TODO: change function name?
-	template <typename T>
-	vertex_out_varying<T> create_vertex_out_varying(const std::string& _name)
-	{
-		m_vertex_out_varying.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<T>(_name)));
-		return vertex_out_varying<T>(std::prev(m_vertex_out_varying.end()));
 	}
 
 	template <typename T>
@@ -261,8 +179,28 @@ public:
 		m_feedback_varyings[index] = _varying.get_name();
 	}
 
+	// TODO: these 3 will break if repeated
+	void attach(vertex_shader& _shad)
+	{
+		m_vshad = &_shad;
+		glAttachShader(native_handle(), _shad.native_handle());
+	}
+
+	void attach(geometry_shader& _shad)
+	{
+		m_gshad = &_shad;
+		glAttachShader(native_handle(), _shad.native_handle());
+	}
+
+	void attach(fragment_shader& _shad)
+	{
+		m_fshad = &_shad;
+		glAttachShader(native_handle(), _shad.native_handle());
+	}
+
 	explicit program(context& _context)
 		: globject(glCreateProgram())
+		, m_vshad(), m_gshad(), m_fshad()
 	{}
 
 private:
@@ -271,15 +209,7 @@ private:
 		glUseProgram(native_handle());
 	};
 
-	// TODO: kill, move to compile parameters, maybe
-	std::string m_vertex_src;
-	std::string m_fragment_src;
-
-	// TODO: kill pointers
-	std::list<std::unique_ptr<detail::variable_base>> m_attributes;
-	std::list<std::unique_ptr<detail::variable_base>> m_fragdatas;
-	std::list<std::unique_ptr<detail::variable_base>> m_vertex_out_varying;
-
+	// TODO: don't store globject pointers like this, it will break on swap/move
 	vertex_shader* m_vshad;
 	geometry_shader* m_gshad;
 	fragment_shader* m_fshad;

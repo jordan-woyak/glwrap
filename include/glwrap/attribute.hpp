@@ -65,8 +65,7 @@ private:
 template <typename T>
 class attribute
 {
-	friend class program;
-	friend class vertex_array;
+	friend class shader<shader_type::vertex>;
 
 public:
 	std::string const& get_name() const
