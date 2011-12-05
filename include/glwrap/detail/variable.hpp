@@ -147,14 +147,10 @@ struct glsl_var_type<basic_mat<T, R, C>>
 };
 
 template <>
-template <int D>
-struct glsl_var_type<texture<D>>
+type_name_t get_type_name<texture_2d>()
 {
-	static type_name_t name()
-	{
-		return (boost::format("sampler%dD") % D).str();
-	}
-};
+	return "sampler2D";
+}
 
 template <typename T, typename Enable = void>
 struct index_count;

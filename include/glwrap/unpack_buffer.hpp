@@ -16,14 +16,9 @@ enum class pixel_format : GLenum
 	bgra = GL_BGRA
 };
 
-template <int D>
-class texture;
-
 template <typename T, int D>
 class unpack_buffer
 {
-	friend class texture<D>;
-
 public:
 	unpack_buffer(T const* _data, pixel_format _pfmt, basic_vec<int_t, 2> const& _dims)
 		: m_data(_data)
@@ -31,7 +26,8 @@ public:
 		, m_dims(_dims)
 	{}
 
-private:
+// TODO: fix privacy
+//private:
 	T const* const m_data;
 	pixel_format const m_pfmt;
 	basic_vec<int_t, 2> const m_dims;

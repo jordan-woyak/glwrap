@@ -78,12 +78,44 @@ private:
 	uint_t m_max_combined_texture_image_units;
 };
 
-template <int D>
+namespace detail
+{
+
+template <texture_type T, typename Enable = void>
+struct texture_dims;
+
+template <>
+struct texture_dims<texture_type::texture_1d>
+{
+	static const int value = 1;
+};
+
+template <texture_type T>
+struct texture_dims<T, typename std::enable_if<
+	(T == texture_type::texture_2d) ||
+	(T == texture_type::texture_rectangle)
+	>::type>
+{
+	static const int value = 2;
+};
+
+template <>
+struct texture_dims<texture_type::texture_3d>
+{
+	static const int value = 3;
+};
+
+}
+
+template <texture_type Type>
 class texture : public globject
 {
 	friend class context;
 
 public:
+	static const texture_type type = Type;
+	static const int dimensions = detail::texture_dims<type>::value;
+
 	void swap(texture& _other)
 	{
 		globject::swap(_other);
@@ -100,7 +132,7 @@ public:
 	{}
 
 	template <typename T>
-	void assign(unpack_buffer<T, D> const& _buffer, image_format _ifmt)
+	void assign(unpack_buffer<T, dimensions> const& _buffer, image_format _ifmt)
 	{
 		bind();
 		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
@@ -109,7 +141,7 @@ public:
 
 	// TODO: level
 
-	void storage(basic_vec<int_t, D> const& _dims, image_format _ifmt)
+	void storage(basic_vec<int_t, dimensions> const& _dims, image_format _ifmt)
 	{
 		// TODO: for non 2d textures
 		bind();
@@ -154,24 +186,20 @@ private:
 	}
 };
 
-typedef texture<1> texture_1d;
-typedef texture<2> texture_2d;
-typedef texture<3> texture_3d;
-
 template <>
-inline GLenum texture<1>::get_target()
+inline GLenum texture<texture_type::texture_1d>::get_target()
 {
 	return GL_TEXTURE_1D;
 }
 
 template <>
-inline GLenum texture<2>::get_target()
+inline GLenum texture<texture_type::texture_2d>::get_target()
 {
 	return GL_TEXTURE_2D;
 }
 
 template <>
-inline GLenum texture<3>::get_target()
+inline GLenum texture<texture_type::texture_3d>::get_target()
 {
 	return GL_TEXTURE_3D;
 }

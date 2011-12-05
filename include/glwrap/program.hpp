@@ -119,6 +119,15 @@ public:
 		return (GL_TRUE == status);
 	}
 
+	// TODO: rename
+	bool is_valid() const
+	{
+		glValidateProgram(native_handle());
+		GLint status;
+		glGetProgramiv(native_handle(), GL_VALIDATE_STATUS, &status);
+		return (GL_TRUE == status);
+	}
+
 //	explicit operator bool() const
 //	{
 //		return is_good();
