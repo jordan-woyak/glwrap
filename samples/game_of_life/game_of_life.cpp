@@ -7,8 +7,8 @@
 
 int main()
 {
-	gl::ivec2 const grid_size{240, 240};
-	gl::ivec2 window_size{240, 240};
+	gl::ivec2 const grid_size{640, 640};
+	gl::ivec2 window_size{640, 640};
 
 	gl::context glc;
 	gl::display dsp(glc, window_size);
@@ -16,11 +16,11 @@ int main()
 
 	// create a texture, load the data (this needs some work)
 	gl::texture_rectangle tex_data_front(glc), tex_data_back(glc);
-	tex_data_front.storage(window_size, gl::base_format::r);
+	tex_data_front.storage(grid_size, gl::base_format::r);
 
 	// initial random grid state
 	{
-	std::uniform_int_distribution<gl::ubyte_t> distribution(0, 8);	// 1/8 alive
+	std::uniform_int_distribution<gl::ubyte_t> distribution(0, 16);	// 1/8 alive
 	std::mt19937 rng;
 	// TODO: ugg
 	rng.seed((std::chrono::system_clock::now() - std::chrono::system_clock::time_point()).count());
@@ -126,7 +126,7 @@ int main()
 	fbo.bind_read_buffer(glc.color_buffer(1));
 
 	gl::renderbuffer rbuf(glc);
-	rbuf.storage(window_size);
+	rbuf.storage(grid_size);
 	fbo.bind_attachment(glc.color_buffer(1), gl::renderbuffer_attachment(rbuf));
 
 	glc.use_program(prog);
@@ -153,12 +153,10 @@ int main()
 		glc.use_draw_framebuffer(nullptr);
 		glc.clear_color({0, 0, 0, 0});
 
-		// TODO: lame, only handles square grid
-		float const min_win_dim = std::min(window_size.x, window_size.y);
-		auto const ratio = min_win_dim / grid_size.x;
+		auto const scale = std::min((float)window_size.x / grid_size.x, (float)window_size.y / grid_size.y);
 
 		// lame, need to define more vec2 ops
-		gl::ivec2 display_size(grid_size.x * ratio, grid_size.y * ratio);
+		gl::ivec2 display_size(grid_size.x * scale, grid_size.y * scale);
 		auto offset = (window_size - display_size) / 2;
 
 		glc.blit_pixels({0, 0}, grid_size, offset, offset + display_size, gl::filter::nearest);
