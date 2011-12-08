@@ -43,7 +43,6 @@ int main()
 	// define some variables in the program,
 	// they are automatically added to the program source
 	auto cell_in_uni = prog.create_uniform<gl::texture_2d>("cell_in");
-	auto mvp_uni = prog.create_uniform<gl::mat4>("mvp");
 
 	auto color_dead_uni = prog.create_uniform<gl::vec3>("color_dead");
 	auto color_live_uni = prog.create_uniform<gl::vec3>("color_live");
@@ -53,7 +52,7 @@ int main()
 	vert_shader.set_source(
 		"void main(void)"
 		"{"
-			"gl_Position = mvp * vec4(position, 0, 1);"
+			"gl_Position = vec4(position, 0, 1);"
 		"}"
 	);
 
@@ -90,7 +89,7 @@ int main()
 	gl::buffer<gl::vec2> verbuf(glc);
 	verbuf.assign((gl::vec2[])
 	{
-		{0, 0}, {0, 1}, {1, 1}, {1, 0}
+		{-1, -1}, {-1, 1}, {1, 1}, {1, -1}
 	});
 
 	// automatically set data types, sizes, strides
@@ -112,7 +111,6 @@ int main()
 	glc.use_primitive_mode(gl::primitive::triangle_fan);
 	glc.use_read_framebuffer(fbo);
 
-	prog.set_uniform(mvp_uni, gl::ortho(0, 1, 1, 0, -1, 1));
 	prog.set_uniform(cell_in_uni, cell_in_loc);
 	// alive and dead colors
 	prog.set_uniform(color_dead_uni, {1, 1, 0});
