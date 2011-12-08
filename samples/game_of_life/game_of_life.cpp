@@ -22,7 +22,7 @@ int main()
 	dsp.set_caption("glwrap-game_of_life");
 
 	// create a texture, load the data (this needs some work)
-	gl::texture_2d tex_data_front(glc), tex_data_back(glc);
+	gl::texture_rectangle tex_data_front(glc), tex_data_back(glc);
 	tex_data_back.assign(gl::unpack(initial_grid_data.data(), gl::pixel_format::r, grid_size), gl::base_format::r);
 	tex_data_front.assign(gl::unpack(initial_grid_data.data(), gl::pixel_format::r, grid_size), gl::base_format::r);
 	//tex_data_front.storage(window_size, gl::base_format::r);
@@ -35,14 +35,14 @@ int main()
 	// used to connect texture objects and sampler uniforms together via texture unit.
 	// ensures the correct type of texture is used
 	gl::texture_unit_alloter tunits(glc);
-	auto cell_in_loc = tunits.allot<gl::texture_2d>();
+	auto cell_in_loc = tunits.allot<gl::texture_rectangle>();
 
 	// create a program
 	gl::program prog(glc);
 
 	// define some variables in the program,
 	// they are automatically added to the program source
-	auto cell_in_uni = prog.create_uniform<gl::texture_2d>("cell_in");
+	auto cell_in_uni = prog.create_uniform<gl::texture_rectangle>("cell_in");
 
 	auto color_dead_uni = prog.create_uniform<gl::vec3>("color_dead");
 	auto color_live_uni = prog.create_uniform<gl::vec3>("color_live");
@@ -60,13 +60,18 @@ int main()
 	auto cell_out = frag_shader.create_output<gl::vec4>("cell_out");
 	auto color_out = frag_shader.create_output<gl::vec4>("color_out");
 	frag_shader.set_source(
+		"bool is_cell_alive(in ivec2 pos)"
+		"{"
+			"return texelFetch(cell_in, pos).r > 0.5;"
+		"}"
+
 		"void main(void)"
 		"{"
-			//"cell_out.r = texelFetch(cell_in, ivec2(gl_FragCoord), 0).r;"
-			//"color_out = vec4((cell_out.r > 0.5) ? color_live : color_dead, 1.0);"
+			"bool life = is_cell_alive(ivec2(gl_FragCoord));"
+			"int neighbors = 0;"
 
-			"cell_out = color_out = vec4(1, 0, 0, 1);"
-			//"cell_out = texelFetch(cell_in, ivec2(gl_FragCoord), 0);"
+			"cell_out = vec4(life, 1, 1, 1);"
+			"color_out = vec4(life ? color_live : color_dead, 1);"
 		"}"
 	);
 
@@ -113,8 +118,10 @@ int main()
 
 	prog.set_uniform(cell_in_uni, cell_in_loc);
 	// alive and dead colors
-	prog.set_uniform(color_dead_uni, {1, 1, 0});
-	prog.set_uniform(color_live_uni, {0, 0, 1});
+	prog.set_uniform(color_dead_uni, {1, 1, 1});
+	prog.set_uniform(color_live_uni, {0, 0, 0});
+
+	glc.viewport({0, 0}, grid_size);
 
 	dsp.set_display_func([&]
 	{
@@ -123,15 +130,16 @@ int main()
 		tex_data_back.swap(tex_data_front);
 
 		glc.use_draw_framebuffer(fbo);
+		glc.clear_color({0, 0, 0, 0});
 		glc.draw_arrays(0, 4);
 
 		glc.use_draw_framebuffer(nullptr);
-		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);
+		glc.blit_pixels({0, 0}, grid_size, {0, 0}, window_size, gl::filter::nearest);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
-		//glc.viewport({0, 0}, window_size = _size);
+		window_size = _size;
 	});
 
 	dsp.run_loop();
