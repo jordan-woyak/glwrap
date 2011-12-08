@@ -1,21 +1,14 @@
 
 #include <iostream>
 #include <random>
+#include <chrono>
 
 #include "glwrap/gl.hpp"
 
 int main()
 {
-	gl::ivec2 grid_size{240, 240};
+	gl::ivec2 const grid_size{240, 240};
 	gl::ivec2 window_size{240, 240};
-
-	std::uniform_int_distribution<gl::ubyte_t> distribution(0, std::numeric_limits<gl::ubyte_t>::max());
-	std::mt19937 rng;
-	//rng.seed();
-
-	std::vector<gl::ubyte_t> initial_grid_data(grid_size.x * grid_size.y);
-	for (auto& cell : initial_grid_data)
-		cell = distribution(rng);
 
 	gl::context glc;
 	gl::display dsp(glc, window_size);
@@ -23,9 +16,21 @@ int main()
 
 	// create a texture, load the data (this needs some work)
 	gl::texture_rectangle tex_data_front(glc), tex_data_back(glc);
+	tex_data_front.storage(window_size, gl::base_format::r);
+
+	// initial random grid state
+	{
+	std::uniform_int_distribution<gl::ubyte_t> distribution(0, 8);	// 1/8 alive
+	std::mt19937 rng;
+	// TODO: ugg
+	rng.seed((std::chrono::system_clock::now() - std::chrono::system_clock::time_point()).count());
+
+	std::vector<gl::ubyte_t> initial_grid_data(grid_size.x * grid_size.y);
+	for (auto& cell : initial_grid_data)
+		cell = (0 == distribution(rng)) * std::numeric_limits<gl::ubyte_t>::max();
+
 	tex_data_back.assign(gl::unpack(initial_grid_data.data(), gl::pixel_format::r, grid_size), gl::base_format::r);
-	tex_data_front.assign(gl::unpack(initial_grid_data.data(), gl::pixel_format::r, grid_size), gl::base_format::r);
-	//tex_data_front.storage(window_size, gl::base_format::r);
+	}
 
 	// used connect array_buffer vertex data and program attributes together
 	// via the typeless "generic vertex attributes" in a type-safe manner
@@ -60,18 +65,31 @@ int main()
 	auto cell_out = frag_shader.create_output<gl::vec4>("cell_out");
 	auto color_out = frag_shader.create_output<gl::vec4>("color_out");
 	frag_shader.set_source(
-		"bool is_cell_alive(in ivec2 pos)"
+		"int is_cell_alive(in ivec2 pos)"
 		"{"
-			"return texelFetch(cell_in, pos).r > 0.5;"
+			"return int(texelFetch(cell_in, pos).r > 0.5);"
 		"}"
 
 		"void main(void)"
 		"{"
-			"bool life = is_cell_alive(ivec2(gl_FragCoord));"
-			"int neighbors = 0;"
+			"ivec2 this_pos = ivec2(gl_FragCoord);"
+			"bool old_life = 0 != is_cell_alive(this_pos);"
 
-			"cell_out = vec4(life, 1, 1, 1);"
-			"color_out = vec4(life ? color_live : color_dead, 1);"
+			"int neighbors = "
+				"is_cell_alive(this_pos + ivec2(-1, -1)) + "
+				"is_cell_alive(this_pos + ivec2(0, -1)) + "
+				"is_cell_alive(this_pos + ivec2(+1, -1)) + "
+				"is_cell_alive(this_pos + ivec2(-1, 0)) + "
+				"is_cell_alive(this_pos + ivec2(+1, 0)) + "
+				"is_cell_alive(this_pos + ivec2(-1, +1)) + "
+				"is_cell_alive(this_pos + ivec2(0, +1)) + "
+				"is_cell_alive(this_pos + ivec2(+1, +1));"
+
+			"bool new_life = "
+				"3 == neighbors || (old_life && 2 == neighbors);"
+
+			"cell_out = vec4(new_life, 1, 1, 1);"
+			"color_out = vec4(new_life ? color_live : color_dead, 1);"
 		"}"
 	);
 
@@ -130,11 +148,20 @@ int main()
 		tex_data_back.swap(tex_data_front);
 
 		glc.use_draw_framebuffer(fbo);
-		glc.clear_color({0, 0, 0, 0});
 		glc.draw_arrays(0, 4);
 
 		glc.use_draw_framebuffer(nullptr);
-		glc.blit_pixels({0, 0}, grid_size, {0, 0}, window_size, gl::filter::nearest);
+		glc.clear_color({0, 0, 0, 0});
+
+		// TODO: lame, only handles square grid
+		float const min_win_dim = std::min(window_size.x, window_size.y);
+		auto const ratio = min_win_dim / grid_size.x;
+
+		// lame, need to define more vec2 ops
+		gl::ivec2 display_size(grid_size.x * ratio, grid_size.y * ratio);
+		auto offset = (window_size - display_size) / 2;
+
+		glc.blit_pixels({0, 0}, grid_size, offset, offset + display_size, gl::filter::nearest);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
