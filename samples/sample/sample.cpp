@@ -72,7 +72,7 @@ int main()
 		"in vec2 uv;"
 		"void main(void)"
 		"{"
-			"fragdata = vec4(col - texture2D(tex, uv).rrr, 1);"
+			"fragdata = vec4(col - texture(tex, uv).rrr, 1);"
 		"}"
 	);
 
