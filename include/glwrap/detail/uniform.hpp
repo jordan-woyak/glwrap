@@ -12,11 +12,11 @@ struct uniform_value
 	typedef T type;
 };
 
-// TODO: try to eliminate this
 template <>
-struct uniform_value<texture_2d>
+template <texture_type T>
+struct uniform_value<texture<T>>
 {
-	typedef texture_unit<texture_2d> type;
+	typedef texture_unit<texture<T>> type;
 };
 
 template <typename T>
@@ -41,6 +41,16 @@ struct set_uniform<std::array<T, S>>
 	static void set(GLuint _location, std::array<T, S> const& _value)
 	{
 		static_assert(sizeof(T) == 0, "array types in uniforms incomplete");
+	}
+};
+
+template <>
+template <texture_type T>
+struct set_uniform<texture_unit<texture<T>>>
+{
+	static void set(GLuint _location, const texture_unit<texture<T>>& _value)
+	{
+		glUniform1i(_location, _value.get_index());
 	}
 };
 
@@ -90,12 +100,6 @@ template <>
 inline void set_uniform_value<mat4>(GLuint _location, const mat4& _value)
 {
 	glUniformMatrix4fv(_location, 1, GL_TRUE, _value.data());
-}
-
-template <>
-inline void set_uniform_value<texture_unit<texture_2d>>(GLuint _location, const texture_unit<texture_2d>& _value)
-{
-	glUniform1i(_location, _value.get_index());
 }
 
 }

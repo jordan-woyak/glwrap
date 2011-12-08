@@ -94,7 +94,9 @@ private:
 	std::function<void(GLenum, GLenum)> m_func;
 };
 
-inline attachment texture_attachment(texture_2d& _tex, int _level)
+template <texture_type T>
+typename std::enable_if<2 == texture<T>::dimensions, attachment>::type
+texture_attachment(texture<T>& _tex, int _level)
 {
 	// TODO: don't capture globject reference
 	return attachment([&_tex, _level](GLenum _target, GLenum _attach_point)

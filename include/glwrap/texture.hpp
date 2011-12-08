@@ -131,21 +131,23 @@ public:
 		: globject(gen_return(glGenTextures))
 	{}
 
+	// TODO: work for NPOT
 	template <typename T>
 	void assign(unpack_buffer<T, dimensions> const& _buffer, image_format _ifmt)
 	{
 		bind();
-		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
+		glTexImage2D(get_target(), 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
 			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
 	}
 
 	// TODO: level
 
+	// TODO: work for NPOT
 	void storage(basic_vec<int_t, dimensions> const& _dims, image_format _ifmt)
 	{
 		// TODO: for non 2d textures
 		bind();
-		glTexImage2D(GL_TEXTURE_2D, 0, _ifmt.value, _dims.x, _dims.y,
+		glTexImage2D(get_target(), 0, _ifmt.value, _dims.x, _dims.y,
 			0, GL_RED, GL_BYTE, nullptr);
 	}
 
@@ -196,6 +198,12 @@ template <>
 inline GLenum texture<texture_type::texture_2d>::get_target()
 {
 	return GL_TEXTURE_2D;
+}
+
+template <>
+inline GLenum texture<texture_type::texture_rectangle>::get_target()
+{
+	return GL_TEXTURE_RECTANGLE;
 }
 
 template <>

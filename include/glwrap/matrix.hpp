@@ -122,6 +122,8 @@ typedef basic_mat<double_t, 4, 2> dmat4x2;
 typedef basic_mat<double_t, 4, 3> dmat4x3;
 typedef basic_mat<double_t, 4, 4> dmat4x4, dmat4;
 
+// TODO: non-float versions of these functions?
+
 inline mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
 {
 	auto const c = std::cos(angle);
@@ -136,6 +138,11 @@ inline mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
 	}};
 }
 
+inline mat4 rotate(float_t _angle, vec3 const& _dims)
+{
+	return rotate(_angle, _dims.x, _dims.y, _dims.z);
+}
+
 inline mat4 scale(float_t x, float_t y, float_t z)
 {
 	return
@@ -147,6 +154,11 @@ inline mat4 scale(float_t x, float_t y, float_t z)
 	}};
 }
 
+inline mat4 scale(vec3 const& _dims)
+{
+	return scale(_dims.x, _dims.y, _dims.z);
+}
+
 inline mat4 translate(float_t x, float_t y, float_t z)
 {
 	return
@@ -156,6 +168,11 @@ inline mat4 translate(float_t x, float_t y, float_t z)
 		{0, 0, 1, z},
 		{0, 0, 0, 1}
 	}};
+}
+
+inline mat4 translate(vec3 const& _dims)
+{
+	return translate(_dims.x, _dims.y, _dims.z);
 }
 
 inline mat4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
