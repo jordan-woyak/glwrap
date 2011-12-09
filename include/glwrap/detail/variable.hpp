@@ -147,31 +147,31 @@ struct glsl_var_type<basic_mat<T, R, C>>
 };
 
 template <>
-type_name_t get_type_name<texture_1d>()
+inline type_name_t get_type_name<texture_1d>()
 {
 	return "sampler1D";
 }
 
 template <>
-type_name_t get_type_name<texture_2d>()
+inline type_name_t get_type_name<texture_2d>()
 {
 	return "sampler2D";
 }
 
 template <>
-type_name_t get_type_name<texture_rectangle>()
+inline type_name_t get_type_name<texture_rectangle>()
 {
 	return "sampler2DRect";
 }
 
 template <>
-type_name_t get_type_name<texture_3d>()
+inline type_name_t get_type_name<texture_3d>()
 {
 	return "sampler3D";
 }
 
 template <>
-type_name_t get_type_name<texture_cube_map>()
+inline type_name_t get_type_name<texture_cube_map>()
 {
 	return "samplerCube";
 }
