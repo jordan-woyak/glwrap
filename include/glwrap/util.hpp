@@ -35,6 +35,32 @@ inline GLuint gen_return(glgenfunc f)
 namespace detail
 {
 
+template <typename T, typename Enable = void>
+struct is_gl_integral : std::false_type
+{};
+
+template <typename T>
+struct is_gl_integral<T, typename std::enable_if<
+		std::is_same<gl::byte_t, T>::value ||
+		std::is_same<gl::ubyte_t, T>::value ||
+		std::is_same<gl::short_t, T>::value ||
+		std::is_same<gl::ushort_t, T>::value ||
+		std::is_same<gl::int_t, T>::value ||
+		std::is_same<gl::uint_t, T>::value>::type> : std::true_type
+{};
+
+template <typename T, typename Enable = void>
+struct is_gl_floating_point : std::false_type
+{};
+
+// TODO: half_t
+template <typename T>
+struct is_gl_floating_point<T, typename std::enable_if<
+		//std::is_same<gl::half_t, T>::value ||
+		std::is_same<gl::float_t, T>::value ||
+		std::is_same<gl::double_t, T>::value>::type> : std::true_type
+{};
+
 template <typename T>
 GLenum data_type_enum();
 
@@ -74,10 +100,24 @@ inline GLenum data_type_enum<int_t>()
 	return GL_INT;
 }
 
+// TODO: half_t
+/*
+template <>
+inline GLenum data_type_enum<half_t>()
+{
+	return GL_HALF_FLOAT;
+}
+*/
 template <>
 inline GLenum data_type_enum<float_t>()
 {
 	return GL_FLOAT;
+}
+
+template <>
+inline GLenum data_type_enum<double_t>()
+{
+	return GL_DOUBLE;
 }
 
 template <typename T>
