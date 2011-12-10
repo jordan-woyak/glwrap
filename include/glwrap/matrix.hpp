@@ -138,9 +138,9 @@ inline mat4 rotate(float_t angle, float_t x, float_t y, float_t z)
 	}};
 }
 
-inline mat4 rotate(float_t _angle, vec3 const& _dims)
+inline mat4 rotate(float_t _angle, vec3 const& _axis)
 {
-	return rotate(_angle, _dims.x, _dims.y, _dims.z);
+	return rotate(_angle, _axis.x, _axis.y, _axis.z);
 }
 
 inline mat4 scale(float_t x, float_t y, float_t z)

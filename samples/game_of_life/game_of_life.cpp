@@ -20,7 +20,7 @@ int main()
 
 	// initial random grid state
 	{
-	std::uniform_int_distribution<gl::ubyte_t> distribution(0, 16);	// 1/8 alive
+	std::uniform_int_distribution<gl::ubyte_t> distribution(0, 15);
 	std::mt19937 rng;
 	// TODO: ugg
 	rng.seed((std::chrono::system_clock::now() - std::chrono::system_clock::time_point()).count());

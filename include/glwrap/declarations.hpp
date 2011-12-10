@@ -7,6 +7,8 @@
 namespace gl
 {
 
+class context;
+
 enum class shader_type : GLenum
 {
 	vertex = GL_VERTEX_SHADER,
@@ -33,6 +35,8 @@ enum class texture_type : GLenum
 	// TODO: 2d multisample [array]
 
 	texture_cube_map = GL_TEXTURE_CUBE_MAP,
+
+	texture_buffer = GL_TEXTURE_BUFFER,
 };
 
 template <texture_type T>
@@ -43,6 +47,7 @@ typedef texture<texture_type::texture_2d> texture_2d;
 typedef texture<texture_type::texture_3d> texture_3d;
 typedef texture<texture_type::texture_rectangle> texture_rectangle;
 typedef texture<texture_type::texture_cube_map> texture_cube_map;
+typedef texture<texture_type::texture_buffer> texture_buffer;
 
 
 }

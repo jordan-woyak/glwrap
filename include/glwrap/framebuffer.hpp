@@ -101,7 +101,7 @@ texture_attachment(texture<T>& _tex, int _level)
 	// TODO: don't capture globject reference
 	return attachment([&_tex, _level](GLenum _target, GLenum _attach_point)
 	{
-		glFramebufferTexture2D(_target, _attach_point, _tex.get_target(), _tex.native_handle(), _level);
+		glFramebufferTexture2D(_target, _attach_point, detail::get_texture_target<T>(), _tex.native_handle(), _level);
 	});
 };
 

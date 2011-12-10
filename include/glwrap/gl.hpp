@@ -15,6 +15,9 @@
 #include "matrix.hpp"
 #include "query.hpp"
 
+#include "buffer.hpp"
+#include "unpack_buffer.hpp"
+
 #include "sampler.hpp"
 #include "texture.hpp"
 
@@ -25,9 +28,5 @@
 
 #include "uniform_block.hpp"
 #include "transform_feedback.hpp"
-
-#include "buffer.hpp"
-#include "unpack_buffer.hpp"
-#include "texture_buffer.hpp"
 
 #include "context.hpp"

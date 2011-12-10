@@ -5,6 +5,8 @@
 #include "util.hpp"
 #include "unpack_buffer.hpp"
 #include "image_format.hpp"
+#include "buffer.hpp"
+#include "detail/texture.hpp"
 
 namespace gl
 {
@@ -78,35 +80,6 @@ private:
 	uint_t m_max_combined_texture_image_units;
 };
 
-namespace detail
-{
-
-template <texture_type T, typename Enable = void>
-struct texture_dims;
-
-template <>
-struct texture_dims<texture_type::texture_1d>
-{
-	static const int value = 1;
-};
-
-template <texture_type T>
-struct texture_dims<T, typename std::enable_if<
-	(T == texture_type::texture_2d) ||
-	(T == texture_type::texture_rectangle)
-	>::type>
-{
-	static const int value = 2;
-};
-
-template <>
-struct texture_dims<texture_type::texture_3d>
-{
-	static const int value = 3;
-};
-
-}
-
 template <texture_type Type>
 class texture : public globject
 {
@@ -179,9 +152,12 @@ public:
 		glTexParameteri(get_target(), GL_TEXTURE_MAX_LEVEL, _level);
 	}
 
-	static GLenum get_target();
-
 private:
+	static GLenum get_target()
+	{
+		return detail::get_texture_target<type>();
+	}
+
 	void bind() const
 	{
 		glBindTexture(get_target(), native_handle());
@@ -189,28 +165,47 @@ private:
 };
 
 template <>
-inline GLenum texture<texture_type::texture_1d>::get_target()
+class texture<texture_type::texture_buffer> : public globject
 {
-	return GL_TEXTURE_1D;
-}
+	friend class context;
 
-template <>
-inline GLenum texture<texture_type::texture_2d>::get_target()
-{
-	return GL_TEXTURE_2D;
-}
+public:
+	static const texture_type type = texture_type::texture_buffer;
+	static const int dimensions = detail::texture_dims<type>::value;
 
-template <>
-inline GLenum texture<texture_type::texture_rectangle>::get_target()
-{
-	return GL_TEXTURE_RECTANGLE;
-}
+	void swap(texture& _other)
+	{
+		globject::swap(_other);
+	}
 
-template <>
-inline GLenum texture<texture_type::texture_3d>::get_target()
-{
-	return GL_TEXTURE_3D;
-}
+	~texture()
+	{
+		auto const nh = native_handle();
+		glDeleteTextures(1, &nh);
+	}
+
+	explicit texture(context& _context)
+		: globject(gen_return(glGenTextures))
+	{}
+
+	template <typename T>
+	void bind_buffer(buffer<T> const& _buffer)
+	{
+		bind();
+		glTexBuffer(get_target(), _buffer.native_handle(), 0);
+	}
+
+private:
+	static GLenum get_target()
+	{
+		return detail::get_texture_target<type>();
+	}
+
+	void bind() const
+	{
+		glBindTexture(get_target(), native_handle());
+	}
+};
 
 }
 

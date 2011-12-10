@@ -6,7 +6,7 @@
 #include <boost/format.hpp>
 
 #include "../vector.hpp"
-#include "../texture.hpp"
+#include "../declarations.hpp"
 
 namespace gl
 {
