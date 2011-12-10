@@ -176,6 +176,12 @@ inline type_name_t get_type_name<texture_cube_map>()
 	return "samplerCube";
 }
 
+template <>
+inline type_name_t get_type_name<texture_buffer>()
+{
+	return "samplerBuffer";
+}
+
 template <typename T, typename Enable = void>
 struct index_count;
 

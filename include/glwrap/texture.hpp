@@ -192,7 +192,8 @@ public:
 	void bind_buffer(buffer<T> const& _buffer)
 	{
 		bind();
-		glTexBuffer(get_target(), _buffer.native_handle(), 0);
+		// TODO: don't hardcode datatype!
+		glTexBuffer(get_target(), GL_RGBA32F, _buffer.native_handle());
 	}
 
 private:
