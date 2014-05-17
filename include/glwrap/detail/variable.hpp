@@ -211,14 +211,13 @@ struct index_count<T, typename std::enable_if<
 	std::is_same<T, double_t>::value
 	, void>::type>
 {
-	static const std::size_t value = 1;
+	static const std::size_t value = 2;
 };
 
-// TODO: wrong!
 template <typename T, int D>
 struct index_count<basic_vec<T, D>>
 {
-	static const std::size_t value = index_count<T>::value * D;
+	static const std::size_t value = index_count<T>::value;
 };
 
 // TODO: wrong!
