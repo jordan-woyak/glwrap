@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include <GL/glew.h>
@@ -26,7 +27,7 @@ typedef double_t depth_t;
 typedef GLsizei sizei_t;
 
 // TODO: move this
-typedef void(*glgenfunc)(GLsizei, GLuint*);
+typedef decltype(glGenBuffers) glgenfunc;
 inline GLuint gen_return(glgenfunc f)
 {
 	GLuint name;
@@ -137,7 +138,6 @@ template <typename T>
 struct is_std_vector : std::false_type
 {};
 
-template <>
 template <typename U>
 struct is_std_vector<std::vector<U>> : std::true_type
 {};
@@ -146,7 +146,6 @@ template <typename T>
 struct is_std_array : std::false_type
 {};
 
-template <>
 template <typename U, std::size_t V>
 struct is_std_array<std::array<U, V>> : std::true_type
 {};

@@ -77,32 +77,32 @@ public:
 	typename detail::shader_io_type<T, P>::input_type
 	create_input(std::string const& _name)
 	{
-		m_inputs.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<P>(_name)));
-		return {std::prev(m_inputs.end())};
+		m_inputs.emplace_back(new detail::variable<P>(_name));
+		return std::prev(m_inputs.end());
 	}
 
 	template <typename P>
 	typename detail::shader_io_type<T, P>::output_type
 	create_output(std::string const& _name)
 	{
-		m_outputs.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<P>(_name)));
-		return {std::prev(m_outputs.end())};
+		m_outputs.emplace_back(new detail::variable<P>(_name));
+		return std::prev(m_outputs.end());
 	}
 
 	template <typename P>
 	typename detail::shader_io_type<T, P>::input_type
 	assume_input(std::string const& _name)
 	{
-		m_assumed_vars.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<P>(_name)));
-		return {std::prev(m_assumed_vars.end())};
+		m_assumed_vars.emplace_back(new detail::variable<P>(_name));
+		return std::prev(m_assumed_vars.end());
 	}
 
 	template <typename P>
 	typename detail::shader_io_type<T, P>::output_type
 	assume_output(std::string const& _name)
 	{
-		m_assumed_vars.push_back(std::unique_ptr<detail::variable_base>(new detail::variable<P>(_name)));
-		return {std::prev(m_assumed_vars.end())};
+		m_assumed_vars.emplace_back(new detail::variable<P>(_name));
+		return std::prev(m_assumed_vars.end());
 	}
 
 private:
@@ -113,14 +113,30 @@ private:
 
 		for (auto& var : m_inputs)
 		{
+#if 0
 			header += (boost::format("in %s %s;\n")
 				% var->get_type_name() % var->get_name()).str();
+#else
+			header += "in ";
+			header += var->get_type_name();
+			header += " ";
+			header += var->get_name();
+			header += ";\n";
+#endif
 		}
 
 		for (auto& var : m_outputs)
 		{
+#if 0
 			header += (boost::format("out %s %s;\n")
 				% var->get_type_name() % var->get_name()).str();
+#else
+			header += "out ";
+			header += var->get_type_name();
+			header += " ";
+			header += var->get_name();
+			header += ";\n";
+#endif
 		}
 
 		return header;

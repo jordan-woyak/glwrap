@@ -12,7 +12,6 @@ namespace detail
 template <typename T, typename Enable = void>
 struct vertex_attrib_pointer;
 
-template <>
 template <typename T>
 struct vertex_attrib_pointer<T, typename std::enable_if<detail::is_gl_floating_point<T>::value>::type>
 {
@@ -23,7 +22,6 @@ struct vertex_attrib_pointer<T, typename std::enable_if<detail::is_gl_floating_p
 	}
 };
 
-template <>
 template <typename T, int D>
 struct vertex_attrib_pointer<basic_vec<T, D>, typename std::enable_if<detail::is_gl_floating_point<T>::value>::type>
 {
@@ -34,7 +32,6 @@ struct vertex_attrib_pointer<basic_vec<T, D>, typename std::enable_if<detail::is
 	}
 };
 
-template <>
 template <typename T>
 struct vertex_attrib_pointer<T, typename std::enable_if<detail::is_gl_integral<T>::value>::type>
 {
@@ -44,7 +41,6 @@ struct vertex_attrib_pointer<T, typename std::enable_if<detail::is_gl_integral<T
 	}
 };
 
-template <>
 template <typename T, int D>
 struct vertex_attrib_pointer<basic_vec<T, D>, typename std::enable_if<detail::is_gl_integral<T>::value>::type>
 {

@@ -124,13 +124,13 @@ int main()
 
 	gl::float_t rotate = 0;
 
-	prog.set_uniform(diff_color_uni, {1, 1, 0.75, 1});
-	prog.set_uniform(spec_color_uni, {1, 1, 1, 0.1});
-	prog.set_uniform(ambient_uni, {1, 1, 1, 0.2});
+	prog.set_uniform(diff_color_uni, {1, 1, 0.75f, 1});
+	prog.set_uniform(spec_color_uni, {1, 1, 1, 0.1f});
+	prog.set_uniform(ambient_uni, {1, 1, 1, 0.2f});
 	prog.set_uniform(light_dir_uni, {-1, 1, -1});
 	prog.set_uniform(shininess_uni, 5);
 
-	prog.set_uniform(mat_color_uni, {0.5, 0.25, 0.125, 1});
+	prog.set_uniform(mat_color_uni, {0.5f, 0.25f, 0.125f, 1});
 
 	prog.set_uniform(projection_uni, {});
 
@@ -143,8 +143,8 @@ int main()
 	glc.use_element_array(indbuf);
 	glc.use_primitive_mode(gl::primitive::triangles);
 
-	auto const pre_rotate = gl::scale(8, 8, 8) * gl::translate(0.2, -0.8, 0);
-	auto const post_rotate = gl::rotate(0.2, 1, 0, 0) *	gl::translate(0, 0, -2.5);
+	auto const pre_rotate = gl::scale(8, 8, 8) * gl::translate(0.2f, -0.8f, 0);
+	auto const post_rotate = gl::rotate(0.2f, 1, 0, 0) *	gl::translate(0, 0, -2.5f);
 
 	dsp.set_display_func([&]
 	{
@@ -156,11 +156,11 @@ int main()
 
 		prog.set_uniform(modelview_uni, modelview);
 
-		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
-			rotate -= 3.14 * 2;
+		if ((rotate += 3.14f * 2 / 360) >= 3.14 * 2)
+			rotate -= 3.14f * 2;
 
-		glc.clear_depth(1.0);
-		glc.clear_color({0.2, 0.2, 0.2, 1});
+		glc.clear_depth(1.0f);
+		glc.clear_color({0.2f, 0.2f, 0.2f, 1});
 		glc.draw_elements(0, indices.size());
 	});
 

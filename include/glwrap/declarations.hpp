@@ -1,8 +1,10 @@
 #pragma once
 
-//#include <GL/glut.h>
+#pragma comment(lib, "glew32s.lib")
+#define GLEW_STATIC
 #include <GL/glew.h>
-#include <GL/gl.h>
+#define FREEGLUT_STATIC
+#include <GL/glut.h>
 
 namespace gl
 {

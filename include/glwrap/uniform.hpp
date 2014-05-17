@@ -24,10 +24,11 @@ class uniform_variable
 	template <typename T>
 	friend class gl::uniform;
 
-private:
+public:
+//private:
 	template <typename T>
-	uniform_variable(T&& _var)
-		: m_var(new T(_var))
+	uniform_variable(detail::variable<T>&& _var)
+		: m_var(new detail::variable<T>(_var))
 	{}
 
 	GLuint get_location() const

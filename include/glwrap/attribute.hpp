@@ -49,7 +49,7 @@ public:
 	attribute_location<T> allot()
 	{
 		attribute_location<T> ind(m_current_index);
-		m_current_index += detail::glslvar::get_index_count<T>();
+		m_current_index += detail::glslvar::index_count<T>::value;
 
 		if (m_current_index > m_max_vertex_attribs)
 			throw exception();

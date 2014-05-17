@@ -12,7 +12,6 @@ struct uniform_value
 	typedef T type;
 };
 
-template <>
 template <texture_type T>
 struct uniform_value<texture<T>>
 {
@@ -34,7 +33,6 @@ void set_uniform_value(GLuint _location, T const& _value)
 	set_uniform<T>::set(_location, _value);
 }
 
-template <>
 template <typename T, std::size_t S>
 struct set_uniform<std::array<T, S>>
 {
@@ -44,7 +42,6 @@ struct set_uniform<std::array<T, S>>
 	}
 };
 
-template <>
 template <texture_type T>
 struct set_uniform<texture_unit<texture<T>>>
 {

@@ -175,28 +175,28 @@ inline mat4 translate(vec3 const& _dims)
 	return translate(_dims.x, _dims.y, _dims.z);
 }
 
-inline mat4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
+inline mat4 ortho(float_t left, float_t right, float_t top, float_t bottom, float_t _near, float_t _far)
 {
 	return
 	{{
 		{2 / (right - left), 0, 0, (right + left) / (left - right)},
 		{0, 2 / (top - bottom), 0, (top + bottom) / (bottom - top)},
-		{0, 0, 2 / (near - far), (far + near) / (near - far)},
+		{0, 0, 2 / (_near - _far), (_far + _near) / (_near - _far)},
 		{0, 0, 0, 1}
 	}};
 }
 
-inline mat4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t near, float_t far)
+inline mat4 frustum(float_t left, float_t right, float_t top, float_t bottom, float_t _near, float_t _far)
 {
 	auto const a = (right + left) / (right - left);
 	auto const b = (top + bottom) / (top - bottom);
-	auto const c = (far + near) / (far - near);
-	auto const d = 2 * far * near / (far - near);
+	auto const c = (_far + _near) / (_far - _near);
+	auto const d = 2 * _far * _near / (_far - _near);
 
 	return
 	{{
-		{2 * near / (right - left), 0, a, 0},
-		{0, 2 * near / (top - bottom), b, 0},
+		{2 * _near / (right - left), 0, a, 0},
+		{0, 2 * _near / (top - bottom), b, 0},
 		{0, 0, c, d},
 		{0, 0, -1, 0}
 	}};

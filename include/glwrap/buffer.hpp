@@ -35,7 +35,6 @@ struct actual_buffer_type
 	typedef T type;
 };
 
-template <>
 template <typename T>
 struct actual_buffer_type<gl::uniform_block_align<T>>
 {
@@ -52,7 +51,6 @@ struct actual_element_size
 	}
 };
 
-template <>
 template <typename T>
 struct actual_element_size<gl::uniform_block_align<T>>
 {
@@ -211,6 +209,11 @@ public:
 		{
 			m_ptr = reinterpret_cast<T*>(reinterpret_cast<char*>(m_ptr) + _offset * m_stride);
 			return *this;
+		}
+
+		friend iterator operator+(iterator _lhs, std::size_t _offset)
+		{
+			return _lhs += _offset;
 		}
 
 		value_type& operator*() const

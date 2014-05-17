@@ -3,7 +3,8 @@
 #include <string>
 #include <functional>
 
-#include <boost/format.hpp>
+//#include <boost/format.hpp>
+#include <sstream>
 
 #include "../vector.hpp"
 #include "../declarations.hpp"
@@ -121,18 +122,22 @@ inline const char* vec_prefix<double_t>()
 	return "d";
 }
 
-template <>
 template <typename T, int D>
 struct glsl_var_type<basic_vec<T, D>>
 {
 	static type_name_t name()
 	{
+#if 0
 		return (boost::format("%svec%d") % vec_prefix<T>() % D).str();
+#else
+		std::ostringstream ss;
+		ss << vec_prefix<T>() << "vec" << D;
+		return ss.str();
+#endif
 	}
 };
 
 // matrix
-template <>
 template <typename T, int R, int C>
 struct glsl_var_type<basic_mat<T, R, C>>
 {
@@ -142,7 +147,13 @@ struct glsl_var_type<basic_mat<T, R, C>>
 
 	static type_name_t name()
 	{
+#if 0
 		return (boost::format("%smat%dx%d") % vec_prefix<T>() % R % C).str();
+#else
+		std::ostringstream ss;
+		ss << vec_prefix<T>() << "mat" << R << 'x' << C;
+		return ss.str();
+#endif
 	}
 };
 
@@ -186,12 +197,6 @@ template <typename T, typename Enable = void>
 struct index_count;
 
 template <typename T>
-constexpr std::size_t get_index_count()
-{
-	return index_count<T>::value;
-}
-
-template <typename T>
 struct index_count<T, typename std::enable_if<
 	std::is_same<T, int_t>::value ||
 	std::is_same<T, uint_t>::value ||
@@ -201,24 +206,26 @@ struct index_count<T, typename std::enable_if<
 	static const std::size_t value = 1;
 };
 
-template <>
-inline std::size_t get_index_count<double_t>()
+template <typename T>
+struct index_count<T, typename std::enable_if<
+	std::is_same<T, double_t>::value
+	, void>::type>
 {
-	return 2;	// TODO: correct?
-}
+	static const std::size_t value = 1;
+};
 
-template <>
+// TODO: wrong!
 template <typename T, int D>
 struct index_count<basic_vec<T, D>>
 {
-	static const std::size_t value = get_index_count<T>() * D;
+	static const std::size_t value = index_count<T>::value * D;
 };
 
-template <>
+// TODO: wrong!
 template <typename T, int R, int C>
 struct index_count<basic_mat<T, R, C>>
 {
-	static const std::size_t value = get_index_count<T>() * R * C;
+	static const std::size_t value = index_count<T>::value * R * C;
 };
 
 }

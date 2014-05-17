@@ -1,6 +1,8 @@
 
 #pragma once
 
+#define GLWRAP_NO_SFML
+
 #ifndef GLWRAP_NO_SFML
 #include <SFML/Graphics.hpp>
 #endif
@@ -38,6 +40,11 @@ public:
 #endif
 	{
 #ifndef GLWRAP_FAKE_CONTEXT
+		int dummy = 0;
+		glutInit(&dummy, 0);
+		//glutInitContextVersion(3, 1);
+		//glutInitContextProfile(GLUT_CORE_PROFILE);
+
 		glewInit();
 #endif
 	}

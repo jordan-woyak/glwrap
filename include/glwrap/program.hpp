@@ -2,7 +2,8 @@
 
 #include <list>
 
-#include <boost/format.hpp>
+//#include <boost/format.hpp>
+#include <sstream>
 
 #include "uniform.hpp"
 #include "shader.hpp"
@@ -33,12 +34,38 @@ public:
 		std::string uniform_header;
 		for (auto& uni : m_uniforms)
 		{
+			uniform_header += "uniform ";
+			uniform_header += uni.get_variable().get_type_name();
+			uniform_header += ' ';
+			uniform_header += uni.get_variable().get_name();
+			uniform_header += ";\n";
+#if 0
 			uniform_header += (boost::format("uniform %s %s;\n")
 				% uni.get_variable().get_type_name() % uni.get_variable().get_name()).str();
+#endif
 		}
 
 		for (auto& block : m_uniform_blocks)
 		{
+			uniform_header += "layout(std140) uniform ";
+			uniform_header += " {\n";
+			uniform_header += block.get_name();
+
+			// TODO: actually look at the offset value!!!
+			// currently super broken, not handling padding for shit
+			for (auto& var : block.m_members)
+			{
+				uniform_header += "uniform ";
+				uniform_header += var.second->get_type_name();
+				uniform_header += " ";
+				uniform_header += var.second->get_name();
+				uniform_header += ";\n";
+			}
+
+			// TODO: allow scoped block
+			uniform_header += "};\n";
+
+#if 0
 			uniform_header += (boost::format("layout(std140) uniform %s {\n") % block.get_name()).str();
 
 			// TODO: actually look at the offset value!!!
@@ -49,6 +76,7 @@ public:
 
 			// TODO: allow scoped block
 			uniform_header += "};\n";
+#endif
 		}
 
 		// vertex shader
@@ -136,7 +164,7 @@ public:
 	template <typename T>
 	uniform<T> create_uniform(const std::string& _name)
 	{
-		m_uniforms.push_back(detail::uniform_variable(detail::variable<T>(_name)));
+		m_uniforms.emplace_back(detail::variable<T>(_name));
 		return uniform<T>(std::prev(m_uniforms.end()));
 	}
 
