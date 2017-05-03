@@ -31,7 +31,7 @@ int main()
 	std::vector<FooVertex> vertices;
 	std::vector<gl::uint_t> indices;
 
-	ply::load("../bun.ply", vert_fmt, vertices, indices);
+	ply::load("bun.ply", vert_fmt, vertices, indices);
 
 	// allot generic vetex attrib locations
 	gl::attribute_location_alloter locs(glc);
@@ -98,6 +98,9 @@ int main()
 	prog.attach(fshad);
 	prog.compile();
 
+	std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
+	std::cout << "fshad log:\n" << fshad.get_log() << std::endl;
+
 	// bind attribute and fragdata location before linking
 	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
 
@@ -106,8 +109,8 @@ int main()
 
 	prog.link();
 
-	//if (!prog.is_good())
-		std::cout << "program log:\n" << prog.get_log() << std::endl;
+	std::cout << "program log:\n" << prog.get_log() << std::endl;
+	std::cout << "program good: " << prog.is_good() << std::endl;
 
 	// load vertex data
 	gl::buffer<FooVertex> verbuf(glc);

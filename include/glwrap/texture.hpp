@@ -8,6 +8,8 @@
 #include "buffer.hpp"
 #include "detail/texture.hpp"
 
+#include "sampler.hpp"
+
 namespace gl
 {
 
@@ -80,6 +82,32 @@ private:
 	uint_t m_max_combined_texture_image_units;
 };
 
+namespace texture_parameter
+{
+
+template <typename T>
+struct parameter_base
+{
+	//typedef T value_type;
+};
+
+struct base_level : parameter_base<int_t>
+{};
+
+struct wrap_s : parameter_base<int_t>
+{};
+
+}
+
+template <typename T, typename V>
+void set_texture_parameter(V);
+
+template <>
+void set_texture_parameter<texture_parameter::wrap_s, wrap_mode>(wrap_mode _mode)
+{
+
+}
+
 template <texture_type Type>
 class texture : public globject
 {
@@ -127,6 +155,7 @@ public:
 	// mipmap vs. mipmaps ?
 	void generate_mipmap()
 	{
+		bind();
 		glGenerateMipmap(get_target());
 	}
 
@@ -145,11 +174,50 @@ public:
 		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_A, static_cast<GLint>(_a));
 	}
 
+	template <typename T>
+	void set_parameter(T _param, typename T::value_type _val);
+
 	// TODO: this should be automatic?
 	void set_max_level(int_t _level)
 	{
+		set_parameter_raw(GL_TEXTURE_MAX_LEVEL, _level);
+	}
+
+	void set_parameter_raw(GLenum _pname, int_t _val)
+	{
 		bind();
-		glTexParameteri(get_target(), GL_TEXTURE_MAX_LEVEL, _level);
+		glTexParameteri(get_target(), _pname, _val);
+	}
+
+	void set_parameter_raw(GLenum _pname, float_t _val)
+	{
+		bind();
+		glTexParameterf(get_target(), _pname, _val);
+	}
+
+	void set_min_filter(texture_filter _mode)
+	{
+		set_parameter_raw(GL_TEXTURE_MIN_FILTER, static_cast<int>(_mode));
+	}
+
+	void set_mag_filter(texture_filter _mode)
+	{
+		set_parameter_raw(GL_TEXTURE_MAG_FILTER, static_cast<int>(_mode));
+	}
+
+	void set_wrap_s(wrap_mode _mode)
+	{
+		set_parameter_raw(GL_TEXTURE_WRAP_S, static_cast<int>(_mode));
+	}
+
+	void set_wrap_t(wrap_mode _mode)
+	{
+		set_parameter_raw(GL_TEXTURE_WRAP_T, static_cast<int>(_mode));
+	}
+
+	void set_wrap_r(wrap_mode _mode)
+	{
+		set_parameter_raw(GL_TEXTURE_WRAP_R, static_cast<int>(_mode));
 	}
 
 private:

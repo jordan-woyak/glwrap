@@ -38,6 +38,23 @@ inline GLuint gen_return(glgenfunc f)
 namespace detail
 {
 
+struct exception
+{
+	GLenum error_flag;
+};
+
+void check_error()
+{
+	GLenum const err = glGetError();
+
+	if (GL_NO_ERROR != err)
+	{
+		exception ex;
+		ex.error_flag = err;
+		throw ex;
+	}
+}
+
 template <typename T, typename Enable = void>
 struct is_gl_integral : std::false_type
 {};

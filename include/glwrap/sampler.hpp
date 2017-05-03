@@ -41,44 +41,54 @@ public:
 		glDeleteSamplers(1, &nh);
 	}
 
+	void set_parameter_raw(GLenum _pname, int_t _val)
+	{
+		glSamplerParameteri(native_handle(), _pname, _val);
+	}
+
+	void set_parameter_raw(GLenum _pname, float_t _val)
+	{
+		glSamplerParameterf(native_handle(), _pname, _val);
+	}
+
 	void set_wrap_s(wrap_mode _mode)
 	{
-		glSamplerParameteri(native_handle(), GL_TEXTURE_WRAP_S, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_WRAP_S, static_cast<int>(_mode));
 	}
 
 	void set_wrap_t(wrap_mode _mode)
 	{
-		glSamplerParameteri(native_handle(), GL_TEXTURE_WRAP_T, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_WRAP_T, static_cast<int>(_mode));
 	}
 
 	void set_wrap_r(wrap_mode _mode)
 	{
-		glSamplerParameteri(native_handle(), GL_TEXTURE_WRAP_R, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_WRAP_R, static_cast<int>(_mode));
 	}
 
 	void set_min_filter(texture_filter _mode)
 	{
-		glSamplerParameteri(native_handle(), GL_TEXTURE_MIN_FILTER, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_MIN_FILTER, static_cast<int>(_mode));
 	}
 
 	void set_mag_filter(texture_filter _mode)
 	{
-		glSamplerParameteri(native_handle(), GL_TEXTURE_MAG_FILTER, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_MAG_FILTER, static_cast<int>(_mode));
 	}
 
 	void set_min_lod(float_t _lod)
 	{
-		glSamplerParameterf(native_handle(), GL_TEXTURE_MIN_LOD, _lod);
+		set_parameter_raw(GL_TEXTURE_MIN_LOD, _lod);
 	}
 
 	void set_max_lod(float_t _lod)
 	{
-		glSamplerParameterf(native_handle(), GL_TEXTURE_MAX_LOD, _lod);
+		set_parameter_raw(GL_TEXTURE_MAX_LOD, _lod);
 	}
 
 	void set_lod_bias(float_t _bias)
 	{
-		glSamplerParameterf(native_handle(), GL_TEXTURE_LOD_BIAS, _bias);
+		set_parameter_raw(GL_TEXTURE_LOD_BIAS, _bias);
 	}
 
 	// TODO: GL_TEXTURE_BORDER_COLOR

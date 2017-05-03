@@ -87,6 +87,7 @@ public:
 
 			std::array<const char*, 3> shad_full = {{shad_header.c_str(), uniform_header.c_str(), shad_src.c_str()}};
 			glShaderSource(m_vshad->native_handle(), shad_full.size(), shad_full.data(), 0);
+			glCompileShader(m_vshad->native_handle());
 		}
 
 		// fragment shader
@@ -97,6 +98,7 @@ public:
 
 			std::array<const char*, 3> shad_full = {{shad_header.c_str(), uniform_header.c_str(), shad_src.c_str()}};
 			glShaderSource(m_fshad->native_handle(), shad_full.size(), shad_full.data(), 0);
+			glCompileShader(m_fshad->native_handle());
 		}
 	}
 

@@ -9,6 +9,14 @@
 #include "../bunny/ply.hpp"
 
 #include "glwrap/gl.hpp"
+#include "glwrap/new/gl.hpp"
+
+#include <SFML/Graphics.hpp>
+
+gl::ivec2 getSFImageSize(const sf::Image& img)
+{
+	return gl::ivec2(img.getSize().x, img.getSize().y);
+}
 
 int main()
 {
@@ -32,17 +40,39 @@ int main()
 	//boost::gil::png_read_image("monkey.png", texdata);
 
 	sf::Image texdata;
-	if (texdata.LoadFromFile("../color.png"))
-		tex_color.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba,
-		{texdata.GetWidth(), texdata.GetHeight()}), gl::base_format::rgb);
+	if (texdata.loadFromFile("color.png"))
+		tex_color.assign(gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba,
+		getSFImageSize(texdata)), gl::base_format::rgb);
+	else
+		std::cerr << "failed to load color.png" << std::endl;
 
-	if (texdata.LoadFromFile("../spec.png"))
-		tex_spec.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba,
-		{texdata.GetWidth(), texdata.GetHeight()}), gl::base_format::r);
+	if (texdata.loadFromFile("spec.png"))
+		tex_spec.assign(gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba,
+		getSFImageSize(texdata)), gl::base_format::r);
 
-	if (texdata.LoadFromFile("../normal.png"))
-		tex_normal.assign(gl::unpack(texdata.GetPixelsPtr(), gl::pixel_format::rgba,
-		{texdata.GetWidth(), texdata.GetHeight()}), gl::base_format::rgb);
+	if (texdata.loadFromFile("normal.png"))
+		tex_normal.assign(gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba,
+		getSFImageSize(texdata)), gl::base_format::rgb);
+
+	tex_color.generate_mipmap();
+	tex_spec.generate_mipmap();
+	tex_normal.generate_mipmap();
+
+	//tex_color.set_min_filter(gl::texture_filter::linear);
+	//tex_color.set_mag_filter(gl::texture_filter::linear);
+
+	tex_color.generate_mipmap();
+	glnew::detail::tex_parameter<false>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR, glm::vec4());
+	glnew::detail::get_tex_parameter<false, glm::vec4>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR);
+
+	tex_spec.set_min_filter(gl::texture_filter::linear);
+	tex_spec.set_mag_filter(gl::texture_filter::linear);
+
+	tex_normal.set_min_filter(gl::texture_filter::linear);
+	tex_normal.set_mag_filter(gl::texture_filter::linear);
+	
+	//tex_color.set_wrap_s(gl::wrap_mode::clamp_to_edge);
+	//tex_color.set_wrap_t(gl::wrap_mode::clamp_to_edge);
 
 	// nonsense to load ply
 	ply::vertex_format<FooVertex> vert_fmt;
@@ -58,7 +88,7 @@ int main()
 	std::vector<FooVertex> vertices;
 	std::vector<gl::uint_t> indices;
 
-	ply::load("../model.ply", vert_fmt, vertices, indices);
+	ply::load("model.ply", vert_fmt, vertices, indices);
 
 	// allot generic vetex attrib locations
 	gl::attribute_location_alloter locs(glc);
@@ -122,7 +152,7 @@ int main()
 			//"vec3 adjusted_normal = normalize(vertex_normal + (texture2D(tex_normal, tpos).rgb * 2 - 1));"
 
 			"vec4 mat_color = texture2D(tex_color, tpos);"
-
+			
 			"float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);"
 			"vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;"
 
@@ -142,6 +172,9 @@ int main()
 	prog.attach(vshad);
 	prog.attach(fshad);
 	prog.compile();
+
+	std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
+	std::cout << "fshad log:\n" << fshad.get_log() << std::endl;
 
 	// bind attribute and fragdata location before linking
 	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
@@ -210,9 +243,17 @@ int main()
 
 		glc.clear_depth(1.0);
 		glc.clear_color({0.2, 0.2, 0.2, 1});
+
+		//glnew::context glnc;
+
+		//auto const val = glnc.clear_color().get().r;
+		//auto const val = glnc.parameter<glnew::detail::parameter::clear_color>().get().r;
+		
+		//std::cout << val << std::endl;
+		
 		glc.draw_elements(0, indices.size());
 	});
-
+	
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);

@@ -73,6 +73,26 @@ public:
 		return m_source;
 	}
 
+	std::string get_log() const
+	{
+		//glValidateProgram(native_handle());
+
+		GLint log_length;
+		glGetShaderiv(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
+
+		std::string log;
+
+		if (log_length)
+		{
+			std::vector<GLchar> log_buffer(log_length);
+			glGetShaderInfoLog(native_handle(), log_length, NULL, log_buffer.data());
+
+			log.assign(log_buffer.begin(), log_buffer.end());
+		}
+
+		return log;
+	}
+
 	template <typename P>
 	typename detail::shader_io_type<T, P>::input_type
 	create_input(std::string const& _name)
@@ -109,7 +129,7 @@ private:
 	std::string get_header() const
 	{
 		// TODO: allow setting version
-		std::string header("#version 330\n");
+		std::string header("#version 130\n");
 
 		for (auto& var : m_inputs)
 		{

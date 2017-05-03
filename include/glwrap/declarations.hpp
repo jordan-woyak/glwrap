@@ -1,6 +1,9 @@
 #pragma once
 
+#if defined(_MSC_VER)
 #pragma comment(lib, "glew32s.lib")
+#endif
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #define FREEGLUT_STATIC
