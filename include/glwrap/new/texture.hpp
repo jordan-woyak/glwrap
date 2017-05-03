@@ -7,6 +7,8 @@ namespace __GLWRAP_NAMESPACE__
 namespace detail
 {
 
+
+
 //
 // gl_get_tex_parameter
 //
@@ -57,7 +59,7 @@ void gl_get_tex_parameter<true, GLuint>(GLenum _target, GLenum _pname, GLuint* _
 
 template <bool I, typename T>
 __GLWRAP_FUNC_DECL__
-typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+typename std::enable_if<std::is_scalar<T>::value, T>::type
 get_tex_parameter(GLenum _target, GLenum _pname)
 {
 		T ret;
@@ -145,7 +147,7 @@ void gl_tex_parameter<true, const GLuint*>(GLenum _target, GLenum _pname, const 
 
 template <bool I, typename T>
 __GLWRAP_FUNC_DECL__
-typename std::enable_if<std::is_arithmetic<T>::value>::type
+typename std::enable_if<std::is_scalar<T>::value>::type
 tex_parameter(GLenum _target, GLenum _pname, T _param)
 {
 	gl_tex_parameter<I>(_target, _pname, _param);
@@ -157,8 +159,7 @@ __GLWRAP_FUNC_DECL__
 typename std::enable_if<detail::is_vec<T>::value>::type
 tex_parameter(GLenum _target, GLenum _pname, const T& _param)
 {
-	gl_tex_parameter<I>(_target, _pname, glm::value_ptr(_param));
-	check_unlikely_error();
+	tex_parameter<I>(_target, _pname, glm::value_ptr(_param));
 };
 
 }
