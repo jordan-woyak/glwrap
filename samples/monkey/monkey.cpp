@@ -9,7 +9,6 @@
 #include "../bunny/ply.hpp"
 
 #include "glwrap/gl.hpp"
-#include "glwrap/new/gl.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -58,12 +57,12 @@ int main()
 	tex_spec.generate_mipmap();
 	tex_normal.generate_mipmap();
 
-	//tex_color.set_min_filter(gl::texture_filter::linear);
-	//tex_color.set_mag_filter(gl::texture_filter::linear);
+	tex_color.set_min_filter(gl::texture_filter::linear);
+	tex_color.set_mag_filter(gl::texture_filter::linear);
 
-	tex_color.generate_mipmap();
-	glnew::detail::tex_parameter<false>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR, glm::vec4());
-	glnew::detail::get_tex_parameter<false, glm::vec4>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR);
+	//tex_color.generate_mipmap();
+	//gl::detail::tex_parameter<false>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR, glm::vec4());
+	//gl::detail::get_tex_parameter<false, glm::vec4>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR);
 
 	tex_spec.set_min_filter(gl::texture_filter::linear);
 	tex_spec.set_mag_filter(gl::texture_filter::linear);
