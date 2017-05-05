@@ -33,30 +33,4 @@ struct is_vec<glm::tvec4<T, P>>
 
 }
 
-struct exception
-{
-	GLenum error_flag;
-};
-
-GLWRAP_FUNC_DECL
-void
-check_error()
-{
-	GLenum const err = glGetError();
-
-	if (GL_NO_ERROR != err)
-	{
-		exception ex;
-		ex.error_flag = err;
-		throw ex;
-	}
-}
-
-GLWRAP_FUNC_DECL
-void
-check_unlikely_error()
-{
-	//check_error();
-}
-
 }

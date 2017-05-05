@@ -55,6 +55,13 @@ void check_error()
 	}
 }
 
+GLWRAP_FUNC_DECL
+void
+check_unlikely_error()
+{
+	//check_error();
+}
+
 template <typename T, typename Enable = void>
 struct is_gl_integral : std::false_type
 {};
