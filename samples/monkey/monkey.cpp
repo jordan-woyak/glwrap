@@ -227,18 +227,18 @@ int main()
 	glc.use_element_array(indbuf);
 	glc.use_primitive_mode(gl::primitive::triangles);
 
-	auto const post_rotate = gl::translate(0, 0, -3);
+	auto const post_rotate = gl::translate(0.f, 0.f, -3.f);
 
 	dsp.set_display_func([&]
 	{
 		// rotating projection
-		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) * post_rotate *
-			gl::perspective(45, (float_t)window_size.x / window_size.y, 1, 100);
+		gl::mat4 modelview = gl::rotate(rotate, 0.f, 1.f, 0.f) * post_rotate *
+			gl::perspective(glm::half_pi<float_t>(), (float_t)window_size.x / window_size.y, 1.f, 100.f);
 
 		prog.set_uniform(modelview_uni, modelview);
 
-		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
-			rotate -= 3.14 * 2;
+		//if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
+			//rotate -= 3.14 * 2;
 
 		glc.clear_depth(1.0);
 		glc.clear_color({0.2, 0.2, 0.2, 1});

@@ -9,6 +9,8 @@
 #include "../vector.hpp"
 #include "../declarations.hpp"
 
+#include "traits.hpp"
+
 namespace gl
 {
 namespace detail
@@ -20,7 +22,8 @@ typedef std::string type_name_t;
 
 // glsl variable name suffix
 template <typename T, typename Enable = void>
-struct glsl_var_suffix;
+struct glsl_var_suffix
+{};
 
 template <typename T>
 type_name_t get_type_suffix()
@@ -33,13 +36,15 @@ struct glsl_var_suffix<T, std::enable_if<std::is_array<T>::value>>
 {
 	static type_name_t suffix()
 	{
+		// TODO: ??
 		return "";
 	}
 };
 
 // glsl variable type name
 template <typename T, typename Enable = void>
-struct glsl_var_type;
+struct glsl_var_type
+{};
 
 template <typename T>
 type_name_t get_type_name()
@@ -90,7 +95,11 @@ inline type_name_t get_type_name<double_t>()
 // vectors
 
 template <typename T>
-const char* vec_prefix();
+const char* vec_prefix()
+{
+	static_assert(false && std::is_void<T>::value, "Unsupported vector type");
+	return nullptr;
+}
 
 template <>
 inline const char* vec_prefix<bool_t>()
@@ -122,36 +131,47 @@ inline const char* vec_prefix<double_t>()
 	return "d";
 }
 
-template <typename T, int D>
-struct glsl_var_type<basic_vec<T, D>>
+template <typename T>
+struct glsl_var_type<T, typename std::enable_if<detail::is_vec<T>::value>::type>
 {
+private:
+	typedef typename detail::mat_traits<T>::value_type value_type;
+
+public:
 	static type_name_t name()
 	{
+		int const dimensions = detail::vec_traits<T>::dimensions;
 #if 0
-		return (boost::format("%svec%d") % vec_prefix<T>() % D).str();
+		return (boost::format("%svec%d") % vec_prefix<value_type>() % dimensions).str();
 #else
 		std::ostringstream ss;
-		ss << vec_prefix<T>() << "vec" << D;
+		ss << vec_prefix<value_type>() << "vec" << dimensions;
 		return ss.str();
 #endif
 	}
 };
 
-// matrix
-template <typename T, int R, int C>
-struct glsl_var_type<basic_mat<T, R, C>>
+template <typename T>
+struct glsl_var_type<T, typename std::enable_if<detail::is_mat<T>::value>::type>
 {
-	static_assert(std::is_same<T, float_t>::value ||
-		std::is_same<T, double_t>::value,
-		"only float and double matrices");
+private:
+	typedef typename detail::mat_traits<T>::value_type value_type;
+
+public:
+	static_assert(std::is_same<value_type, float_t>::value ||
+		std::is_same<value_type, double_t>::value,
+		"only float and double matrices supported");
 
 	static type_name_t name()
 	{
+		int const cols = detail::mat_traits<T>::cols;
+		int const rows = detail::mat_traits<T>::rows;
+		
 #if 0
-		return (boost::format("%smat%dx%d") % vec_prefix<T>() % R % C).str();
+		return (boost::format("%smat%dx%d") % vec_prefix<value_type>() % cols % rows).str();
 #else
 		std::ostringstream ss;
-		ss << vec_prefix<T>() << "mat" << R << 'x' << C;
+		ss << vec_prefix<value_type>() << "mat" << cols << 'x' << rows;
 		return ss.str();
 #endif
 	}
@@ -193,8 +213,10 @@ inline type_name_t get_type_name<texture_buffer>()
 	return "samplerBuffer";
 }
 
+// TODO: rename
 template <typename T, typename Enable = void>
-struct index_count;
+struct index_count
+{};
 
 template <typename T>
 struct index_count<T, typename std::enable_if<
@@ -214,17 +236,25 @@ struct index_count<T, typename std::enable_if<
 	static const std::size_t value = 2;
 };
 
-template <typename T, int D>
-struct index_count<basic_vec<T, D>>
+template <typename T>
+struct index_count<T, typename std::enable_if<detail::is_vec<T>::value>::type>
 {
-	static const std::size_t value = index_count<T>::value;
+private:
+	typedef typename detail::vec_traits<T>::value_type value_type;
+
+public:
+	static const std::size_t value = index_count<value_type>::value;
 };
 
-// TODO: wrong!
-template <typename T, int R, int C>
-struct index_count<basic_mat<T, R, C>>
+template <typename T>
+struct index_count<T, typename std::enable_if<detail::is_mat<T>::value>::type>
 {
-	static const std::size_t value = index_count<T>::value * R * C;
+private:
+	typedef typename detail::vec_traits<T>::value_type value_type;
+	
+public:
+	// TODO: which is correct, cols or rows?
+	static const std::size_t value = index_count<value_type>::value * detail::mat_traits<T>::cols;
 };
 
 }

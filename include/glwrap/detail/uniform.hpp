@@ -25,7 +25,8 @@ struct uniform_value<T, typename std::enable_if<std::extent<T>::value>::type>
 };
 
 template <typename T, std::size_t Count = 1>
-struct set_uniform;
+struct set_uniform
+{};
 
 template <typename T>
 void set_uniform_value(GLuint _location, T const& _value)
@@ -69,34 +70,34 @@ inline void set_uniform_value<int_t>(GLuint _location, const int_t& _value)
 template <>
 inline void set_uniform_value<vec2>(GLuint _location, const vec2& _value)
 {
-	glUniform2fv(_location, 1, _value.data());
+	glUniform2fv(_location, 1, glm::value_ptr(_value));
 }
 
 // vec3
 template <>
 inline void set_uniform_value<vec3>(GLuint _location, const vec3& _value)
 {
-	glUniform3fv(_location, 1, _value.data());
+	glUniform3fv(_location, 1, glm::value_ptr(_value));
 }
 
 // vec4
 template <>
 inline void set_uniform_value<vec4>(GLuint _location, const vec4& _value)
 {
-	glUniform4fv(_location, 1, _value.data());
+	glUniform4fv(_location, 1, glm::value_ptr(_value));
 }
 
 // matrix
 template <>
 inline void set_uniform_value<mat3>(GLuint _location, const mat3& _value)
 {
-	glUniformMatrix3fv(_location, 1, GL_TRUE, _value.data());
+	glUniformMatrix3fv(_location, 1, GL_FALSE, glm::value_ptr(_value));
 }
 
 template <>
 inline void set_uniform_value<mat4>(GLuint _location, const mat4& _value)
 {
-	glUniformMatrix4fv(_location, 1, GL_TRUE, _value.data());
+	glUniformMatrix4fv(_location, 1, GL_FALSE, glm::value_ptr(_value));
 }
 
 }

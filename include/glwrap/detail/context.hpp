@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace __GLWRAP_NAMESPACE__
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail
@@ -81,7 +81,7 @@ struct parameter_getter<T, typename std::enable_if<detail::is_vec<T>::value>::ty
 //
 
 template <typename T>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 T get_parameter(GLenum _pname)
 {
 	return parameter_getter<T>::get(_pname);

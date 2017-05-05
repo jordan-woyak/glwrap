@@ -16,13 +16,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/type_trait.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <type_traits>
 
 namespace GLWRAP_NAMESPACE
 {
 
-// TODO: rename boolean
 typedef GLboolean bool_t;
 typedef GLbyte byte_t;
 typedef GLubyte ubyte_t;

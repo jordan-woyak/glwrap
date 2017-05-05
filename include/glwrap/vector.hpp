@@ -3,228 +3,67 @@
 #include <array>
 
 #include "util.hpp"
+#include "detail/traits.hpp"
 
 namespace gl
 {
 
-template <typename T, int D>
-class basic_vec;
+using glm::vec2;
+using glm::vec3;
+using glm::vec4;
+
+using glm::ivec2;
+using glm::ivec3;
+using glm::ivec4;
+
+using glm::uvec2;
+using glm::uvec3;
+using glm::uvec4;
+
+namespace detail
+{
+
+// TODO: better name?
+template <typename T, int N>
+struct vec
+{};
 
 template <typename T>
-class basic_vec<T, 2>
+struct vec<T, 2>
 {
-public:
-	static const int dims = 2;
-
-	// TODO: silly
-	T* data()
-	{ return &x; }
-
-	const T* data() const
-	{ return &x; }
-
-	basic_vec()
-		: x(), y()
-	{}
-
-	basic_vec(T _x, T _y)
-		: x(_x), y(_y)
-	{}
-
-	T x, y;
+	typedef glm::tvec2<T, glm::defaultp> type;
 };
 
 template <typename T>
-class basic_vec<T, 3>
+struct vec<T, 3>
 {
-public:
-	static const int dims = 3;
-
-	// TODO: silly
-	T* data()
-	{ return &x; }
-
-	const T* data() const
-	{ return &x; }
-
-	basic_vec()
-		: x(), y(), z()
-	{}
-
-	basic_vec(T _x, T _y, T _z)
-		: x(_x), y(_y), z(_z)
-	{}
-
-	T x, y, z;
+	typedef glm::tvec3<T, glm::defaultp> type;
 };
 
 template <typename T>
-class basic_vec<T, 4>
+struct vec<T, 4>
 {
-public:
-	static const int dims = 4;
-
-	// TODO: silly
-	T* data()
-	{ return &x; }
-
-	const T* data() const
-	{ return &x; }
-
-	basic_vec()
-		: x(), y(), z(), w()
-	{}
-
-	basic_vec(T _x, T _y, T _z, T _w)
-		: x(_x), y(_y), z(_z), w(_w)
-	{}
-
-	T x, y, z, w;
+	typedef glm::tvec4<T, glm::defaultp> type;
 };
 
-typedef basic_vec<float_t, 2> vec2;
-typedef basic_vec<float_t, 3> vec3;
-typedef basic_vec<float_t, 4> vec4;
-
-typedef basic_vec<int_t, 2> ivec2;
-typedef basic_vec<int_t, 3> ivec3;
-typedef basic_vec<int_t, 4> ivec4;
-
-typedef basic_vec<uint_t, 2> uvec2;
-typedef basic_vec<uint_t, 3> uvec3;
-typedef basic_vec<uint_t, 4> uvec4;
-
-// mult
-template <typename T, int D>
-basic_vec<T, D>& operator*=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
+template <typename T>
+struct vec_traits
 {
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		_vec1.data()[i] *= _vec2.data()[i];
+	vec_traits()
+	{
+		static_assert(is_vec<T>::value, "invalid vector");
+	}
+	
+	// TODO: This is pretty hacky..
+	static const int dimensions = sizeof(T) / sizeof(T::x);
+	
+	typedef typename T::value_type value_type;
+};
 
-	return _vec1;
 }
 
-template <typename T, int D>
-basic_vec<T, D> operator*(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
-{
-	return _vec1 *= _vec2;
-}
-
-// add
-template <typename T, int D>
-basic_vec<T, D>& operator+=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
-{
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		_vec1.data()[i] += _vec2.data()[i];
-
-	return _vec1;
-}
-
-template <typename T, int D>
-basic_vec<T, D> operator+(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
-{
-	return _vec1 += _vec2;
-}
-
-// sub
-template <typename T, int D>
-basic_vec<T, D>& operator-=(basic_vec<T, D>& _vec1, const basic_vec<T, D>& _vec2)
-{
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		_vec1.data()[i] -= _vec2.data()[i];
-
-	return _vec1;
-}
-
-template <typename T, int D>
-basic_vec<T, D> operator-(basic_vec<T, D> _vec1, const basic_vec<T, D>& _vec2)
-{
-	return _vec1 -= _vec2;
-}
-
-// scalar
-// mult
-template <typename T, int D>
-basic_vec<T, D>& operator*=(basic_vec<T, D>& _vec1, T const& _val)
-{
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		_vec1.data()[i] *= _val;
-
-	return _vec1;
-}
-
-template <typename T, int D>
-basic_vec<T, D> operator*(basic_vec<T, D> _vec1, T const& _val)
-{
-	return _vec1 *= _val;
-}
-
-// div
-template <typename T, int D>
-basic_vec<T, D>& operator/=(basic_vec<T, D>& _vec1, T const& _val)
-{
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		_vec1.data()[i] /= _val;
-
-	return _vec1;
-}
-
-template <typename T, int D>
-basic_vec<T, D> operator/(basic_vec<T, D> _vec1, T const& _val)
-{
-	return _vec1 /= _val;
-}
-
-// add
-template <typename T, int D>
-basic_vec<T, D>& operator+=(basic_vec<T, D>& _vec1, T const& _val)
-{
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		_vec1.data()[i] += _val;
-
-	return _vec1;
-}
-
-template <typename T, int D>
-basic_vec<T, D> operator+(basic_vec<T, D> _vec1, T const& _val)
-{
-	return _vec1 += _val;
-}
-
-// sub
-template <typename T, int D>
-basic_vec<T, D>& operator-=(basic_vec<T, D>& _vec1, T const& _val)
-{
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		_vec1.data()[i] -= _val;
-
-	return _vec1;
-}
-
-template <typename T, int D>
-basic_vec<T, D> operator-(basic_vec<T, D> _vec1, T const& _val)
-{
-	return _vec1 -= _val;
-}
-
-template <int D>
-float_t dot(const basic_vec<float_t, D>& _vec1, const basic_vec<float_t, D> & _vec2)
-{
-	float_t result = 0;
-
-	// TODO: recursive template magic
-	for (int i = 0; i != D; ++i)
-		result += _vec1.data()[i] * _vec2.data()[i];
-
-	return result;
-}
+template <typename T, int N>
+using basic_vec = typename detail::vec<T, N>::type;
 
 }
 

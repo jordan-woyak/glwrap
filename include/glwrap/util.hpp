@@ -74,7 +74,11 @@ struct is_gl_floating_point<T, typename std::enable_if<
 {};
 
 template <typename T>
-GLenum data_type_enum();
+GLenum data_type_enum()
+{
+	static_assert(false && std::is_void<T>::value, "Invalid data type.");
+	return 0;
+}
 
 template <>
 inline GLenum data_type_enum<ubyte_t>()

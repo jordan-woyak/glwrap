@@ -118,12 +118,12 @@ public:
 		glStencilMaskSeparate(static_cast<GLenum>(_face), _mask);
 	}
 
-	void viewport(basic_vec<int_t, 2> _pos, basic_vec<int_t, 2> _size)
+	void viewport(ivec2 _pos, ivec2 _size)
 	{
 		glViewport(_pos.x, _pos.y, _size.x, _size.y);
 	}
 
-	void scissor(basic_vec<int_t, 2> _pos, basic_vec<int_t, 2> _size)
+	void scissor(ivec2 _pos, ivec2 _size)
 	{
 		glScissor(_pos.x, _pos.y, _size.x, _size.y);
 	}
