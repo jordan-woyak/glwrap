@@ -87,11 +87,11 @@ using basic_mat = typename std::enable_if<R==3 && C==3, glm::mat3x3>::type;
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type rotate(T _angle, T _x, T _y, T _z)
 {
-	return glm::rotate(_angle, basic_vec<T, 3>{_x, _y, _z});
+	return rotate(_angle, basic_vec<T, 3>{_x, _y, _z});
 }
 
 template <typename T>
-inline typename detail::mat<T, 4, 4>::type rotate(T _angle, typename detail::vec<T, 3>::type const& _axis)
+inline typename detail::mat<T, 4, 4>::type rotate(T _angle, basic_vec<T, 3> const& _axis)
 {
 	return glm::rotate(_angle, _axis);
 }
@@ -99,11 +99,11 @@ inline typename detail::mat<T, 4, 4>::type rotate(T _angle, typename detail::vec
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type scale(T _x, T _y, T _z)
 {
-	return glm::scale(basic_vec<T, 3>{_x, _y, _z});
+	return scale(basic_vec<T, 3>{_x, _y, _z});
 }
 
 template <typename T>
-inline typename detail::mat<T, 4, 4>::type scale(typename detail::vec<T, 3>::type const& _dims)
+inline typename detail::mat<T, 4, 4>::type scale(basic_vec<T, 3> const& _dims)
 {
 	return glm::scale(_dims);
 }
@@ -111,11 +111,11 @@ inline typename detail::mat<T, 4, 4>::type scale(typename detail::vec<T, 3>::typ
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type translate(T x, T y, T z)
 {
-	return glm::translate(basic_vec<T, 3>{x, y, z});
+	return translate(basic_vec<T, 3>{x, y, z});
 }
 
 template <typename T>
-inline typename detail::mat<T, 4, 4>::type translate(typename detail::vec<T, 3>::type const& _dims)
+inline typename detail::mat<T, 4, 4>::type translate(basic_vec<T, 3> const& _dims)
 {
 	return glm::translate(_dims);
 }
@@ -133,8 +133,6 @@ inline typename detail::mat<T, 4, 4>::type frustum(T left, T right, T top, T bot
 	return glm::frustum(left, right, bottom, top, _near, _far);
 }
 
-// TODO: should this be here?
-// TODO: I don't like fov being in degrees
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type perspective(T fovy, T aspect, T znear, T zfar)
 {
