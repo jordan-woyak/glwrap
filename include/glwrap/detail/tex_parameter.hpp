@@ -62,12 +62,12 @@ __GLWRAP_FUNC_DECL__
 typename std::enable_if<std::is_scalar<T>::value, T>::type
 get_tex_parameter(GLenum _target, GLenum _pname)
 {
-		T ret;
+	T ret;
 
-		gl_get_tex_parameter<I>(_target, _pname, &ret);
-		check_unlikely_error();
+	gl_get_tex_parameter<I>(_target, _pname, &ret);
+	check_unlikely_error();
 
-		return ret;
+	return ret;
 }
 
 template <bool I, typename T>
@@ -75,12 +75,7 @@ __GLWRAP_FUNC_DECL__
 typename std::enable_if<detail::is_vec<T>::value, T>::type
 get_tex_parameter(GLenum _target, GLenum _pname)
 {
-		T ret;
-
-		gl_get_tex_parameter<I>(_target, _pname, glm::value_ptr(ret));
-		check_unlikely_error();
-
-		return ret;
+	return get_tex_parameter<I>(_target, _pname, glm::value_ptr(ret));
 }
 
 //
@@ -140,7 +135,7 @@ void gl_tex_parameter<true, const GLuint*>(GLenum _target, GLenum _pname, const 
 }
 
 //
-// tex_parameter
+// set_tex_parameter
 //
 // provides a friendly way to glTexParameter directly from vecNs
 //
@@ -148,19 +143,27 @@ void gl_tex_parameter<true, const GLuint*>(GLenum _target, GLenum _pname, const 
 template <bool I, typename T>
 __GLWRAP_FUNC_DECL__
 typename std::enable_if<std::is_scalar<T>::value>::type
-tex_parameter(GLenum _target, GLenum _pname, T _param)
+set_tex_parameter(GLenum _target, GLenum _pname, T _param)
 {
 	gl_tex_parameter<I>(_target, _pname, _param);
 	check_unlikely_error();
-};
+}
 
 template <bool I, typename T>
 __GLWRAP_FUNC_DECL__
 typename std::enable_if<detail::is_vec<T>::value>::type
-tex_parameter(GLenum _target, GLenum _pname, const T& _param)
+set_tex_parameter(GLenum _target, GLenum _pname, const T& _param)
 {
-	tex_parameter<I>(_target, _pname, glm::value_ptr(_param));
-};
+	set_tex_parameter<I>(_target, _pname, glm::value_ptr(_param));
+}
+
+//
+// tex_parameter
+//
+// provides typed get and set functions for a particular parameter
+//
+
+
 
 }
 

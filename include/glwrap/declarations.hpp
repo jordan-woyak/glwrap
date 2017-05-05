@@ -1,5 +1,9 @@
 #pragma once
 
+#define __GLWRAP_NAMESPACE__ glnew
+#define __GLWRAP_FUNC_DECL__ inline
+#define __GLWRAP_MEMBER_FUNC_DECL__ inline
+
 #if defined(_MSC_VER)
 #pragma comment(lib, "glew32s.lib")
 #endif
@@ -9,7 +13,13 @@
 #define FREEGLUT_STATIC
 #include <GL/glut.h>
 
-namespace gl
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/type_trait.hpp>
+
+#include <type_traits>
+
+namespace __GLWRAP_NAMESPACE__
 {
 
 class context;
