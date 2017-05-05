@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace __GLWRAP_NAMESPACE__
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail
@@ -20,32 +20,32 @@ namespace detail
 //
 
 template <bool Internal, typename T>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_get_tex_parameter(GLenum _target, GLenum _pname, T* _params);
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<false, GLfloat>(GLenum _target, GLenum _pname, GLfloat* _params)
 {
 	glGetTexParameterfv(_target, _pname, _params);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<false, GLint>(GLenum _target, GLenum _pname, GLint* _params)
 {
 	glGetTexParameteriv(_target, _pname, _params);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<true, GLint>(GLenum _target, GLenum _pname, GLint* _params)
 {
 	glGetTexParameterIiv(_target, _pname, _params);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<true, GLuint>(GLenum _target, GLenum _pname, GLuint* _params)
 {
 	glGetTexParameterIuiv(_target, _pname, _params);
@@ -58,7 +58,7 @@ void gl_get_tex_parameter<true, GLuint>(GLenum _target, GLenum _pname, GLuint* _
 //
 
 template <bool I, typename T>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 typename std::enable_if<std::is_scalar<T>::value, T>::type
 get_tex_parameter(GLenum _target, GLenum _pname)
 {
@@ -71,7 +71,7 @@ get_tex_parameter(GLenum _target, GLenum _pname)
 }
 
 template <bool I, typename T>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 typename std::enable_if<detail::is_vec<T>::value, T>::type
 get_tex_parameter(GLenum _target, GLenum _pname)
 {
@@ -89,46 +89,46 @@ get_tex_parameter(GLenum _target, GLenum _pname)
 //
 
 template <bool Internal, typename T>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_tex_parameter(GLenum _target, GLenum _pname, T _param);
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, GLfloat>(GLenum _target, GLenum _pname, GLfloat _param)
 {
 	glTexParameterf(_target, _pname, _param);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, const GLfloat*>(GLenum _target, GLenum _pname, const GLfloat* _params)
 {
 	glTexParameterfv(_target, _pname, _params);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, GLint>(GLenum _target, GLenum _pname, GLint _param)
 {
 	glTexParameteri(_target, _pname, _param);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, const GLint*>(GLenum _target, GLenum _pname, const GLint* _params)
 {
 	glTexParameteriv(_target, _pname, _params);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_tex_parameter<true, const GLint*>(GLenum _target, GLenum _pname, const GLint* _params)
 {
 	glTexParameterIiv(_target, _pname, _params);
 }
 
 template <>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void gl_tex_parameter<true, const GLuint*>(GLenum _target, GLenum _pname, const GLuint* _params)
 {
 	glTexParameterIuiv(_target, _pname, _params);
@@ -141,7 +141,7 @@ void gl_tex_parameter<true, const GLuint*>(GLenum _target, GLenum _pname, const 
 //
 
 template <bool I, typename T>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 typename std::enable_if<std::is_scalar<T>::value>::type
 set_tex_parameter(GLenum _target, GLenum _pname, T _param)
 {
@@ -150,7 +150,7 @@ set_tex_parameter(GLenum _target, GLenum _pname, T _param)
 }
 
 template <bool I, typename T>
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 typename std::enable_if<detail::is_vec<T>::value>::type
 set_tex_parameter(GLenum _target, GLenum _pname, const T& _param)
 {

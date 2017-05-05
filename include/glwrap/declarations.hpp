@@ -1,8 +1,8 @@
 #pragma once
 
-#define __GLWRAP_NAMESPACE__ glnew
-#define __GLWRAP_FUNC_DECL__ inline
-#define __GLWRAP_MEMBER_FUNC_DECL__ inline
+#define GLWRAP_NAMESPACE gl
+#define GLWRAP_FUNC_DECL inline
+#define GLWRAP_MEMBER_FUNC_DECL inline
 
 #if defined(_MSC_VER)
 #pragma comment(lib, "glew32s.lib")
@@ -19,7 +19,7 @@
 
 #include <type_traits>
 
-namespace __GLWRAP_NAMESPACE__
+namespace GLWRAP_NAMESPACE
 {
 
 class context;

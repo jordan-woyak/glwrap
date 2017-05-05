@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace __GLWRAP_NAMESPACE__
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail
@@ -38,7 +38,7 @@ struct exception
 	GLenum error_flag;
 };
 
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void
 check_error()
 {
@@ -52,7 +52,7 @@ check_error()
 	}
 }
 
-__GLWRAP_FUNC_DECL__
+GLWRAP_FUNC_DECL
 void
 check_unlikely_error()
 {
