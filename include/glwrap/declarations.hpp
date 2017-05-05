@@ -22,6 +22,31 @@
 namespace GLWRAP_NAMESPACE
 {
 
+// TODO: rename boolean
+typedef GLboolean bool_t;
+typedef GLbyte byte_t;
+typedef GLubyte ubyte_t;
+typedef GLshort short_t;
+typedef GLushort ushort_t;
+typedef GLint int_t;
+typedef GLuint uint_t;
+//typedef GLfixed fixed_t;
+typedef GLint64 int64_t;
+typedef GLuint64 uint64_t;
+typedef GLsizei sizei_t;
+typedef GLenum enum_t;
+typedef GLintptr intptr_t;
+typedef GLsizeiptr sizeiptr_t;
+//typedef GLsync sync_t
+typedef GLbitfield bitfield_t;
+typedef GLhalf half_t;
+typedef GLfloat float_t;
+//typedef GLclampf clampf_t;
+typedef GLdouble double_t;
+//typedef GLclampd clampd_t;
+// TODO: kill this
+typedef double_t depth_t;
+
 class context;
 
 enum class shader_type : GLenum
