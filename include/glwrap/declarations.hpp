@@ -48,6 +48,13 @@ typedef GLdouble double_t;
 // TODO: kill this
 typedef double_t depth_t;
 
+namespace detail
+{
+	
+static const bool_t IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED = GL_FALSE;
+
+}
+
 class context;
 
 enum class shader_type : GLenum

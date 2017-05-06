@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <algorithm>
 
 #include "glwrap/gl.hpp"
 
@@ -152,8 +153,8 @@ int main()
 		auto const ratio = (float)window_size.y / window_size.x;
 
 		// rotating ortho projection
-		gl::mat4 const modelview = gl::rotate(rotate, 0, 0, 1) *
-			gl::scale(0.1 * gl::clamp(ratio, ratio, 1), 0.1 / gl::clamp(ratio, 1, ratio), 1);
+		gl::mat4 const modelview = gl::rotate(rotate, 0.f, 0.f, 1.f) *
+			gl::scale(0.1f * gl::clamp(ratio, ratio, 1), 0.1f / gl::clamp(ratio, 1, ratio), 1.f);
 		prog.set_uniform(mvp_uni, modelview);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <algorithm>
 
 #include "glwrap/gl.hpp"
 
@@ -166,18 +167,18 @@ int main()
 	energy_prog.set_uniform(metaball_data_uni, metaball_data_loc);
 
 	color_prog.set_uniform(metaball_energy_uni, metaball_energy_loc);
-	color_prog.set_uniform(energy_threshold_uni, 0.7);
-	color_prog.set_uniform(metaball_color_uni, {0, 0, 0});
+	color_prog.set_uniform(energy_threshold_uni, 0.7f);
+	color_prog.set_uniform(metaball_color_uni, {0.f, 0.f, 0.f});
 
 	dsp.set_display_func([&]
 	{
 		// first pass, energy levels
 		glc.use_program(energy_prog);
 		glc.bind_texture(metaball_data_loc, metaball_data_tex);
-		energy_prog.set_uniform(mvp_uni, gl::ortho(0, window_size.x, window_size.y, 0, -1, 1));
+		energy_prog.set_uniform(mvp_uni, gl::ortho(0.f, (gl::float_t)window_size.x, (gl::float_t)window_size.y, 0.f, -1.f, 1.f));
 
 		glc.use_draw_framebuffer(fbo);
-		glc.clear_color({0, 0, 0, 0});
+		glc.clear_color({0.f, 0.f, 0.f, 0.f});
 		glc.draw_arrays_instanced(0, 4, metaball_data.size());
 
 		// second pass, energy threshold/colors
@@ -185,7 +186,7 @@ int main()
 		glc.bind_texture(metaball_energy_loc, metaball_energy_tex);
 
 		glc.use_draw_framebuffer(nullptr);
-		glc.clear_color({1, 1, 1, 1});
+		glc.clear_color({1.f, 1.f, 1.f, 1.f});
 		glc.draw_arrays(0, 4);
 	});
 

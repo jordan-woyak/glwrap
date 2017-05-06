@@ -91,13 +91,13 @@ inline void set_uniform_value<vec4>(GLuint _location, const vec4& _value)
 template <>
 inline void set_uniform_value<mat3>(GLuint _location, const mat3& _value)
 {
-	glUniformMatrix3fv(_location, 1, GL_FALSE, glm::value_ptr(_value));
+	glUniformMatrix3fv(_location, 1, IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED, glm::value_ptr(_value));
 }
 
 template <>
 inline void set_uniform_value<mat4>(GLuint _location, const mat4& _value)
 {
-	glUniformMatrix4fv(_location, 1, GL_FALSE, glm::value_ptr(_value));
+	glUniformMatrix4fv(_location, 1, IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED, glm::value_ptr(_value));
 }
 
 }

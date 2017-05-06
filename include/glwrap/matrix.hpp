@@ -6,34 +6,40 @@
 namespace gl
 {
 
-using glm::mat2x2;
 using glm::mat2;
+using glm::mat2x2;
 using glm::mat2x3;
 using glm::mat2x4;
-using glm::mat3x3;
+
 using glm::mat3;
 using glm::mat3x2;
+using glm::mat3x3;
 using glm::mat3x4;
+
+using glm::mat4;
 using glm::mat4x2;
 using glm::mat4x3;
 using glm::mat4x4;
-using glm::mat4;
 
-using glm::dmat2x2;
 using glm::dmat2;
+using glm::dmat2x2;
 using glm::dmat2x3;
 using glm::dmat2x4;
-using glm::dmat3x3;
+
 using glm::dmat3;
 using glm::dmat3x2;
+using glm::dmat3x3;
 using glm::dmat3x4;
+
+using glm::dmat4;
 using glm::dmat4x2;
 using glm::dmat4x3;
 using glm::dmat4x4;
-using glm::dmat4;
 
 namespace detail
 {
+
+static_assert(sizeof(mat4x2) == sizeof(float) * 8, "Mat4x2 size is not sane.");
 
 // TODO: better name?
 template <typename T, int R, int C>
@@ -77,12 +83,10 @@ struct mat_traits
 }
 
 template <typename T, int R, int C>
-using basic_mat = typename std::enable_if<R==3 && C==3, glm::mat3x3>::type;
-//using basic_mat = glm::mat3x3;//typename detail::mat<T, R, C>::type;
+using basic_mat = typename detail::mat<T, R, C>::type;
 
 // TODO: non-float versions of these functions?
-// TODO: kill. use glm
-// TODO: only take vec3 instead of xyz
+// TODO: only take vec3 instead of xyz?
 
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type rotate(T _angle, T _x, T _y, T _z)
@@ -109,9 +113,9 @@ inline typename detail::mat<T, 4, 4>::type scale(basic_vec<T, 3> const& _dims)
 }
 
 template <typename T>
-inline typename detail::mat<T, 4, 4>::type translate(T x, T y, T z)
+inline typename detail::mat<T, 4, 4>::type translate(T _x, T _y, T _z)
 {
-	return translate(basic_vec<T, 3>{x, y, z});
+	return translate(basic_vec<T, 3>{_x, _y, _z});
 }
 
 template <typename T>
@@ -127,6 +131,7 @@ inline typename detail::mat<T, 4, 4>::type ortho(T left, T right, T top, T botto
 	return glm::ortho(left, right, bottom, top, _near, _far);
 }
 
+// TODO: param order
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type frustum(T left, T right, T top, T bottom, T _near, T _far)
 {

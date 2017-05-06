@@ -146,16 +146,16 @@ int main()
 	glc.use_element_array(indbuf);
 	glc.use_primitive_mode(gl::primitive::triangles);
 
-	auto const pre_rotate = gl::scale(8, 8, 8) * gl::translate(0.2f, -0.8f, 0);
-	auto const post_rotate = gl::rotate(0.2f, 1, 0, 0) *	gl::translate(0, 0, -2.5f);
+	auto const pre_rotate = gl::scale(8.f, 8.f, 8.f) * gl::translate(0.2f, -0.8f, 0.f);
+	auto const post_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f) *	gl::translate(0.f, 0.f, -2.5f);
 
 	dsp.set_display_func([&]
 	{
 		// rotating projection
 		gl::mat4 modelview = pre_rotate *
-			gl::rotate(rotate, 0, 1, 0) *
+			gl::rotate(rotate, 0.f, 1.f, 0.f) *
 			post_rotate *
-			gl::perspective(45, (float_t)window_size.x / window_size.y, 1, 100);
+			gl::perspective(3.14f / 4.f, (float_t)window_size.x / window_size.y, 1.f, 100.f);
 
 		prog.set_uniform(modelview_uni, modelview);
 

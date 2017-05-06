@@ -209,7 +209,7 @@ int main()
 	prog.set_uniform(light_dir_uni, {0, 0.75, -1});
 	prog.set_uniform(shininess_uni, 50);
 
-	prog.set_uniform(projection_uni, {});
+	prog.set_uniform(projection_uni, gl::mat4{1.f});
 
 	prog.set_uniform(tex_color_uni, tex_color_unit);
 	prog.set_uniform(tex_spec_uni, tex_spec_unit);
@@ -233,7 +233,7 @@ int main()
 	{
 		// rotating projection
 		gl::mat4 modelview = gl::rotate(rotate, 0.f, 1.f, 0.f) * post_rotate *
-			gl::perspective(45.f, (float_t)window_size.x / window_size.y, 1.f, 100.f);
+			gl::perspective(3.14f / 4.f, (float_t)window_size.x / window_size.y, 1.f, 100.f);
 
 		prog.set_uniform(modelview_uni, modelview);
 

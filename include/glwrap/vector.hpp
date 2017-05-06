@@ -20,6 +20,8 @@ using glm::uvec2;
 using glm::uvec3;
 using glm::uvec4;
 
+static_assert(sizeof(vec3) == sizeof(float) * 3, "Vec3 size is not sane.");
+
 namespace detail
 {
 

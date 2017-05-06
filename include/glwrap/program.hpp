@@ -48,8 +48,8 @@ public:
 		for (auto& block : m_uniform_blocks)
 		{
 			uniform_header += "layout(std140) uniform ";
-			uniform_header += " {\n";
 			uniform_header += block.get_name();
+			uniform_header += " {\n";
 
 			// TODO: actually look at the offset value!!!
 			// currently super broken, not handling padding for shit

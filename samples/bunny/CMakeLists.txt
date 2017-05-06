@@ -8,9 +8,6 @@ set(CMAKE_MODULE_PATH /usr/share/apps/cmake/modules)
 
 include_directories(../../include)
 
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
-
 find_package(SFML 2.0 COMPONENTS window graphics REQUIRED)
 include_directories(${SFML_INCLUDE_DIR})
 

@@ -68,6 +68,8 @@ public:
 		m_max_combined_texture_image_units = max_tunits;
 	}
 
+	// TODO: multiple targets are allowed on each texture unit
+
 	template <typename T>
 	texture_unit<T> allot()
 	{

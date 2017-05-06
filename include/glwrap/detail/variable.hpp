@@ -222,18 +222,11 @@ template <typename T>
 struct index_count<T, typename std::enable_if<
 	std::is_same<T, int_t>::value ||
 	std::is_same<T, uint_t>::value ||
-	std::is_same<T, float_t>::value
-	, void>::type>
-{
-	static const std::size_t value = 1;
-};
-
-template <typename T>
-struct index_count<T, typename std::enable_if<
+	std::is_same<T, float_t>::value ||
 	std::is_same<T, double_t>::value
 	, void>::type>
 {
-	static const std::size_t value = 2;
+	static const std::size_t value = 1;
 };
 
 template <typename T>
@@ -253,7 +246,6 @@ private:
 	typedef typename detail::vec_traits<T>::value_type value_type;
 	
 public:
-	// TODO: which is correct, cols or rows?
 	static const std::size_t value = index_count<value_type>::value * detail::mat_traits<T>::cols;
 };
 
