@@ -44,23 +44,8 @@ void gl_get(GLenum _pname, GLint64* _params)
 // provides a friendly way to glGet directly into vecNs
 //
 
-template <typename T, typename Enable = void>
-struct parameter_getter
-{
-	static GLWRAP_MEMBER_FUNC_DECL
-	T get(GLenum _pname)
-	{
-		T ret;
-
-		gl_get(_pname, &ret);
-		check_unlikely_error();
-
-		return ret;
-	}
-};
-
 template <typename T>
-struct parameter_getter<T, typename std::enable_if<detail::is_vec<T>::value>::type>
+struct parameter_getter
 {
 	static GLWRAP_MEMBER_FUNC_DECL
 	T get(GLenum _pname)

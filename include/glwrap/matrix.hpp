@@ -96,7 +96,7 @@ T* value_ptr(const basic_mat<T, R, C>& _val)
 
 }
 
-// TODO: non-float versions of these functions?
+// TODO: kill these and require use of glm directly?
 // TODO: only take vec3 instead of xyz?
 
 template <typename T>

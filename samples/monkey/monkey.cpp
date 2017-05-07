@@ -197,6 +197,7 @@ int main()
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
+	
 	arr.bind_vertex_attribute(pos_loc, verbuf.begin() | &FooVertex::pos);
 	arr.bind_vertex_attribute(norm_loc, verbuf.begin() | &FooVertex::norm);
 	arr.bind_vertex_attribute(texpos_loc, verbuf.begin() | &FooVertex::texpos);

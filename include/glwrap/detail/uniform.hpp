@@ -10,6 +10,7 @@ namespace detail
 // gl_uniform_v / gl_program_uniform_v
 //
 // provides a single name for glUniform*v / glProgramUniform*v functions
+// which accepts typed arguments like vec3 and mat4
 //
 
 #define GLWRAP_UNIFORM_V_DEF(u_name, v_type) \
@@ -128,9 +129,16 @@ void set_program_uniform(uint_t _program, int_t _loc, typename uniform_value<T>:
 	}
 	else
 	{
-		// TODO: un-use?
-		glUseProgram(_program);
+		// TODO: ugly
+		uint_t const prev_program = detail::get_parameter<int_t>(GL_CURRENT_PROGRAM);
+
+		if (prev_program != _program)
+			glUseProgram(_program);
+		
 		gl_uniform(_loc, _value);
+
+		if (prev_program != _program)
+			glUseProgram(prev_program);
 	}
 }
 

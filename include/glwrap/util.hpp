@@ -23,6 +23,51 @@ inline GLuint gen_return(glgenfunc f)
 namespace detail
 {
 
+// TODO: I'd like to kill this.
+template <typename T>
+class scoped_binder
+{
+public:
+	scoped_binder(const scoped_binder&) = delete;
+	scoped_binder& operator=(const scoped_binder&) = delete;
+
+	explicit scoped_binder(const T& _obj)
+		: m_prev_binding(T::get_current_binding())
+		, m_desired_binding(_obj.native_handle())
+	{
+		if (m_prev_binding != m_desired_binding)
+		{
+			T::set_current_binding(m_desired_binding);
+		}
+	}
+
+	scoped_binder(scoped_binder&& _other)
+		: m_prev_binding(_other.m_prev_binding)
+		, m_desired_binding(_other.m_desired_binding)
+	{
+		// _other will no longer unbind on destruction
+		_other.m_desired_binding = m_prev_binding;
+	}
+
+	~scoped_binder()
+	{
+		if (m_prev_binding != m_desired_binding)
+		{
+			T::set_current_binding(m_prev_binding);
+		}
+	}
+
+private:
+	typename T::native_handle_type const m_prev_binding;
+	typename T::native_handle_type m_desired_binding;
+};
+
+template <typename T>
+scoped_binder<T> make_scoped_binder(const T& _obj)
+{
+	return scoped_binder<T>{_obj};
+}
+
 template <typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, T>::type* value_ptr(T& _val)
 {

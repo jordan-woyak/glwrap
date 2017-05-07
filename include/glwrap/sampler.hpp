@@ -41,16 +41,6 @@ public:
 		glDeleteSamplers(1, &nh);
 	}
 
-	void set_parameter_raw(GLenum _pname, int_t _val)
-	{
-		glSamplerParameteri(native_handle(), _pname, _val);
-	}
-
-	void set_parameter_raw(GLenum _pname, float_t _val)
-	{
-		glSamplerParameterf(native_handle(), _pname, _val);
-	}
-
 	void set_wrap_s(wrap_mode _mode)
 	{
 		set_parameter_raw(GL_TEXTURE_WRAP_S, static_cast<int>(_mode));
@@ -96,6 +86,16 @@ public:
 	// TODO: GL_TEXTURE_COMPARE_FUNC
 
 private:
+	void set_parameter_raw(GLenum _pname, int_t _val)
+	{
+		glSamplerParameteri(native_handle(), _pname, _val);
+	}
+
+	void set_parameter_raw(GLenum _pname, float_t _val)
+	{
+		glSamplerParameterf(native_handle(), _pname, _val);
+	}
+	
 	void bind(GLuint _unit) const
 	{
 		glBindSampler(_unit, native_handle());

@@ -32,9 +32,7 @@ class context
 
 public:
 	context()
-		: m_program()
-		, m_vertex_array()
-		, m_draw_fbo(), m_read_fbo()
+		: m_draw_fbo(), m_read_fbo()
 		, m_primitive_mode(static_cast<GLenum>(primitive::triangles))
 		, m_element_type()
 #ifndef GLWRAP_NO_SFML
@@ -345,14 +343,12 @@ public:
 
 	void use_program(program& _prog)
 	{
-		m_program = _prog.native_handle();
-		glUseProgram(m_program);
+		glUseProgram(_prog.native_handle());
 	}
 
 	void use_vertex_array(vertex_array& _vert)
 	{
-		m_vertex_array = _vert.native_handle();
-		//glBindVertexArray(_vert.native_handle());
+		glBindVertexArray(_vert.native_handle());
 	}
 
 	template <typename T>
@@ -410,12 +406,6 @@ private:
 	void prepare_draw()
 	{
 		// TODO: make this not necessary
-		// silly
-		uint_t prog = detail::get_parameter<int_t>(GL_CURRENT_PROGRAM);
-		if (prog != m_program)
-			glUseProgram(m_program);
-
-		glBindVertexArray(m_vertex_array);
 		prepare_use_fb();
 	}
 
@@ -441,9 +431,6 @@ private:
 		return *m_sf_window;
 	}
 #endif
-
-	GLuint m_program;
-	GLuint m_vertex_array;
 
 	GLuint m_draw_fbo, m_read_fbo;
 
