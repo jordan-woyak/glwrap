@@ -48,14 +48,13 @@ struct vec<T, 4>
 	typedef glm::tvec4<T, glm::defaultp> type;
 };
 
-template <typename T>
+template <typename T, typename Enable = void>
 struct vec_traits
+{};
+
+template <typename T>
+struct vec_traits<T, typename std::enable_if<is_vec<T>::value>::type>
 {
-	vec_traits()
-	{
-		static_assert(is_vec<T>::value, "invalid vector");
-	}
-	
 	// TODO: This is pretty hacky..
 	static const int dimensions = sizeof(T) / sizeof(T::x);
 	

@@ -31,7 +31,7 @@ int main()
 	std::vector<FooVertex> vertices;
 	std::vector<gl::uint_t> indices;
 
-	ply::load("../torus.ply", vert_fmt, vertices, indices);
+	ply::load("./torus.ply", vert_fmt, vertices, indices);
 
 	// allot generic vetex attrib locations
 	gl::attribute_location_alloter locs(glc);
@@ -80,7 +80,7 @@ int main()
 	auto fragdata = fshad.create_output<gl::vec4>("fragdata");
 
 	fshad.set_source(
-		"in vec3 norm_light_dir, vertex_normal, Ia, E;"
+		"smooth in vec3 norm_light_dir, vertex_normal, Ia, E;"
 
 		"void main(void)"
 		"{"
@@ -152,9 +152,9 @@ int main()
 	dsp.set_display_func([&]
 	{
 		// rotating projection
-		gl::mat4 modelview = gl::rotate(rotate, 0, 1, 0) * gl::rotate(rotate * 2, 1, 0, 0) *
-			gl::translate(0, 0, -4) *
-			gl::perspective(45, (gl::float_t)window_size.x / window_size.y, 1, 100);
+		gl::mat4 modelview = gl::rotate(rotate, 0.f, 1.f, 0.f) * gl::rotate(rotate * 2.f, 1.f, 0.f, 0.f) *
+			gl::translate(0.f, 0.f, -4.f) *
+			gl::perspective(45.f, (gl::float_t)window_size.x / window_size.y, 1.f, 100.f);
 
 		prog.set_uniform(modelview_uni, modelview);
 

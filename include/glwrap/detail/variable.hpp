@@ -134,12 +134,9 @@ inline const char* vec_prefix<double_t>()
 template <typename T>
 struct glsl_var_type<T, typename std::enable_if<detail::is_vec<T>::value>::type>
 {
-private:
-	typedef typename detail::mat_traits<T>::value_type value_type;
-
-public:
 	static type_name_t name()
 	{
+		typedef typename detail::vec_traits<T>::value_type value_type;
 		int const dimensions = detail::vec_traits<T>::dimensions;
 #if 0
 		return (boost::format("%svec%d") % vec_prefix<value_type>() % dimensions).str();
@@ -154,18 +151,16 @@ public:
 template <typename T>
 struct glsl_var_type<T, typename std::enable_if<detail::is_mat<T>::value>::type>
 {
-private:
-	typedef typename detail::mat_traits<T>::value_type value_type;
-
-public:
-	static_assert(std::is_same<value_type, float_t>::value ||
-		std::is_same<value_type, double_t>::value,
-		"only float and double matrices supported");
-
 	static type_name_t name()
 	{
+		typedef typename detail::mat_traits<T>::value_type value_type;
+		
 		int const cols = detail::mat_traits<T>::cols;
 		int const rows = detail::mat_traits<T>::rows;
+
+		static_assert(std::is_same<value_type, float_t>::value ||
+			std::is_same<value_type, double_t>::value,
+			"only float and double matrices supported");
 		
 #if 0
 		return (boost::format("%smat%dx%d") % vec_prefix<value_type>() % cols % rows).str();
@@ -243,7 +238,7 @@ template <typename T>
 struct index_count<T, typename std::enable_if<detail::is_mat<T>::value>::type>
 {
 private:
-	typedef typename detail::vec_traits<T>::value_type value_type;
+	typedef typename detail::mat_traits<T>::value_type value_type;
 	
 public:
 	static const std::size_t value = index_count<value_type>::value * detail::mat_traits<T>::cols;

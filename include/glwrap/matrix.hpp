@@ -65,14 +65,13 @@ struct mat<T, 4, 4>
 	typedef glm::tmat4x4<T, glm::defaultp> type;
 };
 
-template <typename T>
+template <typename T, typename Enable = void>
 struct mat_traits
+{};
+
+template <typename T>
+struct mat_traits<T, typename std::enable_if<is_mat<T>::value>::type>
 {
-	mat_traits()
-	{
-		static_assert(is_mat<T>::value, "invalid matrix");
-	}
-	
 	// TODO: This is hacks that relies on glm impl details!
 	static const int rows = vec_traits<typename T::col_type>::dimensions;
 	static const int cols = vec_traits<typename T::row_type>::dimensions;

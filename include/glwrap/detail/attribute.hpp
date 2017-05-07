@@ -12,10 +12,7 @@ namespace detail
 template <typename T, typename Enable = void>
 struct vertex_attrib_pointer
 {
-	vertex_attrib_pointer()
-	{
-		static_assert(false && std::is_void<T>::value, "Unsupported vertex attrib pointer type.");
-	}
+	static_assert(false && std::is_void<T>::value, "Unsupported vertex attrib pointer type.");
 };
 
 template <typename T>

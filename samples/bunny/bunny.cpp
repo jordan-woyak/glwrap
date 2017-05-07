@@ -135,7 +135,7 @@ int main()
 
 	prog.set_uniform(mat_color_uni, {0.5f, 0.25f, 0.125f, 1});
 
-	prog.set_uniform(projection_uni, {});
+	prog.set_uniform(projection_uni, gl::mat4{});
 
 	glc.enable(gl::capability::depth_test);
 	//glc.enable(gl::capability::cull_face);
@@ -147,7 +147,7 @@ int main()
 	glc.use_primitive_mode(gl::primitive::triangles);
 
 	auto const pre_rotate = gl::scale(8.f, 8.f, 8.f) * gl::translate(0.2f, -0.8f, 0.f);
-	auto const post_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f) *	gl::translate(0.f, 0.f, -2.5f);
+	auto const post_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f) * gl::translate(0.f, 0.f, -2.5f);
 
 	dsp.set_display_func([&]
 	{
@@ -155,7 +155,9 @@ int main()
 		gl::mat4 modelview = pre_rotate *
 			gl::rotate(rotate, 0.f, 1.f, 0.f) *
 			post_rotate *
-			gl::perspective(3.14f / 4.f, (float_t)window_size.x / window_size.y, 1.f, 100.f);
+			// TODO: why is perspective in the modelview?
+			gl::perspective(45.f, (float_t)window_size.x / window_size.y, 1.f, 100.f);
+			//gl::ortho(0.f, 100.f, 0.f, 100.f, -100.f, 100.f);
 
 		prog.set_uniform(modelview_uni, modelview);
 
@@ -165,6 +167,10 @@ int main()
 		glc.clear_depth(1.0f);
 		glc.clear_color({0.2f, 0.2f, 0.2f, 1});
 		glc.draw_elements(0, indices.size());
+
+		auto const err = glGetError();
+		if (GL_NO_ERROR != err)
+			std::cerr << "error: " << err << std::endl;
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
