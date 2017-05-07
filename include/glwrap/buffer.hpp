@@ -2,6 +2,8 @@
 
 #include "uniform_block.hpp"
 
+#include "detail/context.hpp"
+
 namespace gl
 {
 
@@ -58,9 +60,7 @@ struct actual_element_size<gl::uniform_block_align<T>>
 	{
 		// TODO: fails if T is bigger than alignment value!
 
-		GLint offset{};
-		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &offset);
-		return offset;
+		return detail::get_parameter<int_t>(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT);
 	}
 };
 

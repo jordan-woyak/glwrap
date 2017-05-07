@@ -10,17 +10,17 @@ class transform_feedback_binding
 	friend class transform_feedback_binding_alloter;
 
 public:
-	uint_t get_index() const
+	int_t get_index() const
 	{
 		return m_index;
 	}
 
 private:
-	transform_feedback_binding(uint_t _index)
+	transform_feedback_binding(int_t _index)
 		: m_index(_index)
 	{}
 
-	uint_t m_index;
+	int_t m_index;
 };
 
 // TODO: name?
@@ -32,23 +32,21 @@ public:
 		: m_current_index()
 	{
 		// TODO: using correct "max"?
-		GLint max_bindings{};
-		glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS, &max_bindings);
-		m_max_transform_feedback_separate_components = max_bindings;
+		detail::gl_get(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS, &m_max_tf_separate_components);
 	}
 
 	template <typename T>
 	transform_feedback_binding<T> allot()
 	{
-		if (m_current_index == m_max_transform_feedback_separate_components)
+		if (m_current_index == m_max_tf_separate_components)
 			throw exception();
 
 		return {m_current_index++};
 	}
 
 private:
-	uint_t m_current_index;
-	uint_t m_max_transform_feedback_separate_components;
+	int_t m_current_index;
+	int_t m_max_tf_separate_components;
 };
 
 }

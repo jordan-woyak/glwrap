@@ -86,6 +86,8 @@ void gl_program_uniform(uint_t _program, int_t _loc, const T& _value)
 	gl_program_uniform_v(_program, _loc, 1, &_value);
 }
 
+// TODO: bool and bvec
+
 template <typename T, typename Enable = void>
 struct uniform_value
 {

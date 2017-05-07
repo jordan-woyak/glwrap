@@ -6,6 +6,8 @@
 
 #include "variable.hpp"
 
+#include "detail/context.hpp"
+
 namespace gl
 {
 
@@ -46,17 +48,17 @@ class uniform_block_binding
 	friend class uniform_block_binding_alloter;
 
 public:
-	uint_t get_index() const
+	int_t get_index() const
 	{
 		return m_index;
 	}
 
 private:
-	uniform_block_binding(uint_t _index)
+	uniform_block_binding(int_t _index)
 		: m_index(_index)
 	{}
 
-	uint_t m_index;
+	int_t m_index;
 };
 
 // TODO: name?
@@ -68,9 +70,7 @@ public:
 		: m_current_index()
 		, m_max_uniform_buffer_bindings()
 	{
-		GLint max_bindings{};
-		glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &max_bindings);
-		m_max_uniform_buffer_bindings = max_bindings;
+		detail::gl_get(GL_MAX_UNIFORM_BUFFER_BINDINGS, &m_max_uniform_buffer_bindings);
 	}
 
 	template <typename T>
@@ -83,8 +83,8 @@ public:
 	}
 
 private:
-	uint_t m_current_index;
-	uint_t m_max_uniform_buffer_bindings;
+	int_t m_current_index;
+	int_t m_max_uniform_buffer_bindings;
 };
 
 template <typename T>

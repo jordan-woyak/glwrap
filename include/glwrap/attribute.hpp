@@ -18,17 +18,17 @@ class attribute_location
 	friend class attribute_location_alloter;
 
 public:
-	uint_t get_index() const
+	int_t get_index() const
 	{
 		return m_index;
 	}
 
 private:
-	attribute_location(uint_t _index)
+	attribute_location(int_t _index)
 		: m_index(_index)
 	{}
 
-	uint_t m_index;
+	int_t m_index;
 };
 
 // TODO: name?
@@ -40,9 +40,7 @@ public:
 		: m_current_index()
 		, m_max_vertex_attribs()
 	{
-		GLint max_attribs{};
-		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max_attribs);
-		m_max_vertex_attribs = max_attribs;
+		detail::gl_get(GL_MAX_VERTEX_ATTRIBS, &m_max_vertex_attribs);
 	}
 
 	template <typename T>
@@ -58,8 +56,8 @@ public:
 	}
 
 private:
-	uint_t m_current_index;
-	uint_t m_max_vertex_attribs;
+	int_t m_current_index;
+	int_t m_max_vertex_attribs;
 };
 
 template <typename T>

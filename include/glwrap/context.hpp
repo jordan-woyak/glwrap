@@ -19,6 +19,8 @@
 #include "transform_feedback.hpp"
 #include "sync.hpp"
 
+#include "detail/context.hpp"
+
 namespace gl
 {
 
@@ -408,11 +410,9 @@ private:
 	void prepare_draw()
 	{
 		// TODO: make this not necessary
-
 		// silly
-		GLint prog{};
-		glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
-		if ((GLuint)prog != m_program)
+		uint_t prog = detail::get_parameter<int_t>(GL_CURRENT_PROGRAM);
+		if (prog != m_program)
 			glUseProgram(m_program);
 
 		glBindVertexArray(m_vertex_array);

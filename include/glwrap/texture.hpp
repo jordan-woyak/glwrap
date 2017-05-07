@@ -7,6 +7,7 @@
 #include "image_format.hpp"
 #include "buffer.hpp"
 #include "detail/texture.hpp"
+#include "detail/context.hpp"
 
 #include "sampler.hpp"
 
@@ -47,7 +48,7 @@ public:
 	}
 
 private:
-	texture_unit(uint_t _index)
+	texture_unit(int_t _index)
 		: m_index(_index)
 	{}
 
@@ -61,11 +62,9 @@ public:
 	// TODO: really need context?
 	texture_unit_alloter(context& _context)
 		: m_current_index()
-		, m_max_combined_texture_image_units()
+		, m_max_comb_tunits()
 	{
-		GLint max_tunits{};
-		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_tunits);
-		m_max_combined_texture_image_units = max_tunits;
+		detail::gl_get(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_max_comb_tunits);
 	}
 
 	// TODO: multiple targets are allowed on each texture unit
@@ -73,15 +72,15 @@ public:
 	template <typename T>
 	texture_unit<T> allot()
 	{
-		if (m_current_index == m_max_combined_texture_image_units)
+		if (m_current_index == m_max_comb_tunits)
 			throw exception();
 
 		return {m_current_index++};
 	}
 
 private:
-	uint_t m_current_index;
-	uint_t m_max_combined_texture_image_units;
+	int_t m_current_index;
+	int_t m_max_comb_tunits;
 };
 
 namespace texture_parameter

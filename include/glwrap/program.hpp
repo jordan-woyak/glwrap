@@ -18,8 +18,6 @@ class context;
 
 class program : public globject
 {
-	friend class context;
-
 public:
 	~program()
 	{
@@ -244,11 +242,6 @@ public:
 	{}
 
 private:
-	void bind() const
-	{
-		glUseProgram(native_handle());
-	};
-
 	// TODO: don't store globject pointers like this, it will break on swap/move
 	vertex_shader* m_vshad;
 	geometry_shader* m_gshad;

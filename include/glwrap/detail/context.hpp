@@ -47,7 +47,7 @@ void gl_get(GLenum _pname, GLint64* _params)
 template <typename T, typename Enable = void>
 struct parameter_getter
 {
-	static __GLWRAP_MEMBER_FUNC_DECL__
+	static GLWRAP_MEMBER_FUNC_DECL
 	T get(GLenum _pname)
 	{
 		T ret;
@@ -62,7 +62,7 @@ struct parameter_getter
 template <typename T>
 struct parameter_getter<T, typename std::enable_if<detail::is_vec<T>::value>::type>
 {
-	static __GLWRAP_MEMBER_FUNC_DECL__
+	static GLWRAP_MEMBER_FUNC_DECL
 	T get(GLenum _pname)
 	{
 		T ret;
@@ -106,7 +106,7 @@ class parameter_ref<parameter::blend_color>
 public:
 	typedef glm::vec4 value_type;
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	void
 	set(value_type _val)
 	{
@@ -114,7 +114,7 @@ public:
 		check_unlikely_error();
 	}
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	value_type
 	get() const
 	{
@@ -128,7 +128,7 @@ class parameter_ref<parameter::clear_color>
 public:
 	typedef glm::vec4 value_type;
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	void
 	set(const value_type& _val)
 	{
@@ -136,7 +136,7 @@ public:
 		check_unlikely_error();
 	}
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	value_type
 	get() const
 	{
@@ -150,7 +150,7 @@ class parameter_ref<parameter::clear_depth>
 public:
 	typedef glm::float_t value_type;
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	void
 	set(value_type _val)
 	{
@@ -158,7 +158,7 @@ public:
 		check_unlikely_error();
 	}
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	value_type
 	get() const
 	{
@@ -172,7 +172,7 @@ class parameter_ref<parameter::clear_stencil>
 public:
 	typedef glm::int_t value_type;
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	void
 	set(value_type _val)
 	{
@@ -180,7 +180,7 @@ public:
 		check_unlikely_error();
 	}
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	value_type
 	get() const
 	{
@@ -190,31 +190,32 @@ public:
 
 }
 
+/*
 class context
 {
 public:
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	detail::parameter_ref<detail::parameter::blend_color>
 	blend_color()
 	{
 		return detail::parameter_ref<detail::parameter::blend_color>();
 	}
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	detail::parameter_ref<detail::parameter::clear_color>
 	clear_color()
 	{
 		return detail::parameter_ref<detail::parameter::clear_color>();
 	}
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	detail::parameter_ref<detail::parameter::clear_depth>
 	clear_depth()
 	{
 		return detail::parameter_ref<detail::parameter::clear_depth>();
 	}
 
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	detail::parameter_ref<detail::parameter::clear_stencil>
 	clear_stencil()
 	{
@@ -222,7 +223,7 @@ public:
 	}
 
 	template <typename T>
-	__GLWRAP_MEMBER_FUNC_DECL__
+	GLWRAP_MEMBER_FUNC_DECL
 	detail::parameter_ref<T>
 	parameter()
 	{
@@ -232,5 +233,5 @@ public:
 private:
 
 };
-
+*/
 }
