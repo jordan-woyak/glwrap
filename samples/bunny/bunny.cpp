@@ -159,7 +159,8 @@ int main()
 			gl::perspective(45.f, (float_t)window_size.x / window_size.y, 1.f, 100.f);
 			//gl::ortho(0.f, 100.f, 0.f, 100.f, -100.f, 100.f);
 
-		prog.set_uniform(modelview_uni, modelview);
+		//prog.set_uniform(modelview_uni, modelview);
+		prog.set_uniform(modelview_uni, gl::ortho(-1.f, 1.f, -1.f, 1.f, -100.f, 100.f));
 
 		if ((rotate += 3.14f * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14f * 2;
