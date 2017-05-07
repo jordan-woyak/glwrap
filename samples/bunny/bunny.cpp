@@ -41,7 +41,7 @@ int main()
 	// create program
 	gl::program prog(glc);
 
-	auto modelview_uni = prog.create_uniform<gl::mat4>("modelview");
+	auto model_uni = prog.create_uniform<gl::mat4>("model");
 	auto projection_uni = prog.create_uniform<gl::mat4>("projection");
 
 	auto light_dir_uni = prog.create_uniform<gl::vec3>("light_dir");
@@ -61,12 +61,12 @@ int main()
 		"void main(void)"
 		"{"
 			"norm_light_dir = normalize(light_dir);"
-			"vertex_normal = mat3(modelview) * norm;"
+			"vertex_normal = mat3(model) * norm;"
 			"E = normalize(mat3(projection) * vec3(0, 0, -1));"
 
 			"Ia = ambient.rgb * ambient.a;"
 
-			"gl_Position = modelview * projection * vec4(pos, 1);"
+			"gl_Position = projection * model * vec4(pos, 1);"
 		"}"
 	);
 
@@ -130,12 +130,10 @@ int main()
 	prog.set_uniform(diff_color_uni, {1, 1, 0.75f, 1});
 	prog.set_uniform(spec_color_uni, {1, 1, 1, 0.1f});
 	prog.set_uniform(ambient_uni, {1, 1, 1, 0.2f});
-	prog.set_uniform(light_dir_uni, {-1, 1, -1});
+	prog.set_uniform(light_dir_uni, {-1, 1, 1});
 	prog.set_uniform(shininess_uni, 5);
 
 	prog.set_uniform(mat_color_uni, {0.5f, 0.25f, 0.125f, 1});
-
-	prog.set_uniform(projection_uni, gl::mat4{});
 
 	glc.enable(gl::capability::depth_test);
 	//glc.enable(gl::capability::cull_face);
@@ -146,21 +144,27 @@ int main()
 	glc.use_element_array(indbuf);
 	glc.use_primitive_mode(gl::primitive::triangles);
 
-	auto const pre_rotate = gl::scale(8.f, 8.f, 8.f) * gl::translate(0.2f, -0.8f, 0.f);
-	auto const post_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f) * gl::translate(0.f, 0.f, -2.5f);
+	// point the rabbit down towards the camera
+	auto const pre_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f);
+	// shift the rabbit out from it's rotation point a bit and scale up
+	auto const post_rotate = gl::translate(0.1f, -0.8f, 0.f) * gl::scale(8.f, 8.f, 8.f);
+
+	auto const proj =
+		gl::perspective(glm::radians(45.f), (float_t)window_size.x / window_size.y, 1.f, 100.f) *
+		glm::lookAt(glm::vec3{0.f, 0.f, 3.f}, glm::vec3{}, glm::vec3{0.f, 1.f, 0.f});
+		//gl::ortho(-1.f, 1.f, -1.f, 1.f);
+		
+	prog.set_uniform(projection_uni, proj);
 
 	dsp.set_display_func([&]
 	{
 		// rotating projection
-		gl::mat4 modelview = pre_rotate *
+		gl::mat4 model =
+			pre_rotate *
 			gl::rotate(rotate, 0.f, 1.f, 0.f) *
-			post_rotate *
-			// TODO: why is perspective in the modelview?
-			gl::perspective(45.f, (float_t)window_size.x / window_size.y, 1.f, 100.f);
-			//gl::ortho(0.f, 100.f, 0.f, 100.f, -100.f, 100.f);
+			post_rotate;			
 
-		//prog.set_uniform(modelview_uni, modelview);
-		prog.set_uniform(modelview_uni, gl::ortho(-1.f, 1.f, -1.f, 1.f, -100.f, 100.f));
+		prog.set_uniform(model_uni, model);
 
 		if ((rotate += 3.14f * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14f * 2;

@@ -123,14 +123,18 @@ inline typename detail::mat<T, 4, 4>::type translate(basic_vec<T, 3> const& _dim
 	return glm::translate(_dims);
 }
 
-// TODO: param order
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type ortho(T _left, T _right, T _bottom, T _top, T _near, T _far)
 {
 	return glm::ortho(_left, _right, _bottom, _top, _near, _far);
 }
 
-// TODO: param order
+template <typename T>
+inline typename detail::mat<T, 4, 4>::type ortho(T _left, T _right, T _bottom, T _top)
+{
+	return glm::ortho(_left, _right, _bottom, _top);
+}
+
 template <typename T>
 inline typename detail::mat<T, 4, 4>::type frustum(T _left, T _right, T _bottom, T _top, T _near, T _far)
 {
