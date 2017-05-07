@@ -34,9 +34,7 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, _comp.m_buffer);
 
 		// TODO: make not needed
-		auto binder = detail::make_scoped_binder(*this);
-
-		set_current_binding(native_handle());
+		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 		
 		glEnableVertexAttribArray(index);
 		detail::vertex_attrib_pointer<T>::bind(index, _comp.stride(), _comp.m_offset);
@@ -46,23 +44,9 @@ public:
 	void unbind_vertex_attribute(const attribute_location<T>& _location)
 	{
 		// TODO: make not needed
-		auto binder = detail::make_scoped_binder(*this);
+		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 		
 		glDisableVertexAttribArray(_location.get_index());
-	}
-
-private:
-	// TODO: would like to kill:
-	friend class detail::scoped_binder<vertex_array>;
-
-	static void set_current_binding(native_handle_type _handle)
-	{
-		glBindVertexArray(_handle);
-	}
-
-	static native_handle_type get_current_binding()
-	{
-		return detail::get_parameter<int_t>(GL_VERTEX_ARRAY_BINDING);
 	}
 };
 

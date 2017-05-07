@@ -135,7 +135,9 @@ public:
 
 	void bind_attachment(attach_point const& _point, attachment const& _attach)
 	{
-		bind_read();
+		// ugly..
+		detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+		
 		_attach.m_func(GL_READ_FRAMEBUFFER, _point.get_value());
 	}
 
@@ -163,7 +165,9 @@ public:
 
 	void bind_read_buffer(color_attach_point const& _attach_point)
 	{
-		bind_read();
+		// ugly..
+		detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+		
 		glReadBuffer(_attach_point.get_value());
 	}
 
@@ -179,22 +183,15 @@ public:
 	}
 
 private:
-	void bind_draw() const
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, native_handle());
-	}
-
-	void bind_read() const
-	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, native_handle());
-	}
-
 	void update_draw_buffers()
 	{
-		bind_draw();
+		// ugly..
+		detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
+		
 		glDrawBuffers(m_draw_buffers.size(), m_draw_buffers.data());
 	}
 
+	// TODO: can this be killed?
 	std::vector<GLenum> m_draw_buffers;
 };
 

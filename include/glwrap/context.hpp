@@ -32,8 +32,7 @@ class context
 
 public:
 	context()
-		: m_draw_fbo(), m_read_fbo()
-		, m_primitive_mode(static_cast<GLenum>(primitive::triangles))
+		: m_primitive_mode(static_cast<GLenum>(primitive::triangles))
 		, m_element_type()
 #ifndef GLWRAP_NO_SFML
 		, m_sf_window(new sf::RenderWindow)
@@ -55,24 +54,18 @@ public:
 	// TODO: kill these 3, provide clear functionality like ogl
 	void clear_color(vec4 const& _color = vec4{})
 	{
-		prepare_use_fb();
-
 		glClearColor(_color.x, _color.y, _color.z, _color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	void clear_stencil(int_t _index = 0)
 	{
-		prepare_use_fb();
-
 		glClearStencil(_index);
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 
 	void clear_depth(depth_t _depth = 1.0)
 	{
-		prepare_use_fb();
-
 		glClearDepth(_depth);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
@@ -264,8 +257,6 @@ public:
 		// TODO: mask
 		auto _mask = GL_COLOR_BUFFER_BIT;
 
-		prepare_use_fb();
-
 		glBlitFramebuffer(
 			_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
 			_dst_begin.x, _dst_begin.y, _dst_end.x, _dst_end.y,
@@ -292,8 +283,6 @@ public:
 
 	void draw_arrays(std::size_t _offset, std::size_t _count)
 	{
-		prepare_draw();
-
 		glDrawArrays(get_primitive_mode(),
 			_offset,
 			_count);
@@ -301,8 +290,6 @@ public:
 
 	void draw_arrays_instanced(std::size_t _offset, std::size_t _count, std::size_t _instances)
 	{
-		prepare_draw();
-
 		glDrawArraysInstanced(get_primitive_mode(),
 			_offset,
 			_count,
@@ -311,8 +298,6 @@ public:
 
 	void draw_elements(std::size_t _start, std::size_t _count)
 	{
-		prepare_draw();
-
 		glDrawElements(get_primitive_mode(),
 			_count,
 			get_element_type(),
@@ -321,8 +306,6 @@ public:
 
 	void draw_elements_offset(std::size_t _start, std::size_t _count, std::size_t _offset)
 	{
-		prepare_draw();
-
 		glDrawElementsBaseVertex(get_primitive_mode(),
 			_count,
 			get_element_type(),
@@ -332,8 +315,6 @@ public:
 
 	void draw_elements_instanced(std::size_t _start, std::size_t _count, std::size_t _instances)
 	{
-		prepare_draw();
-
 		glDrawElementsInstanced(get_primitive_mode(),
 			_count,
 			get_element_type(),
@@ -372,13 +353,11 @@ public:
 
 	void use_draw_framebuffer(framebuffer_reference _fb)
 	{
-		m_draw_fbo = _fb.native_handle();
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
 	}
 
 	void use_read_framebuffer(framebuffer_reference _fb)
 	{
-		m_read_fbo = _fb.native_handle();
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _fb.native_handle());
 	}
 
@@ -403,18 +382,6 @@ public:
 	}
 
 private:
-	void prepare_draw()
-	{
-		// TODO: make this not necessary
-		prepare_use_fb();
-	}
-
-	void prepare_use_fb()
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_draw_fbo);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_read_fbo);
-	}
-
 	GLenum get_primitive_mode() const
 	{
 		return m_primitive_mode;
@@ -432,8 +399,7 @@ private:
 	}
 #endif
 
-	GLuint m_draw_fbo, m_read_fbo;
-
+	// TODO: why do I save this?
 	GLenum m_primitive_mode;
 	GLenum m_element_type;
 

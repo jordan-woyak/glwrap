@@ -23,50 +23,45 @@ inline GLuint gen_return(glgenfunc f)
 namespace detail
 {
 
+// TODO: poorly named
 // TODO: I'd like to kill this.
 template <typename T>
-class scoped_binder
+class scoped_value
 {
 public:
-	scoped_binder(const scoped_binder&) = delete;
-	scoped_binder& operator=(const scoped_binder&) = delete;
+	scoped_value(const scoped_value&) = delete;
+	scoped_value& operator=(const scoped_value&) = delete;
 
-	explicit scoped_binder(const T& _obj)
-		: m_prev_binding(T::get_current_binding())
-		, m_desired_binding(_obj.native_handle())
+	explicit scoped_value(const typename T::value_type& _val)
+		: m_prev_value(T::get())
+		, m_desired_value(_val)
 	{
-		if (m_prev_binding != m_desired_binding)
+		if (m_prev_value != m_desired_value)
 		{
-			T::set_current_binding(m_desired_binding);
+			T::set(m_desired_value);
 		}
 	}
 
-	scoped_binder(scoped_binder&& _other)
-		: m_prev_binding(_other.m_prev_binding)
-		, m_desired_binding(_other.m_desired_binding)
+	scoped_value(scoped_value&& _other)
+		: m_prev_value(_other.m_prev_value)
+		, m_desired_value(_other.m_desired_value)
 	{
 		// _other will no longer unbind on destruction
-		_other.m_desired_binding = m_prev_binding;
+		_other.m_desired_value = m_prev_value;
 	}
 
-	~scoped_binder()
+	~scoped_value()
 	{
-		if (m_prev_binding != m_desired_binding)
+		if (m_prev_value != m_desired_value)
 		{
-			T::set_current_binding(m_prev_binding);
+			T::set(m_prev_value);
 		}
 	}
 
 private:
-	typename T::native_handle_type const m_prev_binding;
-	typename T::native_handle_type m_desired_binding;
+	typename T::value_type const m_prev_value;
+	typename T::value_type m_desired_value;
 };
-
-template <typename T>
-scoped_binder<T> make_scoped_binder(const T& _obj)
-{
-	return scoped_binder<T>{_obj};
-}
 
 template <typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, T>::type* value_ptr(T& _val)

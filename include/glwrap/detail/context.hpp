@@ -39,38 +39,32 @@ void gl_get(GLenum _pname, GLint64* _params)
 }
 
 //
-// parameter_getter
-//
-// provides a friendly way to glGet directly into vecNs
-//
-
-template <typename T>
-struct parameter_getter
-{
-	static GLWRAP_MEMBER_FUNC_DECL
-	T get(GLenum _pname)
-	{
-		T ret;
-
-		gl_get(_pname, value_ptr(ret));
-		check_unlikely_error();
-
-		return ret;
-	}
-};
-
-//
 // get_parameter
 //
-// a slightly more friendly interface for parameter_getter
+// a slightly more friendly interface for gl_get
 //
 
 template <typename T>
 GLWRAP_FUNC_DECL
-T get_parameter(GLenum _pname)
+T get_parameter(enum_t _pname)
 {
-	return parameter_getter<T>::get(_pname);
+	T ret;
+
+	gl_get(_pname, value_ptr(ret));
+	check_unlikely_error();
+
+	return ret;
 }
+
+template <typename T, enum_t P>
+struct regular_parameter_getter
+{
+	static GLWRAP_MEMBER_FUNC_DECL
+	T get()
+	{
+		return get_parameter<T>(P);
+	}
+};
 
 namespace parameter
 {
@@ -79,6 +73,51 @@ struct clear_color {};
 struct clear_depth {};
 struct clear_stencil {};
 struct blend_color {};
+
+// TODO: named with _binding ?
+struct draw_framebuffer : regular_parameter_getter<int_t, GL_DRAW_FRAMEBUFFER_BINDING>
+{
+	typedef uint_t value_type;
+	
+	static GLWRAP_MEMBER_FUNC_DECL
+	void set(value_type _value)
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _value);
+	}
+};
+
+struct read_framebuffer : regular_parameter_getter<int_t, GL_READ_FRAMEBUFFER_BINDING>
+{
+	typedef uint_t value_type;
+	
+	static GLWRAP_MEMBER_FUNC_DECL
+	void set(value_type _value)
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _value);
+	}
+};
+
+struct vertex_array : regular_parameter_getter<int_t, GL_VERTEX_ARRAY_BINDING>
+{
+	typedef uint_t value_type;
+	
+	static GLWRAP_MEMBER_FUNC_DECL
+	void set(value_type _value)
+	{
+		glBindVertexArray(_value);
+	}
+};
+
+struct program : regular_parameter_getter<int_t, GL_CURRENT_PROGRAM>
+{
+	typedef uint_t value_type;
+	
+	static GLWRAP_MEMBER_FUNC_DECL
+	void set(value_type _value)
+	{
+		glUseProgram(_value);
+	}
+};
 
 }
 

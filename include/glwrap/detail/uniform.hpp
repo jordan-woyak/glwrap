@@ -130,15 +130,9 @@ void set_program_uniform(uint_t _program, int_t _loc, typename uniform_value<T>:
 	else
 	{
 		// TODO: ugly
-		uint_t const prev_program = detail::get_parameter<int_t>(GL_CURRENT_PROGRAM);
-
-		if (prev_program != _program)
-			glUseProgram(_program);
+		scoped_value<parameter::program> binding(_program);
 		
 		gl_uniform(_loc, _value);
-
-		if (prev_program != _program)
-			glUseProgram(prev_program);
 	}
 }
 
