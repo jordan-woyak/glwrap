@@ -180,11 +180,12 @@ public:
 		return uniform_block<T>(std::prev(m_uniform_blocks.end()));
 	}
 
+	// TODO: array support
 	template <typename T>
 	void set_uniform(uniform<T>& _uniform, typename detail::uniform_value<T>::type const& _value)
 	{
-		bind();
-		_uniform.set_value(_value);
+		detail::set_program_uniform<T>(native_handle(), _uniform.get_location(),
+			detail::uniform_value<T>::convert_to_gl_type(_value));
 	}
 
 	template <typename T>

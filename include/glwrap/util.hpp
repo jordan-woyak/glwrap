@@ -23,6 +23,12 @@ inline GLuint gen_return(glgenfunc f)
 namespace detail
 {
 
+template <typename T>
+typename std::enable_if<std::is_arithmetic<T>::value, T>::type* value_ptr(T& _val)
+{
+	return &_val;
+}
+
 struct exception
 {
 	GLenum error_flag;

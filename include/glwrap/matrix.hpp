@@ -84,6 +84,18 @@ struct mat_traits<T, typename std::enable_if<is_mat<T>::value>::type>
 template <typename T, int R, int C>
 using basic_mat = typename detail::mat<T, R, C>::type;
 
+namespace detail
+{
+
+template <typename T, int R, int C>
+GLWRAP_FUNC_DECL
+T* value_ptr(const basic_mat<T, R, C>& _val)
+{
+	return glm::value_ptr(_val);
+}
+
+}
+
 // TODO: non-float versions of these functions?
 // TODO: only take vec3 instead of xyz?
 

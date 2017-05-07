@@ -25,13 +25,6 @@ int main()
 	gl::display dsp(glc, window_size);
 	dsp.set_caption("glwrap-monkey");
 
-	// custom vertex type
-	struct FooVertex
-	{
-		gl::vec3 pos, norm;
-		gl::vec2 texpos;
-	};
-
 	// load textures
 	gl::texture_2d tex_color(glc), tex_spec(glc), tex_normal(glc);
 
@@ -72,6 +65,13 @@ int main()
 	
 	//tex_color.set_wrap_s(gl::wrap_mode::clamp_to_edge);
 	//tex_color.set_wrap_t(gl::wrap_mode::clamp_to_edge);
+
+	// custom vertex type
+	struct FooVertex
+	{
+		gl::vec3 pos, norm;
+		gl::vec2 texpos;
+	};
 
 	// nonsense to load ply
 	ply::vertex_format<FooVertex> vert_fmt;
@@ -206,7 +206,7 @@ int main()
 	prog.set_uniform(diff_color_uni, {1, 1, 1, 1});
 	prog.set_uniform(spec_color_uni, {1, 1, 1, 0.1});
 	prog.set_uniform(ambient_uni, {1, 1, 1, 0.2});
-	prog.set_uniform(light_dir_uni, {0, 0.75, 1});
+	prog.set_uniform(light_dir_uni, {-1, 0.75, 1});
 	prog.set_uniform(shininess_uni, 50);
 
 	prog.set_uniform(tex_color_uni, tex_color_unit);

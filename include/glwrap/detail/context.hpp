@@ -67,7 +67,7 @@ struct parameter_getter<T, typename std::enable_if<detail::is_vec<T>::value>::ty
 	{
 		T ret;
 
-		gl_get(_pname, glm::value_ptr(ret));
+		gl_get(_pname, value_ptr(ret));
 		check_unlikely_error();
 
 		return ret;

@@ -75,7 +75,7 @@ GLWRAP_FUNC_DECL
 typename std::enable_if<detail::is_vec<T>::value, T>::type
 get_tex_parameter(GLenum _target, GLenum _pname)
 {
-	return get_tex_parameter<I>(_target, _pname, glm::value_ptr(ret));
+	return get_tex_parameter<I>(_target, _pname, value_ptr(ret));
 }
 
 //
@@ -154,7 +154,7 @@ GLWRAP_FUNC_DECL
 typename std::enable_if<detail::is_vec<T>::value>::type
 set_tex_parameter(GLenum _target, GLenum _pname, const T& _param)
 {
-	set_tex_parameter<I>(_target, _pname, glm::value_ptr(_param));
+	set_tex_parameter<I>(_target, _pname, value_ptr(_param));
 }
 
 //

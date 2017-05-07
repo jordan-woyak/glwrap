@@ -31,12 +31,12 @@ public:
 		: m_var(new detail::variable<T>(_var))
 	{}
 
-	GLuint get_location() const
+	int_t get_location() const
 	{
 		return m_location;
 	}
 
-	void set_location(GLuint _location)
+	void set_location(int_t _location)
 	{
 		m_location = _location;
 	}
@@ -47,7 +47,7 @@ public:
 	}
 
 	std::unique_ptr<variable_base> m_var;
-	uint_t m_location;
+	int_t m_location;
 };
 
 }
@@ -64,14 +64,9 @@ private:
 		: m_iter(_iter)
 	{}
 
-	uint_t get_location() const
+	int_t get_location() const
 	{
 		return m_iter->get_location();
-	}
-
-	void set_value(typename detail::uniform_value<T>::type const& _value)
-	{
-		detail::set_uniform_value(get_location(), _value);
 	}
 
 	iter_t m_iter;

@@ -41,7 +41,7 @@ class texture_unit
 	friend class texture_unit_alloter;
 
 public:
-	uint_t get_index() const
+	int_t get_index() const
 	{
 		return m_index;
 	}
@@ -51,7 +51,7 @@ private:
 		: m_index(_index)
 	{}
 
-	uint_t m_index;
+	int_t m_index;
 };
 
 // TODO: name?

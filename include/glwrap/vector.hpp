@@ -66,5 +66,17 @@ struct vec_traits<T, typename std::enable_if<is_vec<T>::value>::type>
 template <typename T, int N>
 using basic_vec = typename detail::vec<T, N>::type;
 
+namespace detail
+{
+
+template <typename T, int N>
+GLWRAP_FUNC_DECL
+T* value_ptr(const basic_vec<T, N>& _val)
+{
+	return glm::value_ptr(_val);
+}
+
+}
+
 }
 
