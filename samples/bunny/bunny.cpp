@@ -158,7 +158,7 @@ int main()
 
 	dsp.set_display_func([&]
 	{
-		// rotating projection
+		// rotating model
 		gl::mat4 model =
 			pre_rotate *
 			gl::rotate(rotate, 0.f, 1.f, 0.f) *
