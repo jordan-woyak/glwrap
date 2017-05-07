@@ -166,6 +166,7 @@ public:
 		glTexParameteri(get_target(), static_cast<GLenum>(_comp), static_cast<GLint>(_val));
 	}
 
+	// TODO: basic_vec<swizzle_value, 3> ?
 	void set_swizzle_rgba(swizzle_value _r, swizzle_value _g, swizzle_value _b, swizzle_value _a)
 	{
 		bind();

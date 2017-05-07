@@ -28,8 +28,6 @@ enum class texture_filter : GLenum
 
 class sampler : public globject
 {
-	friend class context;
-
 public:
 	sampler(context& _context)
 		: globject(gen_return(glGenSamplers))
@@ -94,11 +92,6 @@ private:
 	void set_parameter_raw(GLenum _pname, float_t _val)
 	{
 		glSamplerParameterf(native_handle(), _pname, _val);
-	}
-	
-	void bind(GLuint _unit) const
-	{
-		glBindSampler(_unit, native_handle());
 	}
 };
 

@@ -69,11 +69,6 @@ typename std::enable_if<std::is_arithmetic<T>::value, T>::type* value_ptr(T& _va
 	return &_val;
 }
 
-struct exception
-{
-	GLenum error_flag;
-};
-
 void check_error()
 {
 	GLenum const err = glGetError();

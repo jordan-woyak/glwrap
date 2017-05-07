@@ -6,7 +6,7 @@
 
 int main()
 {
-	gl::ivec2 window_size{240, 240};
+	gl::ivec2 window_size{640, 640};
 
 	gl::context glc;
 	gl::display dsp(glc, window_size);

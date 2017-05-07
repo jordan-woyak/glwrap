@@ -119,6 +119,17 @@ struct program : regular_parameter_getter<int_t, GL_CURRENT_PROGRAM>
 	}
 };
 
+struct renderbuffer : regular_parameter_getter<int_t, GL_RENDERBUFFER_BINDING>
+{
+	typedef uint_t value_type;
+	
+	static GLWRAP_MEMBER_FUNC_DECL
+	void set(value_type _value)
+	{
+		glBindRenderbuffer(GL_RENDERBUFFER, _value);
+	}
+};
+
 }
 
 template <typename P>

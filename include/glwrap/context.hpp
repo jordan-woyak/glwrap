@@ -215,7 +215,7 @@ public:
 	template <typename T>
 	void bind_sampler(texture_unit<T> const& _unit, sampler const& _sampler)
 	{
-		_sampler.bind(_unit.get_index());
+		glBindSampler(_unit.get_index(), _sampler.native_handle());
 	}
 
 	template <typename T>

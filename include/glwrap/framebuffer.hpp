@@ -197,8 +197,6 @@ private:
 
 class framebuffer_reference
 {
-	friend class context;
-
 public:
 	framebuffer_reference(framebuffer const& _fb)
 		: m_fb(_fb.native_handle())
@@ -214,11 +212,6 @@ public:
 	}
 
 private:
-	void bind_draw()
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fb);
-	}
-
 	GLuint m_fb;
 };
 
