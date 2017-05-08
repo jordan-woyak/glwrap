@@ -209,7 +209,7 @@ public:
 	void bind_texture(texture_unit<T> const& _unit, T const& _texture)
 	{
 		glActiveTexture(GL_TEXTURE0 + _unit.get_index());
-		_texture.bind();
+		glBindTexture(T::target, _texture.native_handle());
 	}
 
 	template <typename T>

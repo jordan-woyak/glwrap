@@ -100,15 +100,6 @@ struct wrap_s : parameter_base<int_t>
 
 }
 
-template <typename T, typename V>
-void set_texture_parameter(V);
-
-template <>
-void set_texture_parameter<texture_parameter::wrap_s, wrap_mode>(wrap_mode _mode)
-{
-
-}
-
 template <texture_type Type>
 class texture : public globject
 {
@@ -137,8 +128,10 @@ public:
 	template <typename T>
 	void assign(unpack_buffer<T, dimensions> const& _buffer, image_format _ifmt)
 	{
-		bind();
-		glTexImage2D(get_target(), 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
+		// TODO: ugly
+		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+		
+		glTexImage2D(target, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
 			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
 	}
 
@@ -147,37 +140,37 @@ public:
 	// TODO: work for NPOT
 	void storage(basic_vec<int_t, dimensions> const& _dims, image_format _ifmt)
 	{
+		// TODO: ugly
+		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+
 		// TODO: for non 2d textures
-		bind();
-		glTexImage2D(get_target(), 0, _ifmt.value, _dims.x, _dims.y,
+		
+		glTexImage2D(target, 0, _ifmt.value, _dims.x, _dims.y,
 			0, GL_RED, GL_BYTE, nullptr);
 	}
 
 	// mipmap vs. mipmaps ?
 	void generate_mipmap()
 	{
-		bind();
-		glGenerateMipmap(get_target());
+		// TODO: ugly
+		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+		
+		glGenerateMipmap(target);
 	}
 
 	void set_swizzle(swizzle_component _comp, swizzle_value _val)
 	{
-		bind();
-		glTexParameteri(get_target(), static_cast<GLenum>(_comp), static_cast<GLint>(_val));
+		set_parameter_raw(static_cast<GLenum>(_comp), static_cast<int_t>(_val));
 	}
 
 	// TODO: basic_vec<swizzle_value, 3> ?
 	void set_swizzle_rgba(swizzle_value _r, swizzle_value _g, swizzle_value _b, swizzle_value _a)
 	{
-		bind();
-		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_R, static_cast<GLint>(_r));
-		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_G, static_cast<GLint>(_g));
-		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_B, static_cast<GLint>(_b));
-		glTexParameteri(get_target(), GL_TEXTURE_SWIZZLE_A, static_cast<GLint>(_a));
+		set_parameter_raw(GL_TEXTURE_SWIZZLE_R, static_cast<int_t>(_r));
+		set_parameter_raw(GL_TEXTURE_SWIZZLE_G, static_cast<int_t>(_g));
+		set_parameter_raw(GL_TEXTURE_SWIZZLE_B, static_cast<int_t>(_b));
+		set_parameter_raw(GL_TEXTURE_SWIZZLE_A, static_cast<int_t>(_a));
 	}
-
-	template <typename T>
-	void set_parameter(T _param, typename T::value_type _val);
 
 	// TODO: this should be automatic?
 	void set_max_level(int_t _level)
@@ -185,52 +178,38 @@ public:
 		set_parameter_raw(GL_TEXTURE_MAX_LEVEL, _level);
 	}
 
-	void set_parameter_raw(GLenum _pname, int_t _val)
-	{
-		bind();
-		glTexParameteri(get_target(), _pname, _val);
-	}
-
-	void set_parameter_raw(GLenum _pname, float_t _val)
-	{
-		bind();
-		glTexParameterf(get_target(), _pname, _val);
-	}
-
 	void set_min_filter(texture_filter _mode)
 	{
-		set_parameter_raw(GL_TEXTURE_MIN_FILTER, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_MIN_FILTER, static_cast<int_t>(_mode));
 	}
 
 	void set_mag_filter(texture_filter _mode)
 	{
-		set_parameter_raw(GL_TEXTURE_MAG_FILTER, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_MAG_FILTER, static_cast<int_t>(_mode));
 	}
 
 	void set_wrap_s(wrap_mode _mode)
 	{
-		set_parameter_raw(GL_TEXTURE_WRAP_S, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_WRAP_S, static_cast<int_t>(_mode));
 	}
 
 	void set_wrap_t(wrap_mode _mode)
 	{
-		set_parameter_raw(GL_TEXTURE_WRAP_T, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_WRAP_T, static_cast<int_t>(_mode));
 	}
 
 	void set_wrap_r(wrap_mode _mode)
 	{
-		set_parameter_raw(GL_TEXTURE_WRAP_R, static_cast<int>(_mode));
+		set_parameter_raw(GL_TEXTURE_WRAP_R, static_cast<int_t>(_mode));
 	}
 
 private:
-	static GLenum get_target()
-	{
-		return detail::get_texture_target<type>();
-	}
+	static const enum_t target = detail::texture_traits<type>::target;
 
-	void bind() const
+	template <typename T>
+	void set_parameter_raw(GLenum _pname, T _val)
 	{
-		glBindTexture(get_target(), native_handle());
+		detail::set_texture_parameter<type>(native_handle(), _pname, _val);
 	}
 };
 
@@ -263,18 +242,15 @@ public:
 	{
 		bind();
 		// TODO: don't hardcode datatype!
-		glTexBuffer(get_target(), GL_RGBA32F, _buffer.native_handle());
+		glTexBuffer(target, GL_RGBA32F, _buffer.native_handle());
 	}
 
 private:
-	static GLenum get_target()
-	{
-		return detail::get_texture_target<type>();
-	}
+	static const enum_t target = detail::texture_traits<type>::target;
 
 	void bind() const
 	{
-		glBindTexture(get_target(), native_handle());
+		glBindTexture(target, native_handle());
 	}
 };
 
