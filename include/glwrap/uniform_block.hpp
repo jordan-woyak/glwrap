@@ -133,8 +133,4 @@ private:
 	iter_t m_iter;
 };
 
-template <typename T>
-struct uniform_block_align
-{};
-
 }

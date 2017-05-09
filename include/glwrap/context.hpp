@@ -226,16 +226,15 @@ public:
 
 	// TODO: should allow reference to buffer element as well
 	// range is probably not needed/wanted for uniform buffer
-	// TODO: require "uniform_block_align<T>"
 	template <typename T>
-	void bind_buffer(uniform_block_binding<T> const& _unit, buffer_iterator<T> const& _iter, uint_t _size)
+	void bind_buffer(uniform_block_binding<T> const& _unit, uniform_buffer_iterator<T> const& _iter, uint_t _size)
 	{
 		glBindBufferRange(GL_UNIFORM_BUFFER, _unit.get_index(),
 			_iter.m_buffer,	reinterpret_cast<GLintptr>(_iter.m_offset), sizeof(T) * _size);
 	}
 
 	template <typename T>
-	void bind_buffer(transform_feedback_binding<T> const& _unit, buffer_iterator<T> const& _iter, uint_t _size)
+	void bind_buffer(transform_feedback_binding<T> const& _unit, tight_buffer_iterator<T> const& _iter, uint_t _size)
 	{
 		glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, _unit.get_index(),
 			_iter.m_buffer, reinterpret_cast<GLintptr>(_iter.m_offset), sizeof(T) * _size);

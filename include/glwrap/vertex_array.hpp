@@ -25,9 +25,9 @@ public:
 		glDeleteVertexArrays(1, &nh);
 	}
 
-	template <typename T, typename B>
-	typename std::enable_if<is_buffer_iterator<T, B>::value, void>::type
-	bind_vertex_attribute(const attribute_location<T>& _location, const B& _comp)
+	// TODO: make sure this is callable from a tight_buffer_iterator as well.
+	template <typename T>
+	void bind_vertex_attribute(const attribute_location<T>& _location, const strided_buffer_iterator<T>& _comp)
 	{
 		auto const index = _location.get_index();
 
@@ -37,7 +37,7 @@ public:
 		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 		
 		glEnableVertexAttribArray(index);
-		detail::vertex_attrib_pointer<T>::bind(index, _comp.stride(), _comp.m_offset);
+		detail::vertex_attrib_pointer<T>::bind(index, _comp.m_stride, _comp.m_offset);
 	}
 
 	template <typename T>
