@@ -3,6 +3,8 @@
 #include "attribute.hpp"
 #include "framebuffer.hpp"
 
+#include "detail/variable.hpp"
+
 namespace gl
 {
 
@@ -37,9 +39,12 @@ namespace detail
 template <shader_type, typename>
 struct shader_io_type;
 
+// TODO: separate these for inputs/outputs
 template <typename T>
 struct shader_io_type<shader_type::vertex, T>
 {
+	static_assert(glslvar::is_valid_glsl_type<T>::value, "Invalid Vertex Input/Output type.");
+	
 	typedef attribute<T> input_type;
 	typedef vertex_out_varying<T> output_type;
 };
@@ -47,6 +52,9 @@ struct shader_io_type<shader_type::vertex, T>
 template <typename T>
 struct shader_io_type<shader_type::fragment, T>
 {
+	// TODO: this should be more restrictive
+	static_assert(glslvar::is_valid_glsl_type<T>::value, "Invalid Fragment Output type.");
+	
 	//typedef ...<T> input_type;
 	typedef fragdata<T> output_type;
 };
@@ -129,7 +137,7 @@ private:
 	std::string get_header() const
 	{
 		// TODO: allow setting version
-		std::string header("#version 130\n");
+		std::string header("#version 300 es\n");
 
 		for (auto& var : m_inputs)
 		{

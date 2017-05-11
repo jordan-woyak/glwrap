@@ -46,6 +46,10 @@ struct static_buffer_alignment
 	}
 };
 
+
+template <typename T>
+using tight_buffer_alignment = static_buffer_alignment<sizeof(T)>;
+
 // TODO: sensible name? needed at all?
 struct dynamic_buffer_alignment
 {
@@ -72,6 +76,9 @@ using uniform_buffer_iterator = buffer_iterator<T, detail::uniform_buffer_alignm
 
 template <typename T, sizei_t N>
 using static_buffer_iterator = buffer_iterator<T, detail::static_buffer_alignment<N>>;
+
+template <typename T>
+using tight_buffer_iterator = buffer_iterator<T, detail::tight_buffer_alignment<T>>;
 
 template <typename T>
 using dynamic_buffer_iterator = buffer_iterator<T, detail::dynamic_buffer_alignment>;
@@ -159,10 +166,10 @@ buffer_iterator<M, A> operator|(buffer_iterator<T, A> const& _iter, M T::*_membe
 		_iter.get_alignment(), _iter.get_member_offset() + member_offset);
 }
 
-template <typename T>
+template <typename T, typename A>
 class mapped_buffer;
 
-template <typename T, typename A = detail::static_buffer_alignment<sizeof(T)>>
+template <typename T, typename A = detail::tight_buffer_alignment<T>>
 class buffer : public globject
 {
 	friend class context;
@@ -173,7 +180,7 @@ public:
 
 	typedef buffer_iterator<T, A> iterator;
 
-	friend class mapped_buffer<value_type>;
+	friend class mapped_buffer<T, A>;
 
 	explicit buffer(context& _context)
 		: globject(gen_return(glGenBuffers))
@@ -250,27 +257,24 @@ private:
 	alignment_type m_alignment;
 };
 
-/*
-// TODO: fix for uniform_block_align<> :/
-template <typename T, typename A>
+template <typename T, typename A = detail::tight_buffer_alignment<T>>
 class mapped_buffer
 {
 public:
 	typedef T value_type;
 	typedef A alignment_type;
 
-	template <typename B>
-	mapped_buffer(buffer<B>& _buffer)
+	mapped_buffer(buffer<T, A>& _buffer)
 		: m_ptr()
 		, m_size()
 		, m_buffer(_buffer.native_handle())
-		, m_stride(_buffer.m_stride)
+		, m_alignment(_buffer.m_alignment)
 	{
 		glBindBuffer(GL_COPY_WRITE_BUFFER, m_buffer);
 
 		// TODO: allow range
 		// TODO: don't hardcode access mode
-		m_ptr = static_cast<T*>(glMapBuffer(GL_COPY_WRITE_BUFFER, GL_READ_WRITE));
+		m_ptr = static_cast<ubyte_t*>(glMapBuffer(GL_COPY_WRITE_BUFFER, GL_READ_WRITE));
 		m_size = _buffer.size();
 
 		// TODO: check for error
@@ -303,7 +307,7 @@ public:
 
 		iterator& operator+=(sizei_t _offset)
 		{
-			m_ptr = reinterpret_cast<T*>(reinterpret_cast<char*>(m_ptr) + _offset * m_stride);
+			m_ptr += _offset * m_alignment.get_stride();
 			return *this;
 		}
 
@@ -314,7 +318,7 @@ public:
 
 		value_type& operator*() const
 		{
-			return *m_ptr;
+			return *reinterpret_cast<T*>(m_ptr);
 		}
 
 		value_type* operator->() const
@@ -333,13 +337,13 @@ public:
 		}
 
 	private:
-		iterator(T* _ptr, sizei_t _stride)
+		iterator(ubyte_t* _ptr, alignment_type _alignment)
 			: m_ptr(_ptr)
-			, m_stride(_stride)
+			, m_alignment(_alignment)
 		{}
 
-		T* m_ptr;
-		sizei_t m_stride;
+		ubyte_t* m_ptr;
+		alignment_type m_alignment;
 	};
 
 	iterator begin()
@@ -349,7 +353,7 @@ public:
 
 	iterator end()
 	{
-		return {reinterpret_cast<T*>(reinterpret_cast<char*>(m_ptr) + m_size * m_stride), m_stride};
+		return {m_ptr + m_size * get_stride(), m_alignment};
 	}
 
 	~mapped_buffer()
@@ -365,10 +369,10 @@ private:
 	}
 
 
-	T* m_ptr;
+	ubyte_t* m_ptr;
 	sizei_t m_size;
 	uint_t m_buffer;
 	alignment_type m_alignment;
 };
-*/
+
 }

@@ -13,8 +13,11 @@
 
 namespace gl
 {
+
 namespace detail
 {
+
+// TODO: kill this namespace?
 namespace glslvar
 {
 
@@ -243,6 +246,86 @@ private:
 public:
 	static const std::size_t value = index_count<value_type>::value * detail::mat_traits<T>::cols;
 };
+
+// TODO: complete and use these
+template <typename T, typename Enable = void>
+struct is_valid_glsl_vec_size : std::false_type
+{};
+
+template <typename T>
+struct is_valid_glsl_vec_size<T, typename std::enable_if<
+	(vec_traits<T>::dimensions >= 2) &&
+	(vec_traits<T>::dimensions <= 4)
+	>::type> : std::true_type
+{};
+
+template <typename T, typename Enable = void>
+struct is_valid_glsl_mat_size : std::false_type
+{};
+
+template <typename T>
+struct is_valid_glsl_mat_size<T, typename std::enable_if<
+	(mat_traits<T>::rows >= 2) &&
+	(mat_traits<T>::rows <= 4) &&
+	(mat_traits<T>::cols >= 2) &&
+	(mat_traits<T>::cols <= 4)
+	>::type> : std::true_type
+{};
+
+template <typename T, typename Enable = void>
+struct is_valid_glsl_vec_value_type : std::false_type
+{};
+
+template <typename T>
+struct is_valid_glsl_vec_value_type<T, typename std::enable_if<
+	std::is_same<typename vec_traits<T>::value_type, bool_t>::value ||
+	std::is_same<typename vec_traits<T>::value_type, int_t>::value ||
+	std::is_same<typename vec_traits<T>::value_type, uint_t>::value ||
+	std::is_same<typename vec_traits<T>::value_type, float_t>::value ||
+	std::is_same<typename vec_traits<T>::value_type, double_t>::value
+	>::type> : std::true_type
+{};
+
+template <typename T, typename Enable = void>
+struct is_valid_glsl_mat_value_type : std::false_type
+{};
+
+template <typename T>
+struct is_valid_glsl_mat_value_type<T, typename std::enable_if<
+	std::is_same<typename vec_traits<T>::value_type, float_t>::value ||
+	std::is_same<typename vec_traits<T>::value_type, double_t>::value
+	>::type> : std::true_type
+{};
+
+template <typename T, typename Enable = void>
+struct is_valid_glsl_type : std::false_type
+{};
+
+template <typename T>
+struct is_valid_glsl_type<T, typename std::enable_if<
+	std::is_same<T, bool_t>::value ||
+	std::is_same<T, int_t>::value ||
+	std::is_same<T, uint_t>::value ||
+	std::is_same<T, float_t>::value ||
+	std::is_same<T, double_t>::value
+	>::type> : std::true_type
+{};
+
+template <typename T>
+struct is_valid_glsl_type<T, typename std::enable_if<
+	is_vec<T>::value &&
+	is_valid_glsl_vec_size<T>::value &&
+	is_valid_glsl_vec_value_type<T>::value
+	>::type> : std::true_type
+{};
+
+template <typename T>
+struct is_valid_glsl_type<T, typename std::enable_if<
+	is_mat<T>::value &&
+	is_valid_glsl_mat_size<T>::value &&
+	is_valid_glsl_mat_value_type<T>::value
+	>::type> : std::true_type
+{};
 
 }
 }

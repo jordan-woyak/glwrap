@@ -157,6 +157,8 @@ public:
 	template <typename T>
 	uniform<T> create_uniform(const std::string& _name)
 	{
+		static_assert(detail::glslvar::is_valid_glsl_type<T>::value, "Invalid Uniform type.");
+		
 		m_uniforms.emplace_back(detail::variable<T>(_name));
 		return uniform<T>(std::prev(m_uniforms.end()));
 	}
@@ -197,13 +199,13 @@ public:
 		glBindFragDataLocation(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
 	}
 
-	template <typename T>
-	void bind_transform_feedback(vertex_out_varying<T>& _varying, transform_feedback_binding<T> const& _binding)
+	void use_transform_feedback_description(const transform_feedback_descriptor& _desc)
 	{
-		//glTransformFeedbackVaryings
-		// (program state)
-		// for each transform feedback buffer index
-		// pair vertex shader outputs (varyings) with byte offsets into vertex
+		// TODO: detect the ability to use GL_SEPARATE_ATTRIBS?
+		// Is it worth it? any more performant?
+		
+		auto const varyings = _desc.build_varyings_array();
+		glTransformFeedbackVaryings(native_handle(), varyings.size(), varyings.data(), GL_INTERLEAVED_ATTRIBS);
 	}
 
 	// TODO: these 3 will break if repeated

@@ -6,7 +6,11 @@
 
 int main()
 {
+	gl::ivec2 window_size{120, 120};
+
 	gl::context glc;
+	gl::display dsp(glc, window_size);
+	dsp.set_caption("transform_feedback");
 
 	// used to connect array_buffer vertex data and program attributes together
 	// via the typeless "generic vertex attributes" in a type-safe manner
@@ -31,12 +35,14 @@ int main()
 	vshad.set_source(
 		"void main(void)"
 		"{"
-			"output1 = input1 * input2 + operand1;"
+			"output1 = float(input1) * float(input2) + operand1;"
 		"}"
 	);
 
 	prog.attach(vshad);
 	prog.compile();
+
+	std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
 
 	// custom vertex type
 	struct Input
@@ -63,21 +69,31 @@ int main()
 	{
 		1000, 2000, 7, 500, -1000
 	};
-	
-	// output buffer
-	gl::buffer<gl::float_t> output_buffer(glc);
-	output_buffer.storage(input_buffer.size() * operands.size());
 
-	gl::tf_vertex_attribute<Input> attr;
+	// TODO: currently requires a struct even for one output
+	struct Output
+	{
+		gl::float_t output1;
+	};
 
 	// connect buffers to varyings in a type-safe manner
 	gl::transform_feedback_binding_alloter tfbs(glc);
-	auto feedback_out = tfbs.allot<gl::float_t>();
+	auto feedback_out = tfbs.allot<Output>();
+
+	// TODO: set up tfeedback vertex format
+	gl::transform_feedback_descriptor tf_desc;
+	tf_desc.bind_vertex_attribute(output1_varying, feedback_out | &Output::output1);
+
+	prog.use_transform_feedback_description(tf_desc);
 
 	prog.link();
 
 	//if (!prog.is_good())
 		std::cout << "program log:\n" << prog.get_log() << std::endl;
+
+	// output buffer
+	gl::buffer<Output> output_buffer(glc);
+	output_buffer.storage(input_buffer.size() * operands.size());
 
 	gl::transform_feedback tfeedback(glc);
 	tfeedback.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
@@ -102,9 +118,9 @@ int main()
 	std::cout << "DONE" << std::endl << std::endl;
 
 	// print results
-	//std::size_t i{};
-	//for (auto& vert : gl::mapped_buffer<gl::float_t>(output_buffer))
-	//	std::cout << vert << "\t" << std::string(0 == (++i % input_buffer.size()), '\n');
+	std::size_t i{};
+	for (auto& vert : gl::mapped_buffer<Output>(output_buffer))
+		std::cout << vert.output1 << "\t" << std::string(0 == (++i % input_buffer.size()), '\n');
 
 	std::cout << std::endl;
 }
