@@ -6,11 +6,11 @@
 
 int main()
 {
-	gl::ivec2 window_size{120, 120};
+	//gl::ivec2 window_size{120, 120};
 
 	gl::context glc;
-	gl::display dsp(glc, window_size);
-	dsp.set_caption("transform_feedback");
+	//gl::display dsp(glc, window_size);
+	//dsp.set_caption("transform_feedback");
 
 	// used to connect array_buffer vertex data and program attributes together
 	// via the typeless "generic vertex attributes" in a type-safe manner

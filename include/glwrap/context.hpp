@@ -41,10 +41,18 @@ public:
 #ifndef GLWRAP_FAKE_CONTEXT
 		int dummy = 0;
 		glutInit(&dummy, 0);
-		//glutInitContextVersion(3, 1);
-		//glutInitContextProfile(GLUT_CORE_PROFILE);
+		
+		glutInitContextVersion(3, 0);
+		glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
+		glutInitContextProfile(GLUT_CORE_PROFILE);
+
+		// TODO: this is gross
+		int const w = glutCreateWindow("");
+		//glutHideWindow();
 
 		glewInit();
+
+		glutDestroyWindow(w);
 #endif
 	}
 

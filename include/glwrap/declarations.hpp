@@ -11,7 +11,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #define FREEGLUT_STATIC
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
