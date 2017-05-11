@@ -130,6 +130,17 @@ struct renderbuffer : regular_parameter_getter<int_t, GL_RENDERBUFFER_BINDING>
 	}
 };
 
+struct transform_feedback : regular_parameter_getter<int_t, GL_TRANSFORM_FEEDBACK_BINDING>
+{
+	typedef uint_t value_type;
+	
+	static GLWRAP_MEMBER_FUNC_DECL
+	void set(value_type _value)
+	{
+		glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, _value);
+	}
+};
+
 }
 
 template <typename P>

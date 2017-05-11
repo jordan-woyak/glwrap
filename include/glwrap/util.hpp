@@ -246,16 +246,16 @@ typename std::enable_if<!is_contiguous<U>::value ||
 	!is_same_ignore_reference_cv<T, typename range_traits<U>::value_type>::value, std::vector<T>>::type
 get_contiguous_range(U&& _range)
 {
-	return {std::begin(_range), std::end(_range)};
-
 	static_assert(sizeof(T) == 0, "using this guy");
+	
+	return {std::begin(_range), std::end(_range)};
 }
 
 template <typename T, typename M>
-std::intptr_t get_member_offset(M T::*_member)
+constexpr std::intptr_t get_member_offset(M T::*_member)
 {
-	const T* const null_obj = nullptr;
-	return reinterpret_cast<std::intptr_t>(&(null_obj->*_member));
+	// TODO: not portable
+	return reinterpret_cast<std::intptr_t>(&(static_cast<const T*>(nullptr)->*_member));
 }
 
 }

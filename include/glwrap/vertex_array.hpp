@@ -26,8 +26,8 @@ public:
 	}
 
 	// TODO: make sure this is callable from a tight_buffer_iterator as well.
-	template <typename T>
-	void bind_vertex_attribute(const attribute_location<T>& _location, const strided_buffer_iterator<T>& _comp)
+	template <typename T, typename A>
+	void bind_vertex_attribute(const attribute_location<T>& _location, const buffer_iterator<T, A>& _comp)
 	{
 		auto const index = _location.get_index();
 

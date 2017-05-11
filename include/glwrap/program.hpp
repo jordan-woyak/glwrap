@@ -102,13 +102,6 @@ public:
 
 	void link()
 	{
-		// TODO: allow use of GL_SEPARATE_ATTRIBS
-		// transform feedback bindings
-		std::vector<const char*> varyings(m_feedback_varyings.size());
-		std::transform(m_feedback_varyings.begin(), m_feedback_varyings.end(),
-			varyings.begin(), std::mem_fun_ref(&std::string::c_str));
-		glTransformFeedbackVaryings(native_handle(), varyings.size(), varyings.data(), GL_SEPARATE_ATTRIBS);
-
 		glLinkProgram(native_handle());
 
 		// update uniform locations
@@ -207,14 +200,10 @@ public:
 	template <typename T>
 	void bind_transform_feedback(vertex_out_varying<T>& _varying, transform_feedback_binding<T> const& _binding)
 	{
-		//glBindFragDataLocation(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
-
-		auto const index = _binding.get_index();
-
-		if (index >= m_feedback_varyings.size())
-			m_feedback_varyings.resize(index + 1);
-
-		m_feedback_varyings[index] = _varying.get_name();
+		//glTransformFeedbackVaryings
+		// (program state)
+		// for each transform feedback buffer index
+		// pair vertex shader outputs (varyings) with byte offsets into vertex
 	}
 
 	// TODO: these 3 will break if repeated
@@ -246,8 +235,6 @@ private:
 	vertex_shader* m_vshad;
 	geometry_shader* m_gshad;
 	fragment_shader* m_fshad;
-
-	std::vector<std::string> m_feedback_varyings;
 
 	// TODO: store ptr or copy?
 	std::list<detail::uniform_block_variable> m_uniform_blocks;

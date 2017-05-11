@@ -49,4 +49,61 @@ private:
 	int_t m_max_tf_separate_components;
 };
 
+class context;
+
+class transform_feedback : public globject
+{
+public:
+	explicit transform_feedback(context& _context)
+		: globject(gen_return(glGenTransformFeedbacks))
+	{}
+
+	~transform_feedback()
+	{
+		auto const nh = native_handle();
+		glDeleteTransformFeedbacks(1, &nh);
+	}
+
+	template <typename T, sizei_t S>
+	void bind_buffer(transform_feedback_binding<T> const& _binding, const static_buffer_iterator<T, S>& _iter, sizei_t _size)
+	{
+		// TODO: check strides for alignment ?
+
+		// TODO: make not needed
+		detail::scoped_value<detail::parameter::transform_feedback> binding(native_handle());
+
+		glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, _binding.get_index(),
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _size * _iter.get_stride());
+	}
+
+private:
+};
+
+template <typename T, typename M = T, uint_t Offset = 0>
+class tf_vertex_attribute
+{
+public:
+};
+
+// TODO: fix
+template <typename T, typename M1, typename M2, uint_t Offset>
+constexpr auto operator|(tf_vertex_attribute<T, M1, Offset> const& _attrib, M2 T::*_member)
+	-> tf_vertex_attribute<T, M2, Offset>
+{
+	return {};
+}
+
+template <typename T>
+class transform_feedback_vertex
+{
+public:
+	template <typename M>
+	void attribute_binder()
+	{
+		
+	}
+
+private:
+};
+
 }

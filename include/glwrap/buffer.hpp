@@ -13,32 +13,53 @@ namespace detail
 {
 
 // TODO: move these elsewhere?
-struct tight_buffer_alignment
-{
-	static sizei_t align(sizei_t _size)
-	{
-		return _size;
-	}
-};
-
 struct uniform_buffer_alignment
 {
-	static sizei_t align(sizei_t _size)
+	uniform_buffer_alignment(sizei_t _size)
 	{
 		// TODO: would be nice to not call this for every buffer.
 		auto const element_size = _size;
 		auto const ubo_alignment = detail::get_parameter<int_t>(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT);
 
-		return ((element_size + ubo_alignment - 1) / ubo_alignment) * ubo_alignment;
+		m_stride = ((element_size + ubo_alignment - 1) / ubo_alignment) * ubo_alignment;
+	}
+
+	sizei_t get_stride() const
+	{
+		return m_stride;
+	}
+
+private:
+	sizei_t m_stride;
+};
+
+template <sizei_t Stride>
+struct static_buffer_alignment
+{
+	// TODO: somewhat ugly..
+	static_buffer_alignment(sizei_t)
+	{}
+	
+	static constexpr sizei_t get_stride()
+	{
+		return Stride;
 	}
 };
 
-struct strided_buffer_alignment
+// TODO: sensible name? needed at all?
+struct dynamic_buffer_alignment
 {
-	static sizei_t align(sizei_t _size)
+	dynamic_buffer_alignment(sizei_t _size)
+		: m_stride(_size)
+	{}
+	
+	sizei_t get_stride() const
 	{
-		return _size;
+		return m_stride;
 	}
+
+private:
+	sizei_t m_stride;
 };
 
 }
@@ -47,13 +68,13 @@ template <typename T, typename A>
 class buffer_iterator;
 
 template <typename T>
-using tight_buffer_iterator = buffer_iterator<T, detail::tight_buffer_alignment>;
-
-template <typename T>
 using uniform_buffer_iterator = buffer_iterator<T, detail::uniform_buffer_alignment>;
 
+template <typename T, sizei_t N>
+using static_buffer_iterator = buffer_iterator<T, detail::static_buffer_alignment<N>>;
+
 template <typename T>
-using strided_buffer_iterator = buffer_iterator<T, detail::strided_buffer_alignment>;
+using dynamic_buffer_iterator = buffer_iterator<T, detail::dynamic_buffer_alignment>;
 
 template <typename T, typename A>
 class buffer;
@@ -68,16 +89,10 @@ public:
 	typedef T value_type;
 	typedef A alignment_type;
 
-	buffer_iterator& operator+=(std::size_t _offset)
+	buffer_iterator& operator+=(std::size_t _val)
 	{
-		m_offset += m_stride * _offset;
+		m_buffer_offset += _val * get_stride();
 		return *this;
-	}
-
-	// TODO: is this conversion operator sane?
-	operator strided_buffer_iterator<T>() const
-	{
-		return strided_buffer_iterator<T>{m_buffer, m_offset, m_stride};
 	}
 
 	friend buffer_iterator operator+(const buffer_iterator& _lhs, std::size_t _offset)
@@ -86,9 +101,10 @@ public:
 	}
 
 	// TODO: this should be private
-	buffer_iterator(uint_t _buffer, ubyte_t* _offset, sizei_t _stride)
-		: m_offset(_offset)
-		, m_stride(_stride)
+	buffer_iterator(uint_t _buffer, ubyte_t* _buffer_offset, const alignment_type& _alignment, uint_t _member_offset = {})
+		: m_buffer_offset(_buffer_offset)
+		, m_member_offset(_member_offset)
+		, m_alignment(_alignment)
 		, m_buffer(_buffer)
 	{}
 
@@ -96,38 +112,57 @@ public:
 	{
 		return m_buffer;
 	}
-
-	// TODO: make an integer version of this?
+	
 	ubyte_t* get_offset() const
 	{
-		return m_offset;
+		return m_buffer_offset + m_member_offset;
+	}
+
+	// TODO: this is a confusing name compared to get_offset
+	ubyte_t* get_buffer_offset() const
+	{
+		return m_buffer_offset;
+	}
+
+	uint_t get_member_offset() const
+	{
+		return m_member_offset;
 	}
 
 	sizei_t get_stride() const
 	{
-		return m_stride;
+		return m_alignment.get_stride();
+	}
+
+	const alignment_type& get_alignment() const
+	{
+		return m_alignment;
 	}
 
 private:
-	ubyte_t* m_offset;
-	// TODO: store alignment instead?
-	sizei_t m_stride;
+	// Offsets are kept separately so I can match iterators
+	// from the same buffer area for transform feedback
+	ubyte_t* m_buffer_offset;
+	uint_t m_member_offset;
+
+	alignment_type m_alignment;
 	uint_t m_buffer;
 };
 
-// Strides a buffer of any alignment by a particular member
-template <typename P, typename A, typename M>
-strided_buffer_iterator<M> operator|(buffer_iterator<P, A> const& _iter, M P::*_member)
+
+template <typename T, typename M, typename A>
+buffer_iterator<M, A> operator|(buffer_iterator<T, A> const& _iter, M T::*_member)
 {
 	auto const member_offset = detail::get_member_offset(_member);
 	return
-		strided_buffer_iterator<M>{_iter.get_buffer(), _iter.get_offset() + member_offset, _iter.get_stride()};
+		buffer_iterator<M, A>(_iter.get_buffer(), _iter.get_buffer_offset(),
+		_iter.get_alignment(), _iter.get_member_offset() + member_offset);
 }
 
 template <typename T>
 class mapped_buffer;
 
-template <typename T, typename A = detail::tight_buffer_alignment>
+template <typename T, typename A = detail::static_buffer_alignment<sizeof(T)>>
 class buffer : public globject
 {
 	friend class context;
@@ -142,7 +177,7 @@ public:
 
 	explicit buffer(context& _context)
 		: globject(gen_return(glGenBuffers))
-		, m_stride(alignment_type::align(sizeof(value_type)))
+		, m_alignment(sizeof(value_type))
 	{}
 
 	~buffer()
@@ -156,7 +191,7 @@ public:
 	void storage(std::size_t _size)
 	{
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glBufferData(GL_COPY_WRITE_BUFFER, _size * m_stride, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, GL_STATIC_DRAW);
 	}
 
 	std::size_t size() const
@@ -165,12 +200,12 @@ public:
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
 		glGetBufferParameteriv(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
 
-		return sz / m_stride;
+		return sz / get_stride();
 	}
 
 	iterator begin()
 	{
-		return iterator(native_handle(), 0, m_stride);
+		return iterator(native_handle(), 0, m_alignment);
 	}
 
 	template <typename R>
@@ -189,12 +224,7 @@ public:
 			"range must contain value_type");
 
 		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		//glBufferData(GL_COPY_WRITE_BUFFER, size * m_element_size, &*begin, GL_STATIC_DRAW);
-
-		// TODO: unoptimized to work with uniform_block_align<>
-		glBufferData(GL_COPY_WRITE_BUFFER, size * m_stride, nullptr, GL_STATIC_DRAW);
-		mapped_buffer<value_type> mbuf(*this);
-		std::copy_n(begin, size, mbuf.begin());
+		glBufferData(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, GL_STATIC_DRAW);
 	}
 
 	void assign(buffer const& _other)
@@ -212,15 +242,23 @@ public:
 private:
 	// TODO: store size?
 
-	// TODO: store alignment instead?
-	std::size_t m_stride;
+	sizei_t get_stride() const
+	{
+		return m_alignment.get_stride();
+	}
+
+	alignment_type m_alignment;
 };
 
+/*
 // TODO: fix for uniform_block_align<> :/
-template <typename T>
+template <typename T, typename A>
 class mapped_buffer
 {
 public:
+	typedef T value_type;
+	typedef A alignment_type;
+
 	template <typename B>
 	mapped_buffer(buffer<B>& _buffer)
 		: m_ptr()
@@ -306,7 +344,7 @@ public:
 
 	iterator begin()
 	{
-		return {m_ptr, m_stride};
+		return {m_ptr, m_alignment};
 	}
 
 	iterator end()
@@ -321,10 +359,16 @@ public:
 	}
 
 private:
+	sizei_t get_stride() const
+	{
+		return m_alignment.get_stride();
+	}
+
+
 	T* m_ptr;
 	sizei_t m_size;
 	uint_t m_buffer;
-	sizei_t m_stride;
+	alignment_type m_alignment;
 };
-
+*/
 }
