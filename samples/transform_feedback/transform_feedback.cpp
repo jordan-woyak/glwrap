@@ -83,6 +83,7 @@ int main()
 	tfeedback.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
 
 	glc.use_program(prog);
+	glc.use_transform_feedback(tfeedback);
 	glc.use_vertex_array(input_vertices);
 	glc.use_primitive_mode(gl::primitive::points);
 

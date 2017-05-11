@@ -324,6 +324,11 @@ public:
 		glBindVertexArray(_vert.native_handle());
 	}
 
+	void use_transform_feedback(transform_feedback& _tf)
+	{
+		glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
+	}
+
 	template <typename T>
 	void use_element_array(buffer<T>& _buff)
 	{
