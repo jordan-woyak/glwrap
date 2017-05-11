@@ -39,7 +39,7 @@ class context;
 template <typename T>
 class texture_unit
 {
-	friend class texture_unit_alloter;
+	friend class texture_unit_enumerator;
 
 public:
 	int_t get_index() const
@@ -56,11 +56,11 @@ private:
 };
 
 // TODO: name?
-class texture_unit_alloter
+class texture_unit_enumerator
 {
 public:
 	// TODO: really need context?
-	texture_unit_alloter(context& _context)
+	texture_unit_enumerator(context& _context)
 		: m_current_index()
 		, m_max_comb_tunits()
 	{
@@ -70,7 +70,7 @@ public:
 	// TODO: multiple targets are allowed on each texture unit
 
 	template <typename T>
-	texture_unit<T> allot()
+	texture_unit<T> get()
 	{
 		if (m_current_index == m_max_comb_tunits)
 			throw exception();

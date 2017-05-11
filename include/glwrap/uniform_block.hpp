@@ -45,7 +45,7 @@ private:
 template <typename T>
 class uniform_block_binding
 {
-	friend class uniform_block_binding_alloter;
+	friend class uniform_block_binding_enumerator;
 
 public:
 	int_t get_index() const
@@ -62,11 +62,11 @@ private:
 };
 
 // TODO: name?
-class uniform_block_binding_alloter
+class uniform_block_binding_enumerator
 {
 public:
 	// TODO: really need context?
-	uniform_block_binding_alloter(context& _context)
+	uniform_block_binding_enumerator(context& _context)
 		: m_current_index()
 		, m_max_uniform_buffer_bindings()
 	{
@@ -74,7 +74,7 @@ public:
 	}
 
 	template <typename T>
-	uniform_block_binding<T> allot()
+	uniform_block_binding<T> get()
 	{
 		if (m_current_index == m_max_uniform_buffer_bindings)
 			throw exception();

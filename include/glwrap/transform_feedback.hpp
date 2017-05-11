@@ -7,7 +7,7 @@ namespace gl
 template <typename T>
 class transform_feedback_binding
 {
-	friend class transform_feedback_binding_alloter;
+	friend class transform_feedback_binding_enumerator;
 
 public:
 	int_t get_index() const
@@ -24,11 +24,11 @@ private:
 };
 
 // TODO: name?
-class transform_feedback_binding_alloter
+class transform_feedback_binding_enumerator
 {
 public:
 	// TODO: really need context?
-	transform_feedback_binding_alloter(context& _context)
+	transform_feedback_binding_enumerator(context& _context)
 		: m_current_index()
 	{
 		// TODO: using correct "max"?
@@ -36,7 +36,7 @@ public:
 	}
 
 	template <typename T>
-	transform_feedback_binding<T> allot()
+	transform_feedback_binding<T> get()
 	{
 		if (m_current_index == m_max_tf_separate_components)
 			throw exception();

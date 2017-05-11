@@ -9,13 +9,13 @@ namespace gl
 
 class program;
 
-class attribute_location_alloter;
+class attribute_location_enumerator;
 
 // TODO: rename attribute_location?
 template <typename T>
 class attribute_location
 {
-	friend class attribute_location_alloter;
+	friend class attribute_location_enumerator;
 
 public:
 	int_t get_index() const
@@ -32,11 +32,11 @@ private:
 };
 
 // TODO: name?
-class attribute_location_alloter
+class attribute_location_enumerator
 {
 public:
 	// TODO: really need context?
-	attribute_location_alloter(context& _context)
+	attribute_location_enumerator(context& _context)
 		: m_current_index()
 		, m_max_vertex_attribs()
 	{
@@ -44,7 +44,7 @@ public:
 	}
 
 	template <typename T>
-	attribute_location<T> allot()
+	attribute_location<T> get()
 	{
 		attribute_location<T> ind(m_current_index);
 		m_current_index += detail::glslvar::index_count<T>::value;

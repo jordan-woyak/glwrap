@@ -14,9 +14,9 @@ int main()
 
 	// used to connect array_buffer vertex data and program attributes together
 	// via the typeless "generic vertex attributes" in a type-safe manner
-	gl::attribute_location_alloter locs(glc);
-	auto input1_loc = locs.allot<gl::int_t>();
-	auto input2_loc = locs.allot<gl::int_t>();
+	gl::attribute_location_enumerator locs(glc);
+	auto input1_loc = locs.get<gl::int_t>();
+	auto input2_loc = locs.get<gl::int_t>();
 
 	// create a program
 	gl::program prog(glc);
@@ -77,8 +77,8 @@ int main()
 	};
 
 	// connect buffers to varyings in a type-safe manner
-	gl::transform_feedback_binding_alloter tfbs(glc);
-	auto feedback_out = tfbs.allot<Output>();
+	gl::transform_feedback_binding_enumerator tfbs(glc);
+	auto feedback_out = tfbs.get<Output>();
 
 	// TODO: set up tfeedback vertex format
 	gl::transform_feedback_descriptor tf_desc;
