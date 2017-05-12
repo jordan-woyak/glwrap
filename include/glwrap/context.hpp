@@ -38,7 +38,7 @@ public:
 		, m_sf_window(new sf::RenderWindow)
 #endif
 	{
-#ifndef GLWRAP_FAKE_CONTEXT
+#if !defined(GLWRAP_FAKE_CONTEXT) && defined(GLWRAP_NO_SFML)
 		int dummy = 0;
 		glutInit(&dummy, 0);
 		
@@ -47,12 +47,12 @@ public:
 		glutInitContextProfile(GLUT_CORE_PROFILE);
 
 		// TODO: this is gross
-		int const w = glutCreateWindow("");
+		//int const w = glutCreateWindow("");
 		//glutHideWindow();
 
 		glewInit();
 
-		glutDestroyWindow(w);
+		//glutDestroyWindow(w);
 #endif
 	}
 
