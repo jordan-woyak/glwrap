@@ -73,9 +73,12 @@ void check_error()
 {
 	GLenum const err = glGetError();
 
-	if (GL_NO_ERROR != err)
+	//if (GL_NO_ERROR != err)
 	{
-		throw exception(err);
+		exception ex(err);
+
+		//throw ex;
+		std::cout << "error: " << ex.get_string() << std::endl;
 	}
 }
 

@@ -110,7 +110,10 @@ class vertex_array : public globject
 public:
 	explicit vertex_array(context& _context)
 		: globject(gen_return(glGenVertexArrays))
-	{}
+	{
+		// TODO: this is ugly, actually create the vertex array:
+		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
+	}
 
 	~vertex_array()
 	{
