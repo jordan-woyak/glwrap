@@ -117,11 +117,11 @@ public:
 	~texture()
 	{
 		auto const nh = native_handle();
-		glDeleteTextures(1, &nh);
+		GLWRAP_EC_CALL(glDeleteTextures)(1, &nh);
 	}
 
 	explicit texture(context& _context)
-		: globject(gen_return(glGenTextures))
+		: globject(detail::gen_return(glGenTextures))
 	{}
 
 	// TODO: work for NPOT
@@ -131,7 +131,7 @@ public:
 		// TODO: ugly
 		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 		
-		glTexImage2D(target, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
+		GLWRAP_EC_CALL(glTexImage2D)(target, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
 			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
 	}
 
@@ -145,7 +145,7 @@ public:
 
 		// TODO: for non 2d textures
 		
-		glTexImage2D(target, 0, _ifmt.value, _dims.x, _dims.y,
+		GLWRAP_EC_CALL(glTexImage2D)(target, 0, _ifmt.value, _dims.x, _dims.y,
 			0, GL_RED, GL_BYTE, nullptr);
 	}
 
@@ -155,7 +155,7 @@ public:
 		// TODO: ugly
 		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 		
-		glGenerateMipmap(target);
+		GLWRAP_EC_CALL(glGenerateMipmap)(target);
 	}
 
 	void set_swizzle(swizzle_component _comp, swizzle_value _val)
@@ -230,11 +230,11 @@ public:
 	~texture()
 	{
 		auto const nh = native_handle();
-		glDeleteTextures(1, &nh);
+		GLWRAP_EC_CALL(glDeleteTextures)(1, &nh);
 	}
 
 	explicit texture(context& _context)
-		: globject(gen_return(glGenTextures))
+		: globject(detail::gen_return(glGenTextures))
 	{}
 
 	template <typename T>
@@ -242,7 +242,7 @@ public:
 	{
 		bind();
 		// TODO: don't hardcode datatype!
-		glTexBuffer(target, GL_RGBA32F, _buffer.native_handle());
+		GLWRAP_EC_CALL(glTexBuffer)(target, GL_RGBA32F, _buffer.native_handle());
 	}
 
 private:
@@ -250,7 +250,7 @@ private:
 
 	void bind() const
 	{
-		glBindTexture(target, native_handle());
+		GLWRAP_EC_CALL(glBindTexture)(target, native_handle());
 	}
 };
 

@@ -76,8 +76,10 @@ int main()
 	struct Input
 	{
 		gl::int_t input1, input2;
+		
 		// TODO: support std::array as well
-		gl::float_t input3[2];
+		// Purposely using wrong type to demonstrate conversion
+		gl::int_t input3[2];
 	};
 	
 	gl::buffer<Input> input_buffer(glc);
@@ -100,14 +102,6 @@ int main()
 	input_vertices.enable_vertex_attribute(input2_loc);
 	input_vertices.enable_vertex_attribute(input3_loc);
 
-#if 0
-	// Old VertexAttribPointer-style
-	input_vertices.bind_vertex_attribute(input1_loc, input_buffer.begin() | &Input::input1);
-	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &Input::input2);
-	input_vertices.bind_vertex_attribute(input3_loc, input_buffer.begin() | &Input::input3);
-
-#else
-	// New VertexAttribFormat-style
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<Input>();
 
@@ -116,7 +110,6 @@ int main()
 	input_vertices.bind_vertex_attribute(input3_loc, input_loc | &Input::input3);
 
 	input_vertices.bind_vertex_buffer(input_loc, input_buffer.begin());
-#endif
 
 	std::vector<gl::float_t> operands =
 	{

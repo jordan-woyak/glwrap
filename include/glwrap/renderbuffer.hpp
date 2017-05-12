@@ -9,13 +9,13 @@ class renderbuffer : public globject
 {
 public:
 	renderbuffer(context& _context)
-		: globject(gen_return(glGenRenderbuffers))
+		: globject(detail::gen_return(glGenRenderbuffers))
 	{}
 
 	~renderbuffer()
 	{
 		auto const nh = native_handle();
-		glDeleteRenderbuffers(1, &nh);
+		GLWRAP_EC_CALL(glDeleteRenderbuffers)(1, &nh);
 	}
 
 	// TODO: internal format
@@ -24,7 +24,7 @@ public:
 		// ugly..
 		detail::scoped_value<detail::parameter::renderbuffer> binding(native_handle());
 		
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, _samples, GL_RGBA, _dims.x, _dims.y);
+		GLWRAP_EC_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, _samples, GL_RGBA, _dims.x, _dims.y);
 	}
 
 	void resize(ivec2 const& _dims)
@@ -34,10 +34,10 @@ public:
 
 		GLint samples{}, format{};
 
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &samples);
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &format);
+		GLWRAP_EC_CALL(glGetRenderbufferParameteriv)(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &samples);
+		GLWRAP_EC_CALL(glGetRenderbufferParameteriv)(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &format);
 
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, format, _dims.x, _dims.y);
+		GLWRAP_EC_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, samples, format, _dims.x, _dims.y);
 	}
 };
 

@@ -27,28 +27,28 @@ template <>
 GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<false, GLfloat>(GLenum _target, GLenum _pname, GLfloat* _params)
 {
-	glGetTexParameterfv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glGetTexParameterfv)(_target, _pname, _params);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<false, GLint>(GLenum _target, GLenum _pname, GLint* _params)
 {
-	glGetTexParameteriv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glGetTexParameteriv)(_target, _pname, _params);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<true, GLint>(GLenum _target, GLenum _pname, GLint* _params)
 {
-	glGetTexParameterIiv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glGetTexParameterIiv)(_target, _pname, _params);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_get_tex_parameter<true, GLuint>(GLenum _target, GLenum _pname, GLuint* _params)
 {
-	glGetTexParameterIuiv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glGetTexParameterIuiv)(_target, _pname, _params);
 }
 
 //
@@ -96,42 +96,42 @@ template <>
 GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, GLfloat>(GLenum _target, GLenum _pname, GLfloat _param)
 {
-	glTexParameterf(_target, _pname, _param);
+	GLWRAP_EC_CALL(glTexParameterf)(_target, _pname, _param);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, const GLfloat*>(GLenum _target, GLenum _pname, const GLfloat* _params)
 {
-	glTexParameterfv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glTexParameterfv)(_target, _pname, _params);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, GLint>(GLenum _target, GLenum _pname, GLint _param)
 {
-	glTexParameteri(_target, _pname, _param);
+	GLWRAP_EC_CALL(glTexParameteri)(_target, _pname, _param);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_tex_parameter<false, const GLint*>(GLenum _target, GLenum _pname, const GLint* _params)
 {
-	glTexParameteriv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glTexParameteriv)(_target, _pname, _params);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_tex_parameter<true, const GLint*>(GLenum _target, GLenum _pname, const GLint* _params)
 {
-	glTexParameterIiv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glTexParameterIiv)(_target, _pname, _params);
 }
 
 template <>
 GLWRAP_FUNC_DECL
 void gl_tex_parameter<true, const GLuint*>(GLenum _target, GLenum _pname, const GLuint* _params)
 {
-	glTexParameterIuiv(_target, _pname, _params);
+	GLWRAP_EC_CALL(glTexParameterIuiv)(_target, _pname, _params);
 }
 
 //

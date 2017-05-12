@@ -10,22 +10,22 @@ namespace detail
 
 void gl_tex_parameter(enum_t _target, enum_t _pname, float_t _value)
 {
-	glTexParameterf(_target, _pname, _value);
+	GLWRAP_EC_CALL(glTexParameterf)(_target, _pname, _value);
 }
 
 void gl_tex_parameter(enum_t _target, enum_t _pname, int_t _value)
 {
-	glTexParameteri(_target, _pname, _value);
+	GLWRAP_EC_CALL(glTexParameteri)(_target, _pname, _value);
 }
 
 void gl_texture_parameter(uint_t _texture, enum_t _pname, float_t _value)
 {
-	glTextureParameterf(_texture, _pname, _value);
+	GLWRAP_EC_CALL(glTextureParameterf)(_texture, _pname, _value);
 }
 
 void gl_texture_parameter(uint_t _texture, enum_t _pname, int_t _value)
 {
-	glTextureParameteri(_texture, _pname, _value);
+	GLWRAP_EC_CALL(glTextureParameteri)(_texture, _pname, _value);
 }
 
 // TODO: work dims into the rest of the traits
@@ -106,7 +106,7 @@ struct texture : regular_parameter_getter<int_t, texture_traits<Type>::binding>
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		glBindTexture(texture_traits<Type>::target, _value);
+		GLWRAP_EC_CALL(glBindTexture)(texture_traits<Type>::target, _value);
 	}
 };
 

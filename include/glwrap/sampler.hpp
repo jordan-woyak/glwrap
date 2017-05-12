@@ -30,13 +30,13 @@ class sampler : public globject
 {
 public:
 	sampler(context& _context)
-		: globject(gen_return(glGenSamplers))
+		: globject(detail::gen_return(glGenSamplers))
 	{}
 
 	~sampler()
 	{
 		auto const nh = native_handle();
-		glDeleteSamplers(1, &nh);
+		GLWRAP_EC_CALL(glDeleteSamplers)(1, &nh);
 	}
 
 	void set_wrap_s(wrap_mode _mode)
@@ -86,12 +86,12 @@ public:
 private:
 	void set_parameter_raw(GLenum _pname, int_t _val)
 	{
-		glSamplerParameteri(native_handle(), _pname, _val);
+		GLWRAP_EC_CALL(glSamplerParameteri)(native_handle(), _pname, _val);
 	}
 
 	void set_parameter_raw(GLenum _pname, float_t _val)
 	{
-		glSamplerParameterf(native_handle(), _pname, _val);
+		GLWRAP_EC_CALL(glSamplerParameterf)(native_handle(), _pname, _val);
 	}
 };
 

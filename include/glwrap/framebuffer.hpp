@@ -101,7 +101,7 @@ texture_attachment(texture<T>& _tex, int _level)
 	// TODO: don't capture globject reference
 	return attachment([&_tex, _level](GLenum _target, GLenum _attach_point)
 	{
-		glFramebufferTexture2D(_target, _attach_point, detail::texture_traits<T>::target, _tex.native_handle(), _level);
+		GLWRAP_EC_CALL(glFramebufferTexture2D)(_target, _attach_point, detail::texture_traits<T>::target, _tex.native_handle(), _level);
 	});
 };
 
@@ -110,7 +110,7 @@ inline attachment renderbuffer_attachment(renderbuffer& _rendbuf)
 	// TODO: don't capture globject reference
 	return attachment([&_rendbuf](GLenum _target, GLenum _attach_point)
 	{
-		glFramebufferRenderbuffer(_target, _attach_point, GL_RENDERBUFFER, _rendbuf.native_handle());
+		GLWRAP_EC_CALL(glFramebufferRenderbuffer)(_target, _attach_point, GL_RENDERBUFFER, _rendbuf.native_handle());
 	});
 };
 
@@ -124,13 +124,13 @@ class framebuffer : public globject
 
 public:
 	framebuffer(context& _context)
-		: globject(gen_return(glGenFramebuffers))
+		: globject(detail::gen_return(glGenFramebuffers))
 	{}
 
 	~framebuffer()
 	{
 		auto const nh = native_handle();
-		glDeleteFramebuffers(1, &nh);
+		GLWRAP_EC_CALL(glDeleteFramebuffers)(1, &nh);
 	}
 
 	void bind_attachment(attach_point const& _point, attachment const& _attach)
@@ -146,8 +146,8 @@ public:
 	{
 		bind_read();
 		// TODO: is this ok?
-		//glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, _point.get_value(), GL_RENDERBUFFER, 0);
-		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, _point.get_value(), GL_TEXTURE_2D, 0, 0);
+		//GLWRAP_EC_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_value(), GL_RENDERBUFFER, 0);
+		GLWRAP_EC_CALL(glFramebufferTexture2D)(GL_READ_FRAMEBUFFER, _point.get_value(), GL_TEXTURE_2D, 0, 0);
 	}
 */
 	void bind_draw_buffer(color_number const& _number, color_attach_point const& _attach_point)
@@ -168,7 +168,7 @@ public:
 		// ugly..
 		detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
 		
-		glReadBuffer(_attach_point.get_value());
+		GLWRAP_EC_CALL(glReadBuffer)(_attach_point.get_value());
 	}
 
 	void unbind_draw_buffer(color_number const& _number)
@@ -188,7 +188,7 @@ private:
 		// ugly..
 		detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
 		
-		glDrawBuffers(m_draw_buffers.size(), m_draw_buffers.data());
+		GLWRAP_EC_CALL(glDrawBuffers)(m_draw_buffers.size(), m_draw_buffers.data());
 	}
 
 	// TODO: can this be killed?

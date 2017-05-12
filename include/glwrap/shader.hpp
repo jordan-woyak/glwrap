@@ -68,7 +68,7 @@ class shader : public globject
 
 public:
 	explicit shader(context& glc)
-		: globject(glCreateShader(static_cast<GLenum>(T)))
+		: globject(GLWRAP_EC_CALL(glCreateShader)(static_cast<GLenum>(T)))
 	{}
 
 	void set_source(std::string const& _src)
@@ -83,17 +83,17 @@ public:
 
 	std::string get_log() const
 	{
-		//glValidateProgram(native_handle());
+		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
 
 		GLint log_length;
-		glGetShaderiv(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
+		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
 
 		std::string log;
 
 		if (log_length)
 		{
 			std::vector<GLchar> log_buffer(log_length);
-			glGetShaderInfoLog(native_handle(), log_length, NULL, log_buffer.data());
+			GLWRAP_EC_CALL(glGetShaderInfoLog)(native_handle(), log_length, NULL, log_buffer.data());
 
 			log.assign(log_buffer.begin(), log_buffer.end());
 		}

@@ -54,13 +54,13 @@ class transform_feedback : public globject
 {
 public:
 	explicit transform_feedback(context& _context)
-		: globject(gen_return(glGenTransformFeedbacks))
+		: globject(detail::gen_return(glGenTransformFeedbacks))
 	{}
 
 	~transform_feedback()
 	{
 		auto const nh = native_handle();
-		glDeleteTransformFeedbacks(1, &nh);
+		GLWRAP_EC_CALL(glDeleteTransformFeedbacks)(1, &nh);
 	}
 
 	template <typename T, sizei_t S>
@@ -71,7 +71,7 @@ public:
 		// TODO: make not needed
 		detail::scoped_value<detail::parameter::transform_feedback> binding(native_handle());
 
-		glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, _binding.get_index(),
+		GLWRAP_EC_CALL(glBindBufferRange)(GL_TRANSFORM_FEEDBACK_BUFFER, _binding.get_index(),
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _size * _iter.get_stride());
 	}
 

@@ -44,7 +44,7 @@ inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 {
 	typedef attrib_traits<InputT> traits;
 	
-	glVertexAttribFormat(_index, traits::size, traits::type, Normalize, _offset);
+	GLWRAP_EC_CALL(glVertexAttribFormat)(_index, traits::size, traits::type, Normalize, _offset);
 }
 
 template <typename ShaderT, typename InputT, bool Normalize>
@@ -53,7 +53,7 @@ inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 {
 	typedef attrib_traits<InputT> traits;
 	
-	glVertexAttribIFormat(_index, traits::size, traits::type, _offset);
+	GLWRAP_EC_CALL(glVertexAttribIFormat)(_index, traits::size, traits::type, _offset);
 }
 
 template <typename ShaderT, typename InputT, bool Normalize>
@@ -76,7 +76,7 @@ inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 {
 	typedef attrib_traits<InputT> traits;
 	
-	glVertexArrayAttribFormat(_vao, _index, traits::size, traits::type, Normalize, _offset);
+	GLWRAP_EC_CALL(glVertexArrayAttribFormat)(_vao, _index, traits::size, traits::type, Normalize, _offset);
 }
 
 template <typename ShaderT, typename InputT, bool Normalize>
@@ -85,7 +85,7 @@ inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 {
 	typedef attrib_traits<InputT> traits;
 	
-	glVertexArrayAttribIFormat(_vao, _index, traits::size, traits::type, _offset);
+	GLWRAP_EC_CALL(glVertexArrayAttribIFormat)(_vao, _index, traits::size, traits::type, _offset);
 }
 
 template <typename ShaderT, typename InputT, bool Normalize>
@@ -110,7 +110,7 @@ inline gl_vertex_attrib_pointer(uint_t _index, uint_t _stride, const void_t* _of
 {
 	typedef attrib_traits<InputT> traits;
 	
-	glVertexAttribPointer(_index, traits::size, traits::type, Normalize, _stride, _offset);
+	GLWRAP_EC_CALL(glVertexAttribPointer)(_index, traits::size, traits::type, Normalize, _stride, _offset);
 }
 
 // TODO: kill this:
@@ -120,7 +120,7 @@ inline gl_vertex_attrib_pointer(uint_t _index, uint_t _stride, const void_t* _of
 {
 	typedef attrib_traits<InputT> traits;
 	
-	glVertexAttribIPointer(_index, traits::size, traits::type, _stride, _offset);
+	GLWRAP_EC_CALL(glVertexAttribIPointer)(_index, traits::size, traits::type, _stride, _offset);
 }
 */
 

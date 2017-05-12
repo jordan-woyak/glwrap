@@ -183,29 +183,29 @@ public:
 	friend class mapped_buffer<T, A>;
 
 	explicit buffer(context& _context)
-		: globject(gen_return(glGenBuffers))
+		: globject(detail::gen_return(glGenBuffers))
 		, m_alignment(sizeof(value_type))
 	{}
 
 	~buffer()
 	{
 		auto const nh = native_handle();
-		glDeleteBuffers(1, &nh);
+		GLWRAP_EC_CALL(glDeleteBuffers)(1, &nh);
 	}
 
 	// TODO: don't hardcode GL_STATIC_DRAW everywhere
 
 	void storage(std::size_t _size)
 	{
-		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glBufferData(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, GL_STATIC_DRAW);
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, GL_STATIC_DRAW);
 	}
 
 	std::size_t size() const
 	{
 		sizei_t sz = 0;
-		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glGetBufferParameteriv(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_EC_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
 
 		return sz / get_stride();
 	}
@@ -230,20 +230,20 @@ public:
 		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
 			"range must contain value_type");
 
-		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
-		glBufferData(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, GL_STATIC_DRAW);
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, GL_STATIC_DRAW);
 	}
 
 	void assign(buffer const& _other)
 	{
-		glBindBuffer(GL_COPY_READ_BUFFER, _other.native_handle());
-		glBindBuffer(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
 
 		sizei_t sz = 0;
-		glGetBufferParameteriv(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
+		GLWRAP_EC_CALL(glGetBufferParameteriv)(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
 
-		glBufferData(GL_COPY_WRITE_BUFFER, size, nullptr, GL_STATIC_DRAW);
-		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
+		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size, nullptr, GL_STATIC_DRAW);
+		GLWRAP_EC_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
 	}
 
 private:
@@ -270,17 +270,17 @@ public:
 		, m_buffer(_buffer.native_handle())
 		, m_alignment(_buffer.m_alignment)
 	{
-		glBindBuffer(GL_COPY_WRITE_BUFFER, m_buffer);
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_buffer);
 
 		// TODO: allow range
 		// TODO: don't hardcode access mode
-		m_ptr = static_cast<ubyte_t*>(glMapBuffer(GL_COPY_WRITE_BUFFER, GL_READ_WRITE));
+		m_ptr = static_cast<ubyte_t*>(GLWRAP_EC_CALL(glMapBuffer)(GL_COPY_WRITE_BUFFER, GL_READ_WRITE));
 		m_size = _buffer.size();
 
 		// TODO: check for error
 
 		// TODO: use this guy
-		//glMapBufferRange(GL_COPY_WRITE_BUFFER, 0, length, access);
+		//GLWRAP_EC_CALL(glMapBufferRange)(GL_COPY_WRITE_BUFFER, 0, length, access);
 	}
 
 	mapped_buffer(mapped_buffer const&) = delete;
@@ -358,8 +358,8 @@ public:
 
 	~mapped_buffer()
 	{
-		glBindBuffer(GL_COPY_WRITE_BUFFER, m_buffer);
-		glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_buffer);
+		GLWRAP_EC_CALL(glUnmapBuffer)(GL_COPY_WRITE_BUFFER);
 	}
 
 private:

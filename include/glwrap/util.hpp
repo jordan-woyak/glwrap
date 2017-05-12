@@ -11,14 +11,11 @@
 namespace gl
 {
 
-// TODO: move this
-typedef decltype(glGenBuffers) glgenfunc;
-inline GLuint gen_return(glgenfunc f)
-{
-	GLuint name;
-	f(1, &name);
-	return name;
-}
+// Zero error checking
+//#define GLWRAP_EC_CALL(x) x
+
+//#define GLWRAP_EC_CALL(x) detail::make_gl_function_caller(x, __PRETTY_FUNCTION__)
+#define GLWRAP_EC_CALL(x) detail::make_gl_function_caller(x, #x) 
 
 namespace detail
 {
@@ -69,16 +66,19 @@ typename std::enable_if<std::is_arithmetic<T>::value, T>::type* value_ptr(T& _va
 	return &_val;
 }
 
-void check_error()
+void check_error(const char* func_name)
 {
 	GLenum const err = glGetError();
 
-	//if (GL_NO_ERROR != err)
+	if (GL_NO_ERROR != err)
 	{
 		exception ex(err);
 
-		//throw ex;
-		std::cout << "error: " << ex.get_string() << std::endl;
+#if 0
+		throw ex;
+#else
+		std::cerr << "error: " << ex.get_string() << " : " << func_name << std::endl;
+#endif
 	}
 }
 
@@ -87,6 +87,54 @@ void
 check_unlikely_error()
 {
 	//check_error();
+}
+
+template <typename R, typename... Args>
+class gl_function_caller
+{
+public:
+	gl_function_caller(R(*_func)(Args...), const char* _name)
+		: m_func(_func)
+		, m_name(_name)
+	{}
+
+	// TODO: fowarding might not be perfect.
+	// .. not that it needs to be for glFunctions
+	R operator()(Args... _args) const
+	{
+		struct dtor_checker
+		{
+			const char* name;
+			
+			~dtor_checker()
+			{
+				check_error(name);
+			}
+		};
+
+		dtor_checker checker{m_name};
+
+		return m_func(std::forward<Args>(_args)...);;
+	}
+
+private:
+	R(*m_func)(Args...);
+	const char* m_name;
+};
+
+template <typename R, typename... Args>
+gl_function_caller<R, Args...> make_gl_function_caller(R(*_func)(Args...), const char* _name)
+{
+	return {_func, _name};
+}
+
+// TODO: move this
+typedef decltype(glGenBuffers) glgenfunc;
+inline GLuint gen_return(glgenfunc _glFunc)
+{
+	GLuint name;
+	GLWRAP_EC_CALL(_glFunc)(1, &name);
+	return name;
 }
 
 template <typename T, typename Enable = void>

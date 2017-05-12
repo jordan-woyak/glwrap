@@ -62,174 +62,174 @@ public:
 	// TODO: kill these 3, provide clear functionality like ogl
 	void clear_color(vec4 const& _color = vec4{})
 	{
-		glClearColor(_color.x, _color.y, _color.z, _color.w);
-		glClear(GL_COLOR_BUFFER_BIT);
+		GLWRAP_EC_CALL(glClearColor)(_color.x, _color.y, _color.z, _color.w);
+		GLWRAP_EC_CALL(glClear)(GL_COLOR_BUFFER_BIT);
 	}
 
 	void clear_stencil(int_t _index = 0)
 	{
-		glClearStencil(_index);
-		glClear(GL_STENCIL_BUFFER_BIT);
+		GLWRAP_EC_CALL(glClearStencil)(_index);
+		GLWRAP_EC_CALL(glClear)(GL_STENCIL_BUFFER_BIT);
 	}
 
 	void clear_depth(depth_t _depth = 1.0)
 	{
-		glClearDepth(_depth);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		GLWRAP_EC_CALL(glClearDepth)(_depth);
+		GLWRAP_EC_CALL(glClear)(GL_DEPTH_BUFFER_BIT);
 	}
 
 	void line_width(float_t _width)
 	{
-		glLineWidth(_width);
+		GLWRAP_EC_CALL(glLineWidth)(_width);
 	}
 
 	void polygon_offset(float_t _factor, float_t _units)
 	{
-		glPolygonOffset(_factor, _units);
+		GLWRAP_EC_CALL(glPolygonOffset)(_factor, _units);
 	}
 
 	void point_size(float_t _size)
 	{
-		glPointSize(_size);
+		GLWRAP_EC_CALL(glPointSize)(_size);
 	}
 
 	void provoking_vertex(provoke_mode _mode)
 	{
-		glProvokingVertex(static_cast<GLenum>(_mode));
+		GLWRAP_EC_CALL(glProvokingVertex)(static_cast<GLenum>(_mode));
 	}
 
 	void front_face(orientation _orient)
 	{
-		glFrontFace(static_cast<GLenum>(_orient));
+		GLWRAP_EC_CALL(glFrontFace)(static_cast<GLenum>(_orient));
 	}
 
 	void stencil_op(stencil_action _fail, stencil_action _pass_fail, stencil_action _pass, face _face = face::both)
 	{
-		glStencilOpSeparate(static_cast<GLenum>(_face),
+		GLWRAP_EC_CALL(glStencilOpSeparate)(static_cast<GLenum>(_face),
 			static_cast<GLenum>(_fail), static_cast<GLenum>(_pass_fail), static_cast<GLenum>(_pass));
 	}
 
 	void stencil_func(comparison _test, int_t _ref, uint_t _mask, face _face = face::both)
 	{
-		glStencilFuncSeparate(static_cast<GLenum>(_face), static_cast<GLenum>(_test), _ref, _mask);
+		GLWRAP_EC_CALL(glStencilFuncSeparate)(static_cast<GLenum>(_face), static_cast<GLenum>(_test), _ref, _mask);
 	}
 
 	void stencil_mask(uint_t _mask, face _face = face::both)
 	{
-		glStencilMaskSeparate(static_cast<GLenum>(_face), _mask);
+		GLWRAP_EC_CALL(glStencilMaskSeparate)(static_cast<GLenum>(_face), _mask);
 	}
 
 	void viewport(ivec2 _pos, ivec2 _size)
 	{
-		glViewport(_pos.x, _pos.y, _size.x, _size.y);
+		GLWRAP_EC_CALL(glViewport)(_pos.x, _pos.y, _size.x, _size.y);
 	}
 
 	void scissor(ivec2 _pos, ivec2 _size)
 	{
-		glScissor(_pos.x, _pos.y, _size.x, _size.y);
+		GLWRAP_EC_CALL(glScissor)(_pos.x, _pos.y, _size.x, _size.y);
 	}
 
 	void blend_color(vec4 _color)
 	{
-		glBlendColor(_color.x, _color.y, _color.z, _color.w);
+		GLWRAP_EC_CALL(glBlendColor)(_color.x, _color.y, _color.z, _color.w);
 	}
 
 	void blend_equation(blend_mode _mode)
 	{
-		glBlendEquation(static_cast<GLenum>(_mode));
+		GLWRAP_EC_CALL(glBlendEquation)(static_cast<GLenum>(_mode));
 	}
 
 	void blend_equation(blend_mode _mode_rgb, blend_mode _mode_alpha)
 	{
-		glBlendEquationSeparate(static_cast<GLenum>(_mode_rgb), static_cast<GLenum>(_mode_alpha));
+		GLWRAP_EC_CALL(glBlendEquationSeparate)(static_cast<GLenum>(_mode_rgb), static_cast<GLenum>(_mode_alpha));
 	}
 
 	void blend_func(blend_factor _sfactor, blend_factor _dfactor)
 	{
-		glBlendFunc(static_cast<GLenum>(_sfactor), static_cast<GLenum>(_dfactor));
+		GLWRAP_EC_CALL(glBlendFunc)(static_cast<GLenum>(_sfactor), static_cast<GLenum>(_dfactor));
 	}
 
 	void blend_func(blend_factor _sfactor_rgb, blend_factor _dfactor_rgb, blend_factor _sfactor_alpha, blend_factor _dfactor_alpha)
 	{
-		glBlendFuncSeparate(static_cast<GLenum>(_sfactor_rgb), static_cast<GLenum>(_dfactor_rgb),
+		GLWRAP_EC_CALL(glBlendFuncSeparate)(static_cast<GLenum>(_sfactor_rgb), static_cast<GLenum>(_dfactor_rgb),
 			static_cast<GLenum>(_sfactor_alpha), static_cast<GLenum>(_dfactor_alpha));
 	}
 
 	void depth_func(comparison _compar)
 	{
-		glDepthFunc(static_cast<GLenum>(_compar));
+		GLWRAP_EC_CALL(glDepthFunc)(static_cast<GLenum>(_compar));
 	}
 
 	void depth_range(depth_t _near, depth_t _far)
 	{
-		glDepthRange(_near, _far);
+		GLWRAP_EC_CALL(glDepthRange)(_near, _far);
 	}
 
 	void depth_mask(bool_t _enable)
 	{
-		glDepthMask(_enable);
+		GLWRAP_EC_CALL(glDepthMask)(_enable);
 	}
 
 	void sample_coverage(float_t _value, bool_t _invert)
 	{
-		glSampleCoverage(_value, _invert);
+		GLWRAP_EC_CALL(glSampleCoverage)(_value, _invert);
 	}
 
 	void sample_mask(uint_t _mask_number, bitfield_t _mask)
 	{
 		// TODO: assert _mask_number < GL_MAX_SAMPLE_MASK_WORDS
 
-		glSampleMaski(_mask_number, _mask);
+		GLWRAP_EC_CALL(glSampleMaski)(_mask_number, _mask);
 	}
 
 	void color_mask(basic_vec<bool, 4> const& _mask)
 	{
-		glColorMask(_mask.x, _mask.y, _mask.z, _mask.w);
+		GLWRAP_EC_CALL(glColorMask)(_mask.x, _mask.y, _mask.z, _mask.w);
 	}
 
 	void color_mask(color_number const& _buf, basic_vec<bool, 4> const& _mask)
 	{
-		glColorMaski(_buf.get_index(), _mask.x, _mask.y, _mask.z, _mask.w);
+		GLWRAP_EC_CALL(glColorMaski)(_buf.get_index(), _mask.x, _mask.y, _mask.z, _mask.w);
 	}
 
 	void hint(hint_target _target, hint_value _value)
 	{
-		glHint(static_cast<GLenum>(_target), static_cast<GLenum>(_value));
+		GLWRAP_EC_CALL(glHint)(static_cast<GLenum>(_target), static_cast<GLenum>(_value));
 	}
 
 	template <typename T>
 	void disable_vertex_attribute(const attribute<T>& _attrib)
 	{
-		glDisableVertexAttribArray(_attrib.get_location());
+		GLWRAP_EC_CALL(glDisableVertexAttribArray)(_attrib.get_location());
 	}
 
 	void enable(capability _cap)
 	{
-		glEnable(static_cast<GLenum>(_cap));
+		GLWRAP_EC_CALL(glEnable)(static_cast<GLenum>(_cap));
 	}
 
 	void disable(capability _cap)
 	{
-		glDisable(static_cast<GLenum>(_cap));
+		GLWRAP_EC_CALL(glDisable)(static_cast<GLenum>(_cap));
 	}
 
 	template <typename T>
 	void bind_texture(texture_unit<T> const& _unit, T const& _texture)
 	{
-		glActiveTexture(GL_TEXTURE0 + _unit.get_index());
-		glBindTexture(T::target, _texture.native_handle());
+		GLWRAP_EC_CALL(glActiveTexture)(GL_TEXTURE0 + _unit.get_index());
+		GLWRAP_EC_CALL(glBindTexture)(T::target, _texture.native_handle());
 	}
 
 	template <typename T>
 	void bind_sampler(texture_unit<T> const& _unit, sampler const& _sampler)
 	{
-		glBindSampler(_unit.get_index(), _sampler.native_handle());
+		GLWRAP_EC_CALL(glBindSampler)(_unit.get_index(), _sampler.native_handle());
 	}
 
 	template <typename T>
 	void unbind_sampler(texture_unit<T> const& _unit)
 	{
-		glBindSampler(_unit.get_index(), 0);
+		GLWRAP_EC_CALL(glBindSampler)(_unit.get_index(), 0);
 	}
 
 	// TODO: should allow reference to buffer element as well
@@ -237,18 +237,18 @@ public:
 	template <typename T>
 	void bind_buffer(uniform_block_binding<T> const& _unit, uniform_buffer_iterator<T> const& _iter, uint_t _size)
 	{
-		glBindBufferRange(GL_UNIFORM_BUFFER, _unit.get_index(),
+		GLWRAP_EC_CALL(glBindBufferRange)(GL_UNIFORM_BUFFER, _unit.get_index(),
 			_iter.get_buffer(),	_iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _size);
 	}
 
 	void start_transform_feedback(primitive _mode)
 	{
-		glBeginTransformFeedback(static_cast<GLenum>(_mode));
+		GLWRAP_EC_CALL(glBeginTransformFeedback)(static_cast<GLenum>(_mode));
 	}
 
 	void stop_transform_feedback()
 	{
-		glEndTransformFeedback();
+		GLWRAP_EC_CALL(glEndTransformFeedback)();
 	}
 
 	void blit_pixels(ivec2 const& _src_begin, ivec2 const& _src_end,
@@ -257,7 +257,7 @@ public:
 		// TODO: mask
 		auto _mask = GL_COLOR_BUFFER_BIT;
 
-		glBlitFramebuffer(
+		GLWRAP_EC_CALL(glBlitFramebuffer)(
 			_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
 			_dst_begin.x, _dst_begin.y, _dst_end.x, _dst_end.y,
 			_mask, static_cast<GLenum>(_filter));
@@ -265,17 +265,17 @@ public:
 
 	void flush()
 	{
-		glFlush();
+		GLWRAP_EC_CALL(glFlush)();
 	}
 
 	void finish()
 	{
-		glFinish();
+		GLWRAP_EC_CALL(glFinish)();
 	}
 
 	sync fence_sync(sync_condition _cond, bitfield_t _flags)
 	{
-		return {glFenceSync(static_cast<GLenum>(_cond), _flags)};
+		return {GLWRAP_EC_CALL(glFenceSync)(static_cast<GLenum>(_cond), _flags)};
 	}
 
 	// TODO: multi draw needed?
@@ -283,14 +283,14 @@ public:
 
 	void draw_arrays(std::size_t _offset, std::size_t _count)
 	{
-		glDrawArrays(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawArrays)(get_primitive_mode(),
 			_offset,
 			_count);
 	}
 
 	void draw_arrays_instanced(std::size_t _offset, std::size_t _count, std::size_t _instances)
 	{
-		glDrawArraysInstanced(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawArraysInstanced)(get_primitive_mode(),
 			_offset,
 			_count,
 			_instances);
@@ -298,7 +298,7 @@ public:
 
 	void draw_elements(std::size_t _start, std::size_t _count)
 	{
-		glDrawElements(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawElements)(get_primitive_mode(),
 			_count,
 			get_element_type(),
 			reinterpret_cast<void*>((intptr_t)_start));
@@ -306,7 +306,7 @@ public:
 
 	void draw_elements_offset(std::size_t _start, std::size_t _count, std::size_t _offset)
 	{
-		glDrawElementsBaseVertex(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawElementsBaseVertex)(get_primitive_mode(),
 			_count,
 			get_element_type(),
 			reinterpret_cast<void*>((intptr_t)_start),
@@ -315,7 +315,7 @@ public:
 
 	void draw_elements_instanced(std::size_t _start, std::size_t _count, std::size_t _instances)
 	{
-		glDrawElementsInstanced(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawElementsInstanced)(get_primitive_mode(),
 			_count,
 			get_element_type(),
 			reinterpret_cast<void*>((intptr_t)_start),
@@ -324,17 +324,17 @@ public:
 
 	void use_program(program& _prog)
 	{
-		glUseProgram(_prog.native_handle());
+		GLWRAP_EC_CALL(glUseProgram)(_prog.native_handle());
 	}
 
 	void use_vertex_array(vertex_array& _vert)
 	{
-		glBindVertexArray(_vert.native_handle());
+		GLWRAP_EC_CALL(glBindVertexArray)(_vert.native_handle());
 	}
 
 	void use_transform_feedback(transform_feedback& _tf)
 	{
-		glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
+		GLWRAP_EC_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
 	}
 
 	template <typename T>
@@ -345,7 +345,7 @@ public:
 			|| std::is_same<T, uint_t>::value
 			, "must be ubyte, uint, ushort");
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buff.native_handle());
+		GLWRAP_EC_CALL(glBindBuffer)(GL_ELEMENT_ARRAY_BUFFER, _buff.native_handle());
 
 		m_element_type = detail::data_type_enum<T>();
 	}
@@ -358,12 +358,12 @@ public:
 
 	void use_draw_framebuffer(framebuffer_reference _fb)
 	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
+		GLWRAP_EC_CALL(glBindFramebuffer)(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
 	}
 
 	void use_read_framebuffer(framebuffer_reference _fb)
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, _fb.native_handle());
+		GLWRAP_EC_CALL(glBindFramebuffer)(GL_READ_FRAMEBUFFER, _fb.native_handle());
 	}
 
 	color_number draw_buffer(uint_t _index)

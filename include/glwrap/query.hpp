@@ -16,31 +16,31 @@ class query : public globject
 {
 public:
 	query(context& _context, query_type _type)
-		: globject(gen_return(glGenQueries))
+		: globject(detail::gen_return(glGenQueries))
 		, m_type(_type)
 	{}
 
 	~query()
 	{
 		auto const nh = native_handle();
-		glDeleteQueries(1, &nh);
+		GLWRAP_EC_CALL(glDeleteQueries)(1, &nh);
 	}
 
 	void start()
 	{
-		glBeginQuery(static_cast<GLenum>(m_type), native_handle());
+		GLWRAP_EC_CALL(glBeginQuery)(static_cast<GLenum>(m_type), native_handle());
 	}
 
 	void stop()
 	{
 		// TODO: stupid stupid
-		glEndQuery(static_cast<GLenum>(m_type));
+		GLWRAP_EC_CALL(glEndQuery)(static_cast<GLenum>(m_type));
 	}
 
 	uint64_t result() const
 	{
 		GLuint64 result = 0;
-		glGetQueryObjectui64v(native_handle(), GL_QUERY_RESULT, &result);
+		GLWRAP_EC_CALL(glGetQueryObjectui64v)(native_handle(), GL_QUERY_RESULT, &result);
 		return result;
 	}
 
