@@ -18,9 +18,14 @@ class attribute_location
 	friend class attribute_location_enumerator;
 
 public:
-	int_t get_index() const
+	int_t get_begin_index() const
 	{
 		return m_index;
+	}
+
+	int_t get_end_index() const
+	{
+		return m_index + detail::glslvar::index_count<T>::value;
 	}
 
 private:

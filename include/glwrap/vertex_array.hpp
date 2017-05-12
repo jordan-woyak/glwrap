@@ -152,20 +152,20 @@ public:
 		if (GL_ARB_direct_state_access)
 		{
 			// TODO: this is ugly
-			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glVertexArrayAttribBinding(native_handle(), _attrib.get_index() + i, _binding.get_index());
+			for (auto index = _attrib.get_begin_index(); index != _attrib.get_end_index(); ++index)
+				glVertexArrayAttribBinding(native_handle(), index, _binding.get_index());
 
-			detail::gl_vertex_array_attrib_format<T, T, false>(native_handle(), _attrib.get_index(), _binding.get_offset());
+			detail::gl_vertex_array_attrib_format<T, T, false>(native_handle(), _attrib.get_begin_index(), _binding.get_offset());
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 
 			// TODO: this is ugly
-			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glVertexAttribBinding(_attrib.get_index() + i, _binding.get_index());
+			for (auto index = _attrib.get_begin_index(); index != _attrib.get_end_index(); ++index)
+				glVertexAttribBinding(index, _binding.get_index());
 
-			detail::gl_vertex_attrib_format<T, T, false>(_attrib.get_index(), _binding.get_offset());
+			detail::gl_vertex_attrib_format<T, T, false>(_attrib.get_begin_index(), _binding.get_offset());
 		}
 	}
 
@@ -187,39 +187,39 @@ public:
 	}
 
 	template <typename T>
-	void enable_vertex_attribute(const attribute_location<T>& _location)
+	void enable_vertex_attribute(const attribute_location<T>& _attrib)
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glEnableVertexArrayAttrib(native_handle(), _location.get_index() + i);
+			for (auto index = _attrib.get_begin_index(); index != _attrib.get_end_index(); ++index)
+				glEnableVertexArrayAttrib(native_handle(), index);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 
 			// TODO: this is ugly
-			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glEnableVertexAttribArray(_location.get_index() + i);
+			for (auto index = _attrib.get_begin_index(); index != _attrib.get_end_index(); ++index)
+				glEnableVertexAttribArray(index);
 		}
 	}
 
 	template <typename T>
-	void disable_vertex_attribute(const attribute_location<T>& _location)
+	void disable_vertex_attribute(const attribute_location<T>& _attrib)
 	{
 		if (GL_ARB_direct_state_access)
 		{
 			// TODO: this is ugly
-			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glDisableVertexArrayAttrib(native_handle(), _location.get_index() + i);
+			for (auto index = _attrib.get_begin_index(); index != _attrib.get_end_index(); ++index)
+				glDisableVertexArrayAttrib(native_handle(), index);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 
 			// TODO: this is ugly
-			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glDisableVertexAttribArray(_location.get_index() + i);
+			for (auto index = _attrib.get_begin_index(); index != _attrib.get_end_index(); ++index)
+				glDisableVertexAttribArray(index);
 		}
 	}
 

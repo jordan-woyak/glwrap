@@ -186,7 +186,8 @@ public:
 	template <typename T>
 	void bind_attribute(attribute<T>& _attrib, attribute_location<T> const& _location)
 	{
-		glBindAttribLocation(native_handle(), _location.get_index(), _attrib.get_name().c_str());
+		// Subsequent indices after begin_index are automatically handled by OpenGL
+		glBindAttribLocation(native_handle(), _location.get_begin_index(), _attrib.get_name().c_str());
 	}
 
 	template <typename T>

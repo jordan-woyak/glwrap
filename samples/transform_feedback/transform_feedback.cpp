@@ -76,10 +76,6 @@ int main()
 	struct Input
 	{
 		gl::int_t input1, input2;
-	};
-
-	struct InputAlt
-	{
 		// TODO: support std::array as well
 		gl::float_t input3[2];
 	};
@@ -87,13 +83,14 @@ int main()
 	gl::buffer<Input> input_buffer(glc);
 	input_buffer.assign((Input[])
 	{
-		{45, 10}, {2, 30}, {70, 7}, {23, 20}, {42, 70}, {10, 499}, {89, 30}, {120, 7}
-	});
-
-	gl::buffer<InputAlt> input_buffer_alt(glc);
-	input_buffer_alt.assign((InputAlt[])
-	{
-		{0, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}, {6, 8}, {7, 9}
+		{45, 10, {0, 2}},
+		{2, 30, {1, 3}},
+		{70, 7, {2, 4}},
+		{23, 20, {3, 5}},
+		{42, 70, {4, 6}},
+		{10, 499, {5, 7}},
+		{89, 30, {6, 8}},
+		{120, 7, {7, 9}}
 	});
 
 	// Holds the state of our vertex formats and input buffers:
@@ -107,20 +104,18 @@ int main()
 	// Old VertexAttribPointer-style
 	input_vertices.bind_vertex_attribute(input1_loc, input_buffer.begin() | &Input::input1);
 	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &Input::input2);
-	input_vertices.bind_vertex_attribute(input3_loc, input_buffer_alt.begin() | &InputAlt::input3);
+	input_vertices.bind_vertex_attribute(input3_loc, input_buffer.begin() | &Input::input3);
 
 #else
 	// New VertexAttribFormat-style
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<Input>();
-	auto input_alt_loc = vbuflocs.get<InputAlt>();
 
 	input_vertices.bind_vertex_attribute(input1_loc, input_loc | &Input::input1);
 	input_vertices.bind_vertex_attribute(input2_loc, input_loc | &Input::input2);
-	input_vertices.bind_vertex_attribute(input3_loc, input_alt_loc | &InputAlt::input3);
+	input_vertices.bind_vertex_attribute(input3_loc, input_loc | &Input::input3);
 
 	input_vertices.bind_vertex_buffer(input_loc, input_buffer.begin());
-	input_vertices.bind_vertex_buffer(input_alt_loc, input_buffer_alt.begin());
 #endif
 
 	std::vector<gl::float_t> operands =
