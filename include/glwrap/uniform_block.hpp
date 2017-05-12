@@ -77,7 +77,7 @@ public:
 	uniform_block_binding<T> get()
 	{
 		if (m_current_index == m_max_uniform_buffer_bindings)
-			throw exception();
+			throw exception(0);
 
 		return {m_current_index++};
 	}

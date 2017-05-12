@@ -38,7 +38,7 @@ public:
 	transform_feedback_binding<T> get()
 	{
 		if (m_current_index == m_max_tf_buffers)
-			throw exception();
+			throw exception(0);
 
 		return {m_current_index++};
 	}

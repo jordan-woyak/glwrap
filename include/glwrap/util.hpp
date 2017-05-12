@@ -75,9 +75,7 @@ void check_error()
 
 	if (GL_NO_ERROR != err)
 	{
-		exception ex;
-		ex.error_flag = err;
-		throw ex;
+		throw exception(err);
 	}
 }
 

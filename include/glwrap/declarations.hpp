@@ -24,6 +24,7 @@
 namespace GLWRAP_NAMESPACE
 {
 
+typedef GLvoid void_t;
 typedef GLboolean bool_t;
 typedef GLbyte byte_t;
 typedef GLubyte ubyte_t;

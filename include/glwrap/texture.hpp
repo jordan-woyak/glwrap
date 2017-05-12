@@ -73,7 +73,7 @@ public:
 	texture_unit<T> get()
 	{
 		if (m_current_index == m_max_comb_tunits)
-			throw exception();
+			throw exception(0);
 
 		return {m_current_index++};
 	}

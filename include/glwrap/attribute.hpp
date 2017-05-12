@@ -50,7 +50,7 @@ public:
 		m_current_index += detail::glslvar::index_count<T>::value;
 
 		if (m_current_index > m_max_vertex_attribs)
-			throw exception();
+			throw exception(0);
 
 		return ind;
 	}
