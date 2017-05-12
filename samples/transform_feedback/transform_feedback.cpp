@@ -81,33 +81,21 @@ int main()
 	// Holds the state of our vertex formats and input buffers:
 	gl::vertex_array input_vertices(glc);
 
-	gl::detail::check_error();
-
 	input_vertices.enable_vertex_attribute(input1_loc);
 	input_vertices.enable_vertex_attribute(input2_loc);
-
-	gl::detail::check_error();
 
 #if 0
 	input_vertices.bind_vertex_attribute(input1_loc, input_buffer.begin() | &Input::input1);
 	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &Input::input2);
 
-#else
-	gl::detail::check_error();
-	
+#else	
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<Input>();
-
-	gl::detail::check_error();
 
 	input_vertices.bind_vertex_attribute(input1_loc, input_loc | &Input::input1);
 	input_vertices.bind_vertex_attribute(input2_loc, input_loc | &Input::input2);
 
-	gl::detail::check_error();
-
 	input_vertices.bind_vertex_buffer(input_loc, input_buffer.begin());
-
-	gl::detail::check_error();
 #endif
 
 	std::vector<gl::float_t> operands =
