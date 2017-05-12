@@ -90,15 +90,15 @@ int main()
 	ply::load("model.ply", vert_fmt, vertices, indices);
 
 	// allot generic vetex attrib locations
-	gl::attribute_location_alloter locs(glc);
-	auto pos_loc = locs.allot<gl::vec3>();
-	auto norm_loc = locs.allot<gl::vec3>();
-	auto texpos_loc = locs.allot<gl::vec2>();
+	gl::attribute_location_enumerator locs(glc);
+	auto pos_loc = locs.get<gl::vec3>();
+	auto norm_loc = locs.get<gl::vec3>();
+	auto texpos_loc = locs.get<gl::vec2>();
 
-	gl::texture_unit_alloter units(glc);
-	auto tex_color_unit = units.allot<gl::texture_2d>();
-	auto tex_spec_unit = units.allot<gl::texture_2d>();
-	auto tex_normal_unit = units.allot<gl::texture_2d>();
+	gl::texture_unit_enumerator units(glc);
+	auto tex_color_unit = units.get<gl::texture_2d>();
+	auto tex_spec_unit = units.get<gl::texture_2d>();
+	auto tex_normal_unit = units.get<gl::texture_2d>();
 
 	// create program
 	gl::program prog(glc);
@@ -197,10 +197,19 @@ int main()
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
+
+	gl::vertex_buffer_binding_enumerator vbufs(glc);
+	auto input_loc = vbufs.get<FooVertex>();
+
+	arr.enable_vertex_attribute(pos_loc);
+	arr.enable_vertex_attribute(norm_loc);
+	arr.enable_vertex_attribute(texpos_loc);
 	
-	arr.bind_vertex_attribute(pos_loc, verbuf.begin() | &FooVertex::pos);
-	arr.bind_vertex_attribute(norm_loc, verbuf.begin() | &FooVertex::norm);
-	arr.bind_vertex_attribute(texpos_loc, verbuf.begin() | &FooVertex::texpos);
+	arr.bind_vertex_attribute(pos_loc, input_loc | &FooVertex::pos);
+	arr.bind_vertex_attribute(norm_loc, input_loc | &FooVertex::norm);
+	arr.bind_vertex_attribute(texpos_loc, input_loc | &FooVertex::texpos);
+
+	arr.bind_vertex_buffer(input_loc, verbuf.begin());
 
 	gl::float_t rotate = 0;
 

@@ -310,8 +310,8 @@ struct is_valid_glsl_mat_value_type : std::false_type
 
 template <typename T>
 struct is_valid_glsl_mat_value_type<T, typename std::enable_if<
-	std::is_same<typename vec_traits<T>::value_type, float_t>::value ||
-	std::is_same<typename vec_traits<T>::value_type, double_t>::value
+	std::is_same<typename mat_traits<T>::value_type, float_t>::value ||
+	std::is_same<typename mat_traits<T>::value_type, double_t>::value
 	>::type> : std::true_type
 {};
 

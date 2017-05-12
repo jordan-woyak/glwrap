@@ -33,7 +33,7 @@ private:
 	typedef typename traits::value_type value_type;
 
 public:
-	static const enum_t size = traits::dimensions();
+	static const enum_t size = traits::dimensions;
 	static const enum_t type = attrib_traits<value_type>::type;
 	static const bool is_integral = attrib_traits<value_type>::is_integral;
 };
