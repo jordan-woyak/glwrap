@@ -153,7 +153,11 @@ public:
 	template <typename T>
 	uniform<T> create_uniform(const std::string& _name)
 	{
-		static_assert(detail::glslvar::is_valid_glsl_type<T>::value, "Invalid Uniform type.");
+		// TODO: ugly
+		static_assert(
+			detail::glslvar::is_valid_glsl_type<T>::value
+			|| std::is_same<T, texture_2d>::value
+			, "Invalid Uniform type.");
 		
 		m_uniforms.emplace_back(detail::variable<T>(_name));
 		return uniform<T>(std::prev(m_uniforms.end()));
