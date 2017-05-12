@@ -31,14 +31,13 @@ public:
 	transform_feedback_binding_enumerator(context& _context)
 		: m_current_index()
 	{
-		// TODO: using correct "max"?
-		detail::gl_get(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS, &m_max_tf_separate_components);
+		detail::gl_get(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS, &m_max_tf_buffers);
 	}
 
 	template <typename T>
 	transform_feedback_binding<T> get()
 	{
-		if (m_current_index == m_max_tf_separate_components)
+		if (m_current_index == m_max_tf_buffers)
 			throw exception();
 
 		return {m_current_index++};
@@ -46,7 +45,7 @@ public:
 
 private:
 	int_t m_current_index;
-	int_t m_max_tf_separate_components;
+	int_t m_max_tf_buffers;
 };
 
 class context;

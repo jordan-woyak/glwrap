@@ -6,6 +6,8 @@
 
 int main()
 {
+	glewExperimental = true;
+	
 	//gl::ivec2 window_size{120, 120};
 
 	gl::context glc;
@@ -57,10 +59,19 @@ int main()
 		{45, 1}, {2, 3}, {7, 7}, {23, 2}, {42, 7}, {1, 499}, {89, 3}, {12, 7}, {3, 3}
 	});
 
+	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
+	auto input_loc = vbuflocs.get<Input>();
+	
 	// set buffers, strides, data types, etc
 	gl::vertex_array input_vertices(glc);
-	input_vertices.bind_vertex_attribute(input1_loc, input_buffer.begin() | &Input::input1);
-	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &Input::input2);
+
+	input_vertices.bind_vertex_attribute(input1_loc, input_loc | &Input::input1);
+	input_vertices.enable_vertex_attribute(input1_loc);
+	
+	input_vertices.bind_vertex_attribute(input2_loc, input_loc | &Input::input2);
+	input_vertices.enable_vertex_attribute(input2_loc);
+
+	input_vertices.bind_vertex_buffer(input_loc, input_buffer.begin());
 
 	prog.bind_attribute(input1_attrib, input1_loc);
 	prog.bind_attribute(input2_attrib, input2_loc);

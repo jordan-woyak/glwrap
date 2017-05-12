@@ -115,44 +115,44 @@ struct is_gl_floating_point<T, typename std::enable_if<
 {};
 
 template <typename T>
-GLenum data_type_enum()
+constexpr GLenum data_type_enum()
 {
 	static_assert(false && std::is_void<T>::value, "Invalid data type.");
 	return 0;
 }
 
 template <>
-inline GLenum data_type_enum<ubyte_t>()
+constexpr inline GLenum data_type_enum<ubyte_t>()
 {
 	return GL_UNSIGNED_BYTE;
 }
 
 template <>
-inline GLenum data_type_enum<byte_t>()
+constexpr inline GLenum data_type_enum<byte_t>()
 {
 	return GL_BYTE;
 }
 
 template <>
-inline GLenum data_type_enum<ushort_t>()
+constexpr inline GLenum data_type_enum<ushort_t>()
 {
 	return GL_UNSIGNED_SHORT;
 }
 
 template <>
-inline GLenum data_type_enum<short_t>()
+constexpr inline GLenum data_type_enum<short_t>()
 {
 	return GL_SHORT;
 }
 
 template <>
-inline GLenum data_type_enum<uint_t>()
+constexpr inline GLenum data_type_enum<uint_t>()
 {
 	return GL_UNSIGNED_INT;
 }
 
 template <>
-inline GLenum data_type_enum<int_t>()
+constexpr inline GLenum data_type_enum<int_t>()
 {
 	return GL_INT;
 }
@@ -160,19 +160,19 @@ inline GLenum data_type_enum<int_t>()
 // TODO: half_t
 /*
 template <>
-inline GLenum data_type_enum<half_t>()
+constexpr inline GLenum data_type_enum<half_t>()
 {
 	return GL_HALF_FLOAT;
 }
 */
 template <>
-inline GLenum data_type_enum<float_t>()
+constexpr inline GLenum data_type_enum<float_t>()
 {
 	return GL_FLOAT;
 }
 
 template <>
-inline GLenum data_type_enum<double_t>()
+constexpr inline GLenum data_type_enum<double_t>()
 {
 	return GL_DOUBLE;
 }
