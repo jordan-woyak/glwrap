@@ -153,10 +153,9 @@ public:
 		{
 			// TODO: this is ugly
 			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-			{
 				glVertexArrayAttribBinding(native_handle(), _attrib.get_index() + i, _binding.get_index());
-				detail::gl_vertex_array_attrib_format<T, T, false>(native_handle(), _attrib.get_index() + i, _binding.get_offset());
-			}
+
+			detail::gl_vertex_array_attrib_format<T, T, false>(native_handle(), _attrib.get_index(), _binding.get_offset());
 		}
 		else
 		{
@@ -164,10 +163,9 @@ public:
 
 			// TODO: this is ugly
 			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-			{
-				glVertexAttribBinding(_attrib.get_index(), _binding.get_index());
-				detail::gl_vertex_attrib_format<T, T, false>(_attrib.get_index(), _binding.get_offset());
-			}
+				glVertexAttribBinding(_attrib.get_index() + i, _binding.get_index());
+
+			detail::gl_vertex_attrib_format<T, T, false>(_attrib.get_index(), _binding.get_offset());
 		}
 	}
 
@@ -194,9 +192,7 @@ public:
 		if (GL_ARB_direct_state_access)
 		{
 			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-			{
 				glEnableVertexArrayAttrib(native_handle(), _location.get_index() + i);
-			}
 		}
 		else
 		{
@@ -204,9 +200,7 @@ public:
 
 			// TODO: this is ugly
 			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-			{
-				glEnableVertexAttribArray(_location.get_index());
-			}
+				glEnableVertexAttribArray(_location.get_index() + i);
 		}
 	}
 
@@ -217,7 +211,7 @@ public:
 		{
 			// TODO: this is ugly
 			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glDisableVertexArrayAttrib(native_handle(), _location.get_index());
+				glDisableVertexArrayAttrib(native_handle(), _location.get_index() + i);
 		}
 		else
 		{
@@ -225,7 +219,7 @@ public:
 
 			// TODO: this is ugly
 			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
-				glDisableVertexAttribArray(_location.get_index());
+				glDisableVertexAttribArray(_location.get_index() + i);
 		}
 	}
 
