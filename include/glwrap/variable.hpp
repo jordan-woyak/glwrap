@@ -21,7 +21,7 @@ public:
 		: m_name(_name)
 	{}
 
-	virtual std::string get_type_name() const = 0;
+	virtual std::string get_glsl_definition() const = 0;
 
 	std::string const& get_name() const
 	{
@@ -40,9 +40,12 @@ public:
 		: variable_base(_name)
 	{}
 
-	std::string get_type_name() const
+	std::string get_glsl_definition() const
 	{
-		return detail::glslvar::get_type_name<T>();
+		return
+			detail::glslvar::get_type_name<T>()
+			+ " " + get_name()
+			+ detail::glslvar::glsl_var_suffix<T>::suffix();
 	}
 };
 

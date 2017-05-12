@@ -121,6 +121,8 @@ public:
 		glDeleteVertexArrays(1, &nh);
 	}
 
+/*
+	// TODO: kill
 	template <typename T, typename A>
 	void bind_vertex_attribute(const attribute_location<T>& _attrib, const buffer_iterator<T, A>& _iter)
 	{
@@ -133,21 +135,39 @@ public:
 		detail::gl_vertex_attrib_pointer<T, T, false>(_attrib.get_index(), _iter.get_stride(), _iter.get_offset());
 	}
 
+	// TODO: kill
+	template <typename T>
+	void set_attrib_divisor(const attribute_location<T>& _attrib, uint_t _divisor)
+	{
+		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
+	
+		glVertexAttribDivisor(_attrib.get_index(), _divisor);
+	}
+*/
+
 	// TODO: allow type conversion
 	template <typename T>
 	void bind_vertex_attribute(const attribute_location<T>& _attrib, const vertex_buffer_binding_attribute<T>& _binding)
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			glVertexArrayAttribBinding(native_handle(), _attrib.get_index(), _binding.get_index());
-			detail::gl_vertex_array_attrib_format<T, T, false>(native_handle(), _attrib.get_index(), _binding.get_offset());
+			// TODO: this is ugly
+			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
+			{
+				glVertexArrayAttribBinding(native_handle(), _attrib.get_index() + i, _binding.get_index());
+				detail::gl_vertex_array_attrib_format<T, T, false>(native_handle(), _attrib.get_index() + i, _binding.get_offset());
+			}
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 
-			glVertexAttribBinding(_attrib.get_index(), _binding.get_index());
-			detail::gl_vertex_attrib_format<T, T, false>(_attrib.get_index(), _binding.get_offset());
+			// TODO: this is ugly
+			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
+			{
+				glVertexAttribBinding(_attrib.get_index(), _binding.get_index());
+				detail::gl_vertex_attrib_format<T, T, false>(_attrib.get_index(), _binding.get_offset());
+			}
 		}
 	}
 
@@ -173,13 +193,20 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			glEnableVertexArrayAttrib(native_handle(), _location.get_index());
+			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
+			{
+				glEnableVertexArrayAttrib(native_handle(), _location.get_index() + i);
+			}
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
-		
-			glEnableVertexAttribArray(_location.get_index());
+
+			// TODO: this is ugly
+			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
+			{
+				glEnableVertexAttribArray(_location.get_index());
+			}
 		}
 	}
 
@@ -188,13 +215,17 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			glDisableVertexArrayAttrib(native_handle(), _location.get_index());
+			// TODO: this is ugly
+			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
+				glDisableVertexArrayAttrib(native_handle(), _location.get_index());
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
-		
-			glDisableVertexAttribArray(_location.get_index());
+
+			// TODO: this is ugly
+			for (uint_t i = 0; i != detail::glslvar::index_count<T>::value; ++i)
+				glDisableVertexAttribArray(_location.get_index());
 		}
 	}
 

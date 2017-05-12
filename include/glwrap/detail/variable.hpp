@@ -29,20 +29,28 @@ struct glsl_var_suffix
 {};
 
 template <typename T>
+struct glsl_var_suffix<T, typename std::enable_if<std::is_array<T>::value>::type>
+{
+	static type_name_t suffix()
+	{
+		return "[" + std::to_string(std::extent<T>::value) + "]";
+	}
+};
+
+template <typename T>
+struct glsl_var_suffix<T, typename std::enable_if<!std::is_array<T>::value>::type>
+{
+	static type_name_t suffix()
+	{
+		return "";
+	}
+};
+
+template <typename T>
 type_name_t get_type_suffix()
 {
 	return glsl_var_suffix<T>::suffix();
 }
-
-template <typename T>
-struct glsl_var_suffix<T, std::enable_if<std::is_array<T>::value>>
-{
-	static type_name_t suffix()
-	{
-		// TODO: ??
-		return "";
-	}
-};
 
 // glsl variable type name
 template <typename T, typename Enable = void>
@@ -247,6 +255,16 @@ public:
 	static const std::size_t value = index_count<value_type>::value * detail::mat_traits<T>::cols;
 };
 
+template <typename T>
+struct index_count<T, typename std::enable_if<std::is_array<T>::value>::type>
+{
+private:
+	typedef typename std::remove_extent<T>::type value_type;
+	
+public:
+	static const std::size_t value = index_count<value_type>::value * std::extent<T>::value;
+};
+
 // TODO: complete and use these
 template <typename T, typename Enable = void>
 struct is_valid_glsl_vec_size : std::false_type
@@ -325,6 +343,12 @@ struct is_valid_glsl_type<T, typename std::enable_if<
 	is_valid_glsl_mat_size<T>::value &&
 	is_valid_glsl_mat_value_type<T>::value
 	>::type> : std::true_type
+{};
+
+template <typename T>
+struct is_valid_glsl_type<T, typename std::enable_if<
+	std::is_array<T>::value
+	>::type> : is_valid_glsl_type<typename std::remove_extent<T>::type>
 {};
 
 }

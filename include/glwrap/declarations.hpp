@@ -20,6 +20,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <type_traits>
+#include <array>
 
 namespace GLWRAP_NAMESPACE
 {
@@ -48,6 +49,9 @@ typedef GLdouble double_t;
 //typedef GLclampd clampd_t;
 // TODO: kill this
 typedef double_t depth_t;
+
+template <typename T, sizei_t N>
+using array = std::array<T, N>;
 
 namespace detail
 {

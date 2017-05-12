@@ -137,7 +137,7 @@ private:
 	std::string get_header() const
 	{
 		// TODO: allow setting version
-		std::string header("#version 300 es\n");
+		std::string header("#version 330\n");
 
 		for (auto& var : m_inputs)
 		{
@@ -146,9 +146,7 @@ private:
 				% var->get_type_name() % var->get_name()).str();
 #else
 			header += "in ";
-			header += var->get_type_name();
-			header += " ";
-			header += var->get_name();
+			header += var->get_glsl_definition();
 			header += ";\n";
 #endif
 		}
@@ -160,9 +158,7 @@ private:
 				% var->get_type_name() % var->get_name()).str();
 #else
 			header += "out ";
-			header += var->get_type_name();
-			header += " ";
-			header += var->get_name();
+			header += var->get_glsl_definition();
 			header += ";\n";
 #endif
 		}

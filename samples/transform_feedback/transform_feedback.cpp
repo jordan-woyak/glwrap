@@ -24,6 +24,10 @@ int main()
 	auto input1_attrib = vshad.create_input<gl::int_t>("input1");
 	auto input2_attrib = vshad.create_input<gl::int_t>("input2");
 
+	auto input3_attrib = vshad.create_input<gl::float_t[2]>("input3");
+
+	//auto input_test_attrib = vshad.create_input<gl::float_t[2][2]>("input_test");
+
 	auto output1_varying = vshad.create_output<gl::float_t>("output1");
 
 	auto operand1_uni = prog.create_uniform<gl::float_t>("operand1");
@@ -31,7 +35,7 @@ int main()
 	vshad.set_source(
 		"void main(void)"
 		"{"
-			"output1 = float(input1) * float(input2) + operand1;"
+			"output1 = float(input1) * float(input2) + operand1 + (input3[0] + input3[1]) / 2.0;"
 		"}"
 	);
 
@@ -46,9 +50,11 @@ int main()
 	// TODO: allow creation based on type of attrib above?
 	auto input1_loc = locs.get<gl::int_t>();
 	auto input2_loc = locs.get<gl::int_t>();
+	auto input3_loc = locs.get<gl::float_t[2]>();
 
 	prog.bind_attribute(input1_attrib, input1_loc);
 	prog.bind_attribute(input2_attrib, input2_loc);
+	prog.bind_attribute(input3_attrib, input3_loc);
 
 	struct Output
 	{
@@ -71,11 +77,23 @@ int main()
 	{
 		gl::int_t input1, input2;
 	};
+
+	struct InputAlt
+	{
+		// TODO: support std::array as well
+		gl::float_t input3[2];
+	};
 	
 	gl::buffer<Input> input_buffer(glc);
 	input_buffer.assign((Input[])
 	{
-		{45, 1}, {2, 3}, {7, 7}, {23, 2}, {42, 7}, {1, 499}, {89, 3}, {12, 7}, {3, 3}
+		{45, 10}, {2, 30}, {70, 7}, {23, 20}, {42, 70}, {10, 499}, {89, 30}, {120, 7}
+	});
+
+	gl::buffer<InputAlt> input_buffer_alt(glc);
+	input_buffer_alt.assign((InputAlt[])
+	{
+		{0, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}, {6, 8}, {7, 9}
 	});
 
 	// Holds the state of our vertex formats and input buffers:
@@ -83,24 +101,31 @@ int main()
 
 	input_vertices.enable_vertex_attribute(input1_loc);
 	input_vertices.enable_vertex_attribute(input2_loc);
+	input_vertices.enable_vertex_attribute(input3_loc);
 
 #if 0
+	// Old VertexAttribPointer-style
 	input_vertices.bind_vertex_attribute(input1_loc, input_buffer.begin() | &Input::input1);
 	input_vertices.bind_vertex_attribute(input2_loc, input_buffer.begin() | &Input::input2);
+	input_vertices.bind_vertex_attribute(input3_loc, input_buffer_alt.begin() | &InputAlt::input3);
 
-#else	
+#else
+	// New VertexAttribFormat-style
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<Input>();
+	auto input_alt_loc = vbuflocs.get<InputAlt>();
 
 	input_vertices.bind_vertex_attribute(input1_loc, input_loc | &Input::input1);
 	input_vertices.bind_vertex_attribute(input2_loc, input_loc | &Input::input2);
+	input_vertices.bind_vertex_attribute(input3_loc, input_alt_loc | &InputAlt::input3);
 
 	input_vertices.bind_vertex_buffer(input_loc, input_buffer.begin());
+	input_vertices.bind_vertex_buffer(input_alt_loc, input_buffer_alt.begin());
 #endif
 
 	std::vector<gl::float_t> operands =
 	{
-		1000, 2000, 70000, 50000, -1000
+		1000, 2000, 70000, 50000, 6000
 	};
 
 	// output buffer

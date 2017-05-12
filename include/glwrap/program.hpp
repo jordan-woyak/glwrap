@@ -33,9 +33,7 @@ public:
 		for (auto& uni : m_uniforms)
 		{
 			uniform_header += "uniform ";
-			uniform_header += uni.get_variable().get_type_name();
-			uniform_header += ' ';
-			uniform_header += uni.get_variable().get_name();
+			uniform_header += uni.get_variable().get_glsl_definition();
 			uniform_header += ";\n";
 #if 0
 			uniform_header += (boost::format("uniform %s %s;\n")
@@ -54,9 +52,7 @@ public:
 			for (auto& var : block.m_members)
 			{
 				uniform_header += "uniform ";
-				uniform_header += var.second->get_type_name();
-				uniform_header += " ";
-				uniform_header += var.second->get_name();
+				uniform_header += var.second->get_glsl_definition();
 				uniform_header += ";\n";
 			}
 
