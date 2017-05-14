@@ -152,10 +152,17 @@ public:
 	// mipmap vs. mipmaps ?
 	void generate_mipmap()
 	{
-		// TODO: ugly
-		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
-		
-		GLWRAP_EC_CALL(glGenerateMipmap)(target);
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glGenerateTextureMipmap)(native_handle());
+		}
+		else
+		{
+			// TODO: ugly
+			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+			
+			GLWRAP_EC_CALL(glGenerateMipmap)(target);
+		}
 	}
 
 	void set_swizzle(swizzle_component _comp, swizzle_value _val)

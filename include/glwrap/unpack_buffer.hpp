@@ -26,6 +26,8 @@ public:
 		, m_dims(_dims)
 	{}
 
+	// TODO: GL_UNPACK_SWAP_BYTES, GL_UNPACK_LSB_FIRST, GL_UNPACK_ROW_LENGTH, GL_UNPACK_ALIGNMENT
+
 // TODO: fix privacy
 //private:
 	T const* const m_data;

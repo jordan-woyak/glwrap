@@ -18,11 +18,13 @@ public:
 		GLWRAP_EC_CALL(glDeleteSync)(native_handle());
 	}
 
+	// allow timeout for in the future ?
 	void wait()
 	{
 		GLWRAP_EC_CALL(glWaitSync)(native_handle(), 0, GL_TIMEOUT_IGNORED);
 	}
 
+	// use the flags parameter ?
 	void client_wait_for(std::chrono::nanoseconds _ns)
 	{
 		// TODO: return something

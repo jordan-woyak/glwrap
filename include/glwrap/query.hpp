@@ -6,10 +6,11 @@ namespace gl
 enum class query_type : GLenum
 {
 	samples_passed = GL_SAMPLES_PASSED,
-	any_samples_passed = GL_ANY_SAMPLES_PASSED,
-	primitives_generated = GL_PRIMITIVES_GENERATED,
+	//any_samples_passed = GL_ANY_SAMPLES_PASSED,
+	any_samples_passed_conservative = GL_ANY_SAMPLES_PASSED_CONSERVATIVE,
+	//primitives_generated = GL_PRIMITIVES_GENERATED,
 	transform_feedback_primitives_written = GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN,
-	time_elapsed = GL_TIME_ELAPSED
+	//time_elapsed = GL_TIME_ELAPSED
 };
 
 class query : public globject

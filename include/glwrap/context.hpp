@@ -296,6 +296,8 @@ public:
 			_instances);
 	}
 
+	// TODO: start values need to be adjusted to byte offsets
+
 	void draw_elements(std::size_t _start, std::size_t _count)
 	{
 		GLWRAP_EC_CALL(glDrawElements)(get_primitive_mode(),
