@@ -14,63 +14,59 @@ class program;
 template <typename T>
 class uniform;
 
-namespace detail
-{
-
-class uniform_variable
-{
-	friend class gl::program;
-
-	template <typename T>
-	friend class gl::uniform;
-
-public:
-//private:
-	template <typename T>
-	uniform_variable(detail::variable<T>&& _var)
-		: m_var(new detail::variable<T>(_var))
-	{}
-
-	int_t get_location() const
-	{
-		return m_location;
-	}
-
-	void set_location(int_t _location)
-	{
-		m_location = _location;
-	}
-
-	variable_base& get_variable()
-	{
-		return *m_var;
-	}
-
-	std::unique_ptr<variable_base> m_var;
-	int_t m_location;
-};
-
-}
+class uniform_location_enumerator;
 
 template <typename T>
-class uniform
+class uniform_location
 {
-	friend class program;
+	friend class uniform_location_enumerator;
 
-private:
-	typedef std::list<detail::uniform_variable>::iterator iter_t;
-
-	uniform(iter_t _iter)
-		: m_iter(_iter)
-	{}
-
-	int_t get_location() const
+public:
+	int_t get_index() const
 	{
-		return m_iter->get_location();
+		return m_index;
 	}
 
-	iter_t m_iter;
+private:
+	uniform_location(int_t _index)
+		: m_index(_index)
+	{}
+
+	int_t m_index;
+};
+
+// TODO: name?
+class uniform_location_enumerator
+{
+public:
+	template <typename T>
+	using location_type = uniform_location<T>;
+	
+	// TODO: really need context?
+	uniform_location_enumerator(context& _context)
+		: m_current_index()
+		, m_max_uniform_locations()
+	{
+		detail::gl_get(GL_MAX_UNIFORM_LOCATIONS, &m_max_uniform_locations);
+	}
+
+	template <typename T>
+	uniform_location<T> get()
+	{
+		if (m_current_index >= m_max_uniform_locations)
+			throw exception(0);
+			
+		uniform_location<T> ind(m_current_index);
+
+		// TODO: every uniform takes up just one location, right?
+		m_current_index += 1;
+
+		return ind;
+	}
+
+private:
+	int_t m_current_index;
+	int_t m_max_uniform_locations;
 };
 
 }
-

@@ -134,7 +134,7 @@ public:
 	friend program;
 
 	template <typename T>
-	void bind_vertex_attribute(const vertex_out_varying<T>& _varying, const transform_feedback_binding_attribute<T>& _attr)
+	void bind_vertex_attribute(const variable_description<T, attribute_location<T>>& _varying, const transform_feedback_binding_attribute<T>& _attr)
 	{
 		// TODO: assert offsets are aligned
 		

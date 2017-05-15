@@ -11,18 +11,18 @@ class program;
 
 class attribute_location_enumerator;
 
-// TODO: rename attribute_location?
 template <typename T>
 class attribute_location
 {
 	friend class attribute_location_enumerator;
 
 public:
-	int_t get_begin_index() const
+	int_t get_index() const
 	{
 		return m_index;
 	}
 
+	// TODO: this is kinda messy and easy to forget about
 	int_t get_end_index() const
 	{
 		return m_index + detail::glslvar::index_count<T>::value;
@@ -40,6 +40,9 @@ private:
 class attribute_location_enumerator
 {
 public:
+	template <typename T>
+	using location_type = attribute_location<T>;
+
 	// TODO: really need context?
 	attribute_location_enumerator(context& _context)
 		: m_current_index()
@@ -49,9 +52,9 @@ public:
 	}
 
 	template <typename T>
-	attribute_location<T> get()
+	location_type<T> get()
 	{
-		attribute_location<T> ind(m_current_index);
+		location_type<T> ind(m_current_index);
 		m_current_index += detail::glslvar::index_count<T>::value;
 
 		if (m_current_index > m_max_vertex_attribs)
@@ -63,27 +66,6 @@ public:
 private:
 	int_t m_current_index;
 	int_t m_max_vertex_attribs;
-};
-
-template <typename T>
-class attribute
-{
-	friend class shader<shader_type::vertex>;
-
-public:
-	std::string const& get_name() const
-	{
-		return (*m_iter)->get_name();
-	}
-
-private:
-	typedef std::list<std::unique_ptr<detail::variable_base>>::iterator iter_t;
-
-	attribute(iter_t _iter)
-		: m_iter(_iter)
-	{}
-
-	iter_t m_iter;
 };
 
 }

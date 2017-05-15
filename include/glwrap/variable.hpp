@@ -7,49 +7,47 @@
 namespace gl
 {
 
-class program;
-
-namespace detail
+template <typename T, typename L>
+class variable_description
 {
-
-class variable_base
-{
-	friend class gl::program;
-
 public:
-	variable_base(const std::string& _name)
-		: m_name(_name)
-	{}
+	typedef T value_type;
+	typedef L location_type;
 
-	virtual std::string get_glsl_definition() const = 0;
+	variable_description(std::string _name, const location_type& _loc)
+		: m_name(std::move(_name))
+		, m_location(_loc)
+	{}
 
 	std::string const& get_name() const
 	{
 		return m_name;
 	}
 
+	location_type const& get_location() const
+	{
+		return m_location;
+	}
+
 private:
 	std::string m_name;
+	location_type m_location;
 };
 
-template <typename T>
-class variable : public variable_base
+template <typename T, typename L>
+auto variable(std::string _name, L& _enumerator) -> variable_description<T, typename L::template location_type<T>>
 {
-public:
-	variable(const std::string& _name)
-		: variable_base(_name)
-	{}
-
-	std::string get_glsl_definition() const
-	{
-		return
-			detail::glslvar::get_type_name<T>()
-			+ " " + get_name()
-			+ detail::glslvar::glsl_var_suffix<T>::suffix();
-	}
-};
-
+	return {std::move(_name), _enumerator.template get<T>()};
 }
+
+/*
+// TODO: templatify all the location types so this can assume the variable type from the location
+template <typename T, typename L>
+auto variable(std::string _name, L& _loc) -> variable_description<T, L>
+{
+	return {std::move(_name), _loc};
+}
+*/
 
 }
 

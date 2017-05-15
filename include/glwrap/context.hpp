@@ -196,13 +196,7 @@ public:
 	{
 		GLWRAP_EC_CALL(glHint)(static_cast<GLenum>(_target), static_cast<GLenum>(_value));
 	}
-
-	template <typename T>
-	void disable_vertex_attribute(const attribute<T>& _attrib)
-	{
-		GLWRAP_EC_CALL(glDisableVertexAttribArray)(_attrib.get_location());
-	}
-
+	
 	void enable(capability _cap)
 	{
 		GLWRAP_EC_CALL(glEnable)(static_cast<GLenum>(_cap));
@@ -232,6 +226,7 @@ public:
 		GLWRAP_EC_CALL(glBindSampler)(_unit.get_index(), 0);
 	}
 
+/*
 	// TODO: should allow reference to buffer element as well
 	// range is probably not needed/wanted for uniform buffer
 	template <typename T>
@@ -240,7 +235,7 @@ public:
 		GLWRAP_EC_CALL(glBindBufferRange)(GL_UNIFORM_BUFFER, _unit.get_index(),
 			_iter.get_buffer(),	_iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _size);
 	}
-
+*/
 	void start_transform_feedback(primitive _mode)
 	{
 		GLWRAP_EC_CALL(glBeginTransformFeedback)(static_cast<GLenum>(_mode));

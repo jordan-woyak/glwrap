@@ -89,37 +89,28 @@ int main()
 
 	ply::load("model.ply", vert_fmt, vertices, indices);
 
-	// allot generic vetex attrib locations
-	gl::attribute_location_enumerator locs(glc);
-	auto pos_loc = locs.get<gl::vec3>();
-	auto norm_loc = locs.get<gl::vec3>();
-	auto texpos_loc = locs.get<gl::vec2>();
+	// allot locations automatically
+	gl::attribute_location_enumerator attribs(glc);
+	gl::uniform_location_enumerator uniforms(glc);
+	gl::fragdata_location_enumerator fragdatas(glc);
 
 	gl::texture_unit_enumerator units(glc);
 	auto tex_color_unit = units.get<gl::texture_2d>();
 	auto tex_spec_unit = units.get<gl::texture_2d>();
 	auto tex_normal_unit = units.get<gl::texture_2d>();
 
-	// create program
-	gl::program prog(glc);
+	gl::vertex_shader_builder vshad(glc);
 
-	auto tex_color_uni = prog.create_uniform<gl::texture_2d>("tex_color");
-	auto tex_spec_uni = prog.create_uniform<gl::texture_2d>("tex_spec");
-	auto tex_normal_uni = prog.create_uniform<gl::texture_2d>("tex_normal");
+	auto pos_attrib = vshad.create_input(gl::variable<gl::vec3>("pos", attribs));
+	auto norm_attrib = vshad.create_input(gl::variable<gl::vec3>("norm", attribs));
+	auto texpos_attrib = vshad.create_input(gl::variable<gl::vec2>("texpos", attribs));
+	
+	auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
+	auto projection_uni = vshad.create_uniform(gl::variable<gl::mat4>("projection", uniforms));
 
-	auto model_uni = prog.create_uniform<gl::mat4>("model");
-	auto projection_uni = prog.create_uniform<gl::mat4>("projection");
-
-	auto light_dir_uni = prog.create_uniform<gl::vec3>("light_dir");
-	auto diff_color_uni = prog.create_uniform<gl::vec4>("diff_color");
-	auto spec_color_uni = prog.create_uniform<gl::vec4>("spec_color");
-	auto ambient_uni = prog.create_uniform<gl::vec4>("ambient");
-	auto shininess_uni = prog.create_uniform<gl::float_t>("shininess");
-
-	gl::vertex_shader vshad(glc);
-	auto pos_attrib = vshad.create_input<gl::vec3>("pos");
-	auto norm_attrib = vshad.create_input<gl::vec3>("norm");
-	auto texpos_attrib = vshad.create_input<gl::vec2>("texpos");
+	auto light_dir_uni = vshad.create_uniform(gl::variable<gl::vec3>("light_dir", uniforms));
+	auto ambient_uni = vshad.create_uniform(gl::variable<gl::vec4>("ambient", uniforms));
+	
 	vshad.set_source(
 		"out vec2 tpos;"
 		"out vec3 vertex_normal, norm_light_dir, Ia, E;"
@@ -139,8 +130,20 @@ int main()
 		"}"
 	);
 
-	gl::fragment_shader fshad(glc);
-	auto fragdata = fshad.create_output<gl::vec4>("fragdata");
+	gl::fragment_shader_builder fshad(glc);
+
+	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
+	(void)fragdata;
+	//prog.bind_fragdata(fragdata, glc.draw_buffer(0));
+
+	auto tex_color_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_color", uniforms));
+	auto tex_spec_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_spec", uniforms));
+	auto tex_normal_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_normal", uniforms));
+
+	auto diff_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("diff_color", uniforms));
+	auto spec_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("spec_color", uniforms));
+	auto shininess_uni = fshad.create_uniform(gl::variable<gl::float_t>("shininess", uniforms));
+	
 	fshad.set_source(
 		"in vec2 tpos;"
 		"in vec3 vertex_normal, norm_light_dir, Ia, E;"
@@ -168,24 +171,24 @@ int main()
 		"}"
 	);
 
-	prog.attach(vshad);
-	prog.attach(fshad);
-	prog.compile();
+	// create program
+	gl::program prog(glc);
 
-	std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
-	std::cout << "fshad log:\n" << fshad.get_log() << std::endl;
+	auto vert_shader = vshad.create_shader(glc);
+	if (!vert_shader.compile_status())
+		std::cout << "vshad log:\n" << vert_shader.get_log() << std::endl << vert_shader.get_source();
 
-	// bind attribute and fragdata location before linking
-	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
-
-	prog.bind_attribute(pos_attrib, pos_loc);
-	prog.bind_attribute(norm_attrib, norm_loc);
-	prog.bind_attribute(texpos_attrib, texpos_loc);
-
+	auto frag_shader = fshad.create_shader(glc);
+	if (!frag_shader.compile_status())
+		std::cout << "fshad log:\n" << frag_shader.get_log() << std::endl << frag_shader.get_source();
+	
+	prog.attach(vert_shader);
+	prog.attach(frag_shader);
 	prog.link();
+	std::cout << "program log:\n" << prog.get_log() << std::endl;
 
-	//if (!prog.is_good())
-		std::cout << "program log:\n" << prog.get_log() << std::endl;
+	if (!prog.is_good())
+		return 1;
 
 	// load vertex data
 	gl::buffer<FooVertex> verbuf(glc);
@@ -201,13 +204,13 @@ int main()
 	gl::vertex_buffer_binding_enumerator vbufs(glc);
 	auto input_loc = vbufs.get<FooVertex>();
 
-	arr.enable_vertex_attribute(pos_loc);
-	arr.enable_vertex_attribute(norm_loc);
-	arr.enable_vertex_attribute(texpos_loc);
+	arr.enable_vertex_attribute(pos_attrib);
+	arr.enable_vertex_attribute(norm_attrib);
+	arr.enable_vertex_attribute(texpos_attrib);
 	
-	arr.bind_vertex_attribute(pos_loc, input_loc | &FooVertex::pos);
-	arr.bind_vertex_attribute(norm_loc, input_loc | &FooVertex::norm);
-	arr.bind_vertex_attribute(texpos_loc, input_loc | &FooVertex::texpos);
+	arr.bind_vertex_attribute(pos_attrib, input_loc | &FooVertex::pos);
+	arr.bind_vertex_attribute(norm_attrib, input_loc | &FooVertex::norm);
+	arr.bind_vertex_attribute(texpos_attrib, input_loc | &FooVertex::texpos);
 
 	arr.bind_vertex_buffer(input_loc, verbuf.begin());
 

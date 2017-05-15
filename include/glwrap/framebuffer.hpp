@@ -8,6 +8,58 @@
 namespace gl
 {
 
+// TODO: rename this
+template <typename T>
+class fragdata_location
+{
+public:
+	fragdata_location(int_t _index)
+		: m_index(_index)
+	{}
+
+
+	int_t get_index() const
+	{
+		return m_index;
+	}
+
+	int_t m_index;
+};
+
+// TODO: rename this
+class fragdata_location_enumerator
+{
+public:
+	template <typename T>
+	using location_type = fragdata_location<T>;
+	
+	// TODO: really need context?
+	fragdata_location_enumerator(context& _context)
+		: m_current_index()
+		, m_max_locations()
+	{
+		detail::gl_get(GL_MAX_DRAW_BUFFERS, &m_max_locations);
+	}
+
+	template <typename T>
+	fragdata_location<T> get()
+	{
+		if (m_current_index >= m_max_locations)
+			throw exception(0);
+			
+		fragdata_location<T> ind(m_current_index);
+
+		// TODO: every uniform takes up just one location, right?
+		m_current_index += 1;
+
+		return ind;
+	}
+
+private:
+	int_t m_current_index;
+	int_t m_max_locations;
+};
+
 class program;
 
 struct attach_point
@@ -55,27 +107,6 @@ private:
 	{}
 
 	uint_t m_index;
-};
-
-template <typename T>
-class fragdata
-{
-	friend class shader<shader_type::fragment>;
-
-public:
-	std::string const& get_name() const
-	{
-		return (*m_iter)->get_name();
-	}
-
-private:
-	typedef std::list<std::unique_ptr<detail::variable_base>>::iterator iter_t;
-
-	fragdata(iter_t _iter)
-		: m_iter(_iter)
-	{}
-
-	iter_t m_iter;
 };
 
 class framebuffer;

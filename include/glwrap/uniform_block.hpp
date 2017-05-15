@@ -15,7 +15,7 @@ class program;
 
 namespace detail
 {
-
+/*
 class uniform_block_variable
 {
 	friend class gl::program;
@@ -38,14 +38,14 @@ private:
 	// TODO: shared_ptr can be killed
 	std::map<std::size_t, std::shared_ptr<variable_base>> m_members;
 };
-
+*/
 }
 
 // TODO: name?
 template <typename T>
-class uniform_block_binding
+class uniform_block_location
 {
-	friend class uniform_block_binding_enumerator;
+	friend class uniform_block_location_enumerator;
 
 public:
 	int_t get_index() const
@@ -54,19 +54,18 @@ public:
 	}
 
 private:
-	uniform_block_binding(int_t _index)
+	uniform_block_location(int_t _index)
 		: m_index(_index)
 	{}
 
 	int_t m_index;
 };
 
-// TODO: name?
-class uniform_block_binding_enumerator
+class uniform_block_location_enumerator
 {
 public:
 	// TODO: really need context?
-	uniform_block_binding_enumerator(context& _context)
+	uniform_block_location_enumerator(context& _context)
 		: m_current_index()
 		, m_max_uniform_buffer_bindings()
 	{
@@ -74,7 +73,7 @@ public:
 	}
 
 	template <typename T>
-	uniform_block_binding<T> get()
+	uniform_block_location<T> get()
 	{
 		if (m_current_index == m_max_uniform_buffer_bindings)
 			throw exception(0);
@@ -87,6 +86,7 @@ private:
 	int_t m_max_uniform_buffer_bindings;
 };
 
+/*
 template <typename T>
 class uniform_block_definition
 {
@@ -111,26 +111,6 @@ private:
 	// TODO: shared_ptr can be killed
 	std::map<std::size_t, std::shared_ptr<detail::variable_base>> m_members;
 };
-
-template <typename T>
-struct uniform_block
-{
-	friend class program;
-
-public:
-	std::string const& get_name() const
-	{
-		return m_iter->get_name();
-	}
-
-private:
-	typedef std::list<detail::uniform_block_variable>::iterator iter_t;
-
-	uniform_block(iter_t _iter)
-		: m_iter(_iter)
-	{}
-
-	iter_t m_iter;
-};
+*/
 
 }

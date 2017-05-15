@@ -24,89 +24,9 @@ public:
 		GLWRAP_EC_CALL(glDeleteProgram)(native_handle());
 	}
 
-	void compile()
-	{
-		// TODO: error check
-
-		// uniforms
-		std::string uniform_header;
-		for (auto& uni : m_uniforms)
-		{
-			uniform_header += "uniform ";
-			uniform_header += uni.get_variable().get_glsl_definition();
-			uniform_header += ";\n";
-#if 0
-			uniform_header += (boost::format("uniform %s %s;\n")
-				% uni.get_variable().get_type_name() % uni.get_variable().get_name()).str();
-#endif
-		}
-
-		for (auto& block : m_uniform_blocks)
-		{
-			uniform_header += "layout(std140) uniform ";
-			uniform_header += block.get_name();
-			uniform_header += " {\n";
-
-			// TODO: actually look at the offset value!!!
-			// currently super broken, not handling padding for shit
-			for (auto& var : block.m_members)
-			{
-				uniform_header += "uniform ";
-				uniform_header += var.second->get_glsl_definition();
-				uniform_header += ";\n";
-			}
-
-			// TODO: allow scoped block
-			uniform_header += "};\n";
-
-#if 0
-			uniform_header += (boost::format("layout(std140) uniform %s {\n") % block.get_name()).str();
-
-			// TODO: actually look at the offset value!!!
-			// currently super broken, not handling padding for shit
-			for (auto& var : block.m_members)
-				uniform_header += (boost::format("uniform %s %s;\n")
-					% var.second->get_type_name() % var.second->get_name()).str();
-
-			// TODO: allow scoped block
-			uniform_header += "};\n";
-#endif
-		}
-
-		// vertex shader
-		if (m_vshad)
-		{
-			std::string const& shad_header = m_vshad->get_header();
-			std::string const& shad_src = m_vshad->get_source();
-
-			std::array<const char*, 3> shad_full = {{shad_header.c_str(), uniform_header.c_str(), shad_src.c_str()}};
-			GLWRAP_EC_CALL(glShaderSource)(m_vshad->native_handle(), shad_full.size(), shad_full.data(), 0);
-			GLWRAP_EC_CALL(glCompileShader)(m_vshad->native_handle());
-		}
-
-		// fragment shader
-		if (m_fshad)
-		{
-			std::string const& shad_header = m_fshad->get_header();
-			std::string const& shad_src = m_fshad->get_source();
-
-			std::array<const char*, 3> shad_full = {{shad_header.c_str(), uniform_header.c_str(), shad_src.c_str()}};
-			GLWRAP_EC_CALL(glShaderSource)(m_fshad->native_handle(), shad_full.size(), shad_full.data(), 0);
-			GLWRAP_EC_CALL(glCompileShader)(m_fshad->native_handle());
-		}
-	}
-
 	void link()
 	{
 		GLWRAP_EC_CALL(glLinkProgram)(native_handle());
-
-		// update uniform locations
-		for (auto& uni : m_uniforms)
-			uni.set_location(GLWRAP_EC_CALL(glGetUniformLocation)(native_handle(),
-				uni.get_variable().get_name().c_str()));
-
-		for (auto& block : m_uniform_blocks)
-			block.m_location = GLWRAP_EC_CALL(glGetUniformBlockIndex)(native_handle(), block.m_name.c_str());
 	}
 
 	std::string get_log() const
@@ -129,6 +49,7 @@ public:
 		return log;
 	}
 
+	// TODO: rename
 	bool is_good() const
 	{
 		GLint status;
@@ -144,27 +65,9 @@ public:
 		GLWRAP_EC_CALL(glGetProgramiv)(native_handle(), GL_VALIDATE_STATUS, &status);
 		return (GL_TRUE == status);
 	}
-
-//	explicit operator bool() const
-//	{
-//		return is_good();
-//	}
-
+/*
 	template <typename T>
-	uniform<T> create_uniform(const std::string& _name)
-	{
-		// TODO: ugly
-		static_assert(
-			detail::glslvar::is_valid_glsl_type<T>::value
-			|| std::is_same<T, texture_2d>::value
-			, "Invalid Uniform type.");
-		
-		m_uniforms.emplace_back(detail::variable<T>(_name));
-		return uniform<T>(std::prev(m_uniforms.end()));
-	}
-
-	template <typename T>
-	uniform_block<T> create_uniform_block(const std::string& _name, uniform_block_definition<T> const& _block_def)
+	uniform_block_location<T> create_uniform_block(const std::string& _name, uniform_block_definition<T> const& _block_def)
 	{
 		m_uniform_blocks.push_back(detail::uniform_block_variable(_name));
 
@@ -172,21 +75,24 @@ public:
 		m_uniform_blocks.back().m_members = _block_def.m_members;
 		return uniform_block<T>(std::prev(m_uniform_blocks.end()));
 	}
-
+*/
 	// TODO: array support
 	template <typename T>
-	void set_uniform(uniform<T>& _uniform, typename detail::uniform_value<T>::type const& _value)
+	void set_uniform(uniform_location<T>& _uniform, typename detail::uniform_value<T>::type const& _value)
 	{
-		detail::set_program_uniform<T>(native_handle(), _uniform.get_location(),
+		detail::set_program_uniform<T>(native_handle(), _uniform.get_index(),
 			detail::uniform_value<T>::convert_to_gl_type(_value));
 	}
 
+/*
 	template <typename T>
-	void set_uniform_block(uniform_block<T>& _block, uniform_block_binding<T> const& _binding)
+	void set_uniform_block(uniform_block_location<T>& _block, uniform_block_binding<T> const& _binding)
 	{
-		GLWRAP_EC_CALL(glUniformBlockBinding)(native_handle(), _block.m_iter->m_location, _binding.get_index());
+		GLWRAP_EC_CALL(glUniformBlockBinding)(native_handle(), _block.get_index(), _binding.get_index());
 	}
-
+*/
+	// TODO: just ban dynamic shader variable bindings in general?
+/*
 	template <typename T>
 	void bind_attribute(attribute<T>& _attrib, attribute_location<T> const& _location)
 	{
@@ -199,7 +105,9 @@ public:
 	{
 		GLWRAP_EC_CALL(glBindFragDataLocation)(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
 	}
+*/
 
+	// TODO: good name?
 	void use_transform_feedback_description(const transform_feedback_descriptor& _desc)
 	{
 		// TODO: detect the ability to use GL_SEPARATE_ATTRIBS?
@@ -209,40 +117,18 @@ public:
 		GLWRAP_EC_CALL(glTransformFeedbackVaryings)(native_handle(), varyings.size(), varyings.data(), GL_INTERLEAVED_ATTRIBS);
 	}
 
-	// TODO: these 3 will break if repeated
-	void attach(vertex_shader& _shad)
+	// TODO: accept a shader_builder as well?
+	template <shader_type T>
+	void attach(const shader<T>& _shad)
 	{
-		m_vshad = &_shad;
-		GLWRAP_EC_CALL(glAttachShader)(native_handle(), _shad.native_handle());
-	}
-
-	void attach(geometry_shader& _shad)
-	{
-		m_gshad = &_shad;
-		GLWRAP_EC_CALL(glAttachShader)(native_handle(), _shad.native_handle());
-	}
-
-	void attach(fragment_shader& _shad)
-	{
-		m_fshad = &_shad;
 		GLWRAP_EC_CALL(glAttachShader)(native_handle(), _shad.native_handle());
 	}
 
 	explicit program(context& _context)
 		: globject(GLWRAP_EC_CALL(glCreateProgram)())
-		, m_vshad(), m_gshad(), m_fshad()
 	{}
 
 private:
-	// TODO: don't store globject pointers like this, it will break on swap/move
-	vertex_shader* m_vshad;
-	geometry_shader* m_gshad;
-	fragment_shader* m_fshad;
-
-	// TODO: store ptr or copy?
-	std::list<detail::uniform_block_variable> m_uniform_blocks;
-
-	std::list<detail::uniform_variable> m_uniforms;
 };
 
 }

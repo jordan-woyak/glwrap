@@ -11,28 +11,6 @@ namespace gl
 class context;
 class program;
 
-// TODO: rename/put elsewhere
-template <typename T>
-struct vertex_out_varying
-{
-	friend class shader<shader_type::vertex>;
-
-public:
-	std::string const& get_name() const
-	{
-		return (*m_iter)->get_name();
-	}
-
-private:
-	typedef std::list<std::unique_ptr<detail::variable_base>>::iterator iter_t;
-
-	vertex_out_varying(iter_t _iter)
-		: m_iter(_iter)
-	{}
-
-	iter_t m_iter;
-};
-
 namespace detail
 {
 
@@ -44,9 +22,8 @@ template <typename T>
 struct shader_io_type<shader_type::vertex, T>
 {
 	static_assert(glslvar::is_valid_glsl_type<T>::value, "Invalid Vertex Input/Output type.");
-	
-	typedef attribute<T> input_type;
-	typedef vertex_out_varying<T> output_type;
+
+	typedef attribute_location<T> input_location;
 };
 
 template <typename T>
@@ -54,13 +31,13 @@ struct shader_io_type<shader_type::fragment, T>
 {
 	// TODO: this should be more restrictive
 	static_assert(glslvar::is_valid_glsl_type<T>::value, "Invalid Fragment Output type.");
-	
-	//typedef ...<T> input_type;
-	typedef fragdata<T> output_type;
+
+	typedef fragdata_location<T> output_location;
 };
 
 }
 
+// TODO: de-templatify
 template <shader_type T>
 class shader : public globject
 {
@@ -71,6 +48,76 @@ public:
 		: globject(GLWRAP_EC_CALL(glCreateShader)(static_cast<GLenum>(T)))
 	{}
 
+	void set_source(const std::string& _src)
+	{
+		std::array<const char*, 1> shad_full = {_src.c_str()};
+		GLWRAP_EC_CALL(glShaderSource)(native_handle(), shad_full.size(), shad_full.data(), 0);
+	}
+
+	std::string get_source() const
+	{
+		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
+
+		GLint src_length = 0;
+		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_SHADER_SOURCE_LENGTH, &src_length);
+
+		std::string src;
+
+		if (src_length)
+		{
+			std::vector<GLchar> src_buffer(src_length);
+			GLWRAP_EC_CALL(glGetShaderSource)(native_handle(), src_length, nullptr, src_buffer.data());
+
+			src.assign(src_buffer.begin(), src_buffer.end());
+		}
+
+		return src;
+	}
+
+	void compile()
+	{
+		GLWRAP_EC_CALL(glCompileShader)(native_handle());
+	}
+
+	bool compile_status() const
+	{
+		int_t status = 0;
+		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_COMPILE_STATUS, &status);
+		return (GL_TRUE == status);
+	}
+
+	std::string get_log() const
+	{
+		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
+
+		GLint log_length = 0;
+		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
+
+		std::string log;
+
+		if (log_length)
+		{
+			std::vector<GLchar> log_buffer(log_length);
+			GLWRAP_EC_CALL(glGetShaderInfoLog)(native_handle(), log_length, nullptr, log_buffer.data());
+
+			log.assign(log_buffer.begin(), log_buffer.end());
+		}
+
+		return log;
+	}
+
+private:
+};
+
+// TODO: de-templatify
+template <shader_type T>
+class shader_builder
+{
+public:
+	// TODO: need context
+	shader_builder(context&)
+	{}
+	
 	void set_source(std::string const& _src)
 	{
 		m_source = _src;
@@ -81,42 +128,46 @@ public:
 		return m_source;
 	}
 
-	std::string get_log() const
+	// TODO: kill the input/output and base it off of the location type?
+
+	template <typename P, typename L>
+	typename detail::shader_io_type<T, P>::input_location
+	create_input(const variable_description<P, L>& _desc)
 	{
-		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
+		// TODO: check for valid type
+		
+		m_header_lines.emplace_back(get_glsl_definition<P>("in", _desc));
 
-		GLint log_length;
-		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
-
-		std::string log;
-
-		if (log_length)
-		{
-			std::vector<GLchar> log_buffer(log_length);
-			GLWRAP_EC_CALL(glGetShaderInfoLog)(native_handle(), log_length, NULL, log_buffer.data());
-
-			log.assign(log_buffer.begin(), log_buffer.end());
-		}
-
-		return log;
+		return _desc.get_location();
 	}
 
-	template <typename P>
-	typename detail::shader_io_type<T, P>::input_type
-	create_input(std::string const& _name)
+	template <typename P, typename L>
+	typename detail::shader_io_type<T, P>::output_location
+	create_output(const variable_description<P, L>& _desc)
 	{
-		m_inputs.emplace_back(new detail::variable<P>(_name));
-		return std::prev(m_inputs.end());
+		// TODO: check for valid type
+		
+		m_header_lines.emplace_back(get_glsl_definition<P>("out", _desc));
+
+		return _desc.get_location();
 	}
 
-	template <typename P>
-	typename detail::shader_io_type<T, P>::output_type
-	create_output(std::string const& _name)
+	// TODO: can probably eliminate L
+	template <typename P, typename L>
+	uniform_location<P> create_uniform(const variable_description<P, L>& _desc)
 	{
-		m_outputs.emplace_back(new detail::variable<P>(_name));
-		return std::prev(m_outputs.end());
+		// TODO: ugly
+		static_assert(
+			detail::glslvar::is_valid_glsl_type<P>::value
+			|| std::is_same<P, texture_2d>::value
+			, "Invalid Uniform type.");
+		
+		m_header_lines.emplace_back(get_glsl_definition<P>("uniform", _desc));
+
+		return _desc.get_location();
 	}
 
+/*
 	template <typename P>
 	typename detail::shader_io_type<T, P>::input_type
 	assume_input(std::string const& _name)
@@ -132,47 +183,41 @@ public:
 		m_assumed_vars.emplace_back(new detail::variable<P>(_name));
 		return std::prev(m_assumed_vars.end());
 	}
+*/
+
+	// TODO: should this just take and modify a shader?
+	shader<T> create_shader(context& _glc) const
+	{
+		shader<T> result(_glc);
+
+		std::string src = "#version 330\n";
+		src += "#extension GL_ARB_explicit_uniform_location : require\n";
+		src += "#extension GL_ARB_explicit_attrib_location : require\n";
+		for (auto& line : m_header_lines)
+			src += line;
+		src += m_source;
+		
+		result.set_source(src);
+		result.compile();
+		return result;
+	}
 
 private:
-	std::string get_header() const
+	// TODO: move this elsewhere:
+	template <typename P, typename L>
+	std::string get_glsl_definition(const std::string& _prefix, const variable_description<P, L>& _desc) const
 	{
-		// TODO: allow setting version
-		std::string header("#version 330\n");
-
-		for (auto& var : m_inputs)
-		{
-#if 0
-			header += (boost::format("in %s %s;\n")
-				% var->get_type_name() % var->get_name()).str();
-#else
-			header += "in ";
-			header += var->get_glsl_definition();
-			header += ";\n";
-#endif
-		}
-
-		for (auto& var : m_outputs)
-		{
-#if 0
-			header += (boost::format("out %s %s;\n")
-				% var->get_type_name() % var->get_name()).str();
-#else
-			header += "out ";
-			header += var->get_glsl_definition();
-			header += ";\n";
-#endif
-		}
-
-		return header;
+		return
+			"layout(location = " + std::to_string(_desc.get_location().get_index()) + ") "
+			+ _prefix + " "
+			+ detail::glslvar::get_type_name<P>()
+			+ " " + _desc.get_name()
+			+ detail::glslvar::glsl_var_suffix<P>::suffix()
+			+ ";\n";
 	}
 
 	std::string m_source;
-
-	// TODO: don't need to store all this here
-	std::list<std::unique_ptr<detail::variable_base>> m_inputs;
-	std::list<std::unique_ptr<detail::variable_base>> m_outputs;
-
-	std::list<std::unique_ptr<detail::variable_base>> m_assumed_vars;
+	std::vector<std::string> m_header_lines;
 };
 
 }
