@@ -7,54 +7,46 @@
 int main()
 {
 	glewExperimental = true;
-	
-	//gl::ivec2 window_size{120, 120};
 
 	gl::context glc;
+	gl::display dsp(glc, {120, 120});
+	dsp.set_caption("glwrap-transform-feedback");
+	
 	//gl::display dsp(glc, window_size);
 	//dsp.set_caption("transform_feedback");
-
-	// create a program
-	gl::program prog(glc);
 
 	// define some variables in the shader,
 	// they are automatically added to the program source
 
-	gl::vertex_shader vshad(glc);
-	auto input1_attrib = vshad.create_input<gl::int_t>("input1");
-	auto input2_attrib = vshad.create_input<gl::int_t>("input2");
+	gl::attribute_location_enumerator attribs(glc);
 
-	auto input3_attrib = vshad.create_input<gl::float_t[2]>("input3");
+	gl::vertex_shader_builder vshad(glc);
+	auto input1_attrib = vshad.create_input(gl::variable<gl::int_t>("input1", attribs));
+	auto input2_attrib = vshad.create_input(gl::variable<gl::int_t>("input2", attribs));
 
-	//auto input_test_attrib = vshad.create_input<gl::float_t[2][2]>("input_test");
+	auto input3_attrib = vshad.create_input(gl::variable<gl::float_t[2]>("input3", attribs));
 
-	auto output1_varying = vshad.create_output<gl::float_t>("output1");
+	gl::uniform_location_enumerator uniforms(glc);
+	auto operand1_uni = vshad.create_uniform(gl::variable<gl::float_t>("operand1", uniforms));
 
-	auto operand1_uni = prog.create_uniform<gl::float_t>("operand1");
+	auto output1_varying =
+		gl::variable_description<gl::float_t, int>("output1", 0);
+		//vshad.create_output<gl::variable<gl::float_t>("output1"));
 
 	vshad.set_source(
+		"out float output1;"
 		"void main(void)"
 		"{"
 			"output1 = float(input1) * float(input2) + operand1 + (input3[0] + input3[1]) / 2.0;"
 		"}"
 	);
 
-	prog.attach(vshad);
-	prog.compile();
+	auto vert_shader = vshad.create_shader(glc);
+	std::cout << "vshad log:\n" << vert_shader.get_log() << std::endl;
 
-	std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
-
-	// used to connect array_buffer vertex data and program attributes together
-	// via the typeless "generic vertex attributes" in a type-safe manner
-	gl::attribute_location_enumerator locs(glc);
-	// TODO: allow creation based on type of attrib above?
-	auto input1_loc = locs.get<gl::int_t>();
-	auto input2_loc = locs.get<gl::int_t>();
-	auto input3_loc = locs.get<gl::float_t[2]>();
-
-	prog.bind_attribute(input1_attrib, input1_loc);
-	prog.bind_attribute(input2_attrib, input2_loc);
-	prog.bind_attribute(input3_attrib, input3_loc);
+	// create a program
+	gl::program prog(glc);
+	prog.attach(vert_shader);
 
 	struct Output
 	{
@@ -98,16 +90,16 @@ int main()
 	// Holds the state of our vertex formats and input buffers:
 	gl::vertex_array input_vertices(glc);
 
-	input_vertices.enable_vertex_attribute(input1_loc);
-	input_vertices.enable_vertex_attribute(input2_loc);
-	input_vertices.enable_vertex_attribute(input3_loc);
+	input_vertices.enable_vertex_attribute(input1_attrib);
+	input_vertices.enable_vertex_attribute(input2_attrib);
+	input_vertices.enable_vertex_attribute(input3_attrib);
 
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<Input>();
 
-	input_vertices.bind_vertex_attribute(input1_loc, input_loc | &Input::input1);
-	input_vertices.bind_vertex_attribute(input2_loc, input_loc | &Input::input2);
-	input_vertices.bind_vertex_attribute(input3_loc, input_loc | &Input::input3);
+	input_vertices.bind_vertex_attribute(input1_attrib, input_loc | &Input::input1);
+	input_vertices.bind_vertex_attribute(input2_attrib, input_loc | &Input::input2);
+	input_vertices.bind_vertex_attribute(input3_attrib, input_loc | &Input::input3);
 
 	input_vertices.bind_vertex_buffer(input_loc, input_buffer.begin());
 

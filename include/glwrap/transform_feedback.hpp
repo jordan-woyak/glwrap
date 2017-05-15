@@ -133,8 +133,9 @@ class transform_feedback_descriptor
 public:
 	friend program;
 
+	// TODO: fix this int-hax
 	template <typename T>
-	void bind_vertex_attribute(const variable_description<T, attribute_location<T>>& _varying, const transform_feedback_binding_attribute<T>& _attr)
+	void bind_vertex_attribute(const variable_description<T, int>& _varying, const transform_feedback_binding_attribute<T>& _attr)
 	{
 		// TODO: assert offsets are aligned
 		

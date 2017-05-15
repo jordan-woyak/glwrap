@@ -149,7 +149,7 @@ public:
 	void bind_vertex_attribute(const attribute_location<ShaderType>& _attrib, const vertex_buffer_binding_attribute<InputType>& _binding)
 	{
 		// TODO: assert that Shader and Input type conversion is sensible
-		static_assert(std::is_same<ShaderType, InputType>::value, "Currently, attrib types must match exactly..");
+		//static_assert(std::is_same<ShaderType, InputType>::value, "Currently, attrib types must match exactly..");
 		
 		if (GL_ARB_direct_state_access)
 		{

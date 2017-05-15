@@ -6,6 +6,8 @@
 
 int main()
 {
+	glewExperimental = true;
+	
 	gl::ivec2 window_size{640, 640};
 
 	gl::context glc;

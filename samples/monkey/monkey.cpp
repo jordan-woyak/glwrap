@@ -19,6 +19,8 @@ gl::ivec2 getSFImageSize(const sf::Image& img)
 
 int main()
 {
+	glewExperimental = true;
+	
 	gl::ivec2 window_size{640, 480};
 
 	gl::context glc;
@@ -134,7 +136,6 @@ int main()
 
 	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
 	(void)fragdata;
-	//prog.bind_fragdata(fragdata, glc.draw_buffer(0));
 
 	auto tex_color_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_color", uniforms));
 	auto tex_spec_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_spec", uniforms));
