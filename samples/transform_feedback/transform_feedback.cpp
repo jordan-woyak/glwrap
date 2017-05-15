@@ -128,7 +128,6 @@ int main()
 
 	glc.stop_transform_feedback();
 
-	glc.finish();
 	std::cout << "DONE" << std::endl << std::endl;
 
 	// print results
