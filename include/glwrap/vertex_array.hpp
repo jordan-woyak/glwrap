@@ -145,8 +145,9 @@ public:
 	}
 */
 
+	// TODO: separate Bind and Format / rename this
 	template <typename ShaderType, typename InputType>
-	void bind_vertex_attribute(const attribute_location<ShaderType>& _attrib, const vertex_buffer_binding_attribute<InputType>& _binding)
+	void set_attribute_format(const attribute_location<ShaderType>& _attrib, const vertex_buffer_binding_attribute<InputType>& _binding)
 	{
 		// TODO: assert that Shader and Input type conversion is sensible
 		//static_assert(std::is_same<ShaderType, InputType>::value, "Currently, attrib types must match exactly..");
@@ -155,7 +156,10 @@ public:
 		{
 			// TODO: this is ugly
 			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
+			{
 				GLWRAP_EC_CALL(glVertexArrayAttribBinding)(native_handle(), index, _binding.get_index());
+				GLWRAP_EC_CALL(glEnableVertexArrayAttrib)(native_handle(), index);
+			}
 
 			detail::gl_vertex_array_attrib_format<ShaderType, InputType, false>(native_handle(), _attrib.get_index(), _binding.get_offset());
 		}
@@ -165,14 +169,17 @@ public:
 
 			// TODO: this is ugly
 			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
+			{
 				GLWRAP_EC_CALL(glVertexAttribBinding)(index, _binding.get_index());
+				GLWRAP_EC_CALL(glEnableVertexAttribArray)(index);
+			}
 
 			detail::gl_vertex_attrib_format<ShaderType, InputType, false>(_attrib.get_index(), _binding.get_offset());
 		}
 	}
 
 	template <typename T, typename A>
-	void bind_vertex_buffer(const vertex_buffer_binding<T>& _binding, const buffer_iterator<T, A>& _iter)
+	void set_buffer(const vertex_buffer_binding<T>& _binding, const buffer_iterator<T, A>& _iter)
 	{
 		if (GL_ARB_direct_state_access)
 		{
@@ -188,8 +195,10 @@ public:
 		}
 	}
 
+	// automatically enabled, currently
+/*
 	template <typename T>
-	void enable_vertex_attribute(const attribute_location<T>& _attrib)
+	void enable_attribute(const attribute_location<T>& _attrib)
 	{
 		if (GL_ARB_direct_state_access)
 		{
@@ -205,9 +214,10 @@ public:
 				GLWRAP_EC_CALL(glEnableVertexAttribArray)(index);
 		}
 	}
+*/
 
 	template <typename T>
-	void disable_vertex_attribute(const attribute_location<T>& _attrib)
+	void disable_attribute(const attribute_location<T>& _attrib)
 	{
 		if (GL_ARB_direct_state_access)
 		{
@@ -226,7 +236,7 @@ public:
 	}
 
 	template <typename T>
-	void set_vertex_divisor(const vertex_buffer_binding<T>& _binding, uint_t _divisor)
+	void set_divisor(const vertex_buffer_binding<T>& _binding, uint_t _divisor)
 	{
 		if (GL_ARB_direct_state_access)
 		{
@@ -239,6 +249,15 @@ public:
 			GLWRAP_EC_CALL(glVertexBindingDivisor)(_binding.get_index(), _divisor);
 		}
 	}
+};
+
+class vertex_array_builder
+{
+public:
+	explicit vertex_array_builder(context&)
+	{}
+
+	// TODO: implement
 };
 
 }
