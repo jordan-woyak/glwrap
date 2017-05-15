@@ -29,33 +29,23 @@ int main()
 	};
 	tex.assign(gl::unpack(texdata.data(), gl::pixel_format::r, {8, 8}), gl::base_format::r);
 
-	// used connect array_buffer vertex data and program attributes together
-	// via the typeless "generic vertex attributes" in a type-safe manner
-	gl::attribute_location_alloter locs(glc);
-	auto color_loc = locs.allot<gl::vec3>();
-	auto pos_loc = locs.allot<gl::vec2>();
-	auto texpos_loc = locs.allot<gl::vec2>();
+	gl::vertex_shader_builder vshad(glc);
 
-	// used to connect texture objects and sampler uniforms together via texture unit.
-	// ensures the correct type of texture is used
-	gl::texture_unit_alloter tunits(glc);
-	auto texunit = tunits.allot<gl::texture_2d>();
-
-	// create a program
-	gl::program prog(glc);
-
+	// Used to enumerate various opengl indices and connect various objects in a type safe manner
+	gl::attribute_location_enumerator attribs(glc);
+	gl::uniform_location_enumerator uniforms(glc);
+	gl::fragdata_location_enumerator fragdatas(glc);
+	gl::texture_unit_enumerator tunits(glc);
+	
 	// define some variables in the program,
 	// they are automatically added to the program source
-	auto mvp_uni = prog.create_uniform<gl::mat4>("mvp");
-	auto tex_uni = prog.create_uniform<gl::texture_2d>("tex");
+	auto mvp_uni = vshad.create_uniform(gl::variable<gl::mat4>("mvp", uniforms));
 
-	gl::vertex_shader vert_shader(glc);
+	auto color_attrib = vshad.create_input(gl::variable<gl::vec3>("color", attribs));
+	auto pos_attrib = vshad.create_input(gl::variable<gl::vec2>("position", attribs));
+	auto texpos_attrib = vshad.create_input(gl::variable<gl::vec2>("texpos", attribs));
 
-	auto color_attrib = vert_shader.create_input<gl::vec3>("color");
-	auto pos_attrib = vert_shader.create_input<gl::vec2>("position");
-	auto texpos_attrib = vert_shader.create_input<gl::vec2>("texpos");
-
-	vert_shader.set_source(
+	vshad.set_source(
 		"out vec3 col;"
 		"out vec2 uv;"
 		"void main(void)"
@@ -66,11 +56,12 @@ int main()
 		"}"
 	);
 
-	gl::fragment_shader frag_shader(glc);
+	gl::fragment_shader_builder fshad(glc);
 
-	auto fragdata = frag_shader.create_output<gl::vec4>("fragdata");
+	auto tex_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex", uniforms));
+	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
 
-	frag_shader.set_source(
+	fshad.set_source(
 		"in vec3 col;"
 		"in vec2 uv;"
 		"void main(void)"
@@ -79,21 +70,28 @@ int main()
 		"}"
 	);
 
+	auto vert_shader = vshad.create_shader(glc);
+	if (!vert_shader.compile_status())
+		std::cout << "vshad log:\n" << vert_shader.get_log() << std::endl << vert_shader.get_source();
+
+	auto frag_shader = fshad.create_shader(glc);
+	if (!frag_shader.compile_status())
+		std::cout << "fshad log:\n" << frag_shader.get_log() << std::endl << frag_shader.get_source();
+	
+	// create a program
+	gl::program prog(glc);
+
 	prog.attach(vert_shader);
 	prog.attach(frag_shader);
-	prog.compile();
-
-	// bind attribute and fragdata location before linking
-	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
-
-	prog.bind_attribute(color_attrib, color_loc);
-	prog.bind_attribute(pos_attrib, pos_loc);
-	prog.bind_attribute(texpos_attrib, texpos_loc);
 
 	prog.link();
 
-	//if (!prog.is_good())
+	if (!prog.is_good())
+	{
 		std::cout << "program log:\n" << prog.get_log() << std::endl;
+		return 1;
+	}
+		
 
 	// custom vertex type
 	struct FooVertex
@@ -116,22 +114,37 @@ int main()
 	verbuf.assign(verts);
 	}
 
+	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
+	auto input_loc = vbuflocs.get<FooVertex>();
+
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_loc, verbuf.begin() | &FooVertex::pos);
-	arr.bind_vertex_attribute(texpos_loc, verbuf.begin() | &FooVertex::texpos);
-	arr.bind_vertex_attribute(color_loc, verbuf.begin() | &FooVertex::color);
+	arr.set_attribute_format(pos_attrib, input_loc | &FooVertex::pos);
+	arr.set_attribute_format(texpos_attrib, input_loc | &FooVertex::texpos);
+	arr.set_attribute_format(color_attrib, input_loc | &FooVertex::color);
 
-	// an fbo
-	gl::framebuffer fbuf(glc);
-	fbuf.bind_draw_buffer(glc.draw_buffer(0), glc.color_buffer(0));
-	fbuf.bind_read_buffer(glc.color_buffer(0));
+	arr.set_buffer(input_loc, verbuf.begin());
+
+	gl::color_attachment_enumerator col_attachments(glc);
+	auto color0 = col_attachments.get();
+
+	// Create a fbo
+	gl::framebuffer_builder fbuf_builder(glc);
+	fbuf_builder.bind_draw_buffer(fragdata, color0);
+	fbuf_builder.bind_read_buffer(color0);
+	
+	gl::framebuffer fbuf = fbuf_builder.create_framebuffer(glc);
 
 	// multisampled renderbuffer
 	gl::renderbuffer rendbuf(glc);
 	rendbuf.storage(window_size, 4);
-	fbuf.bind_attachment(glc.color_buffer(0), gl::renderbuffer_attachment(rendbuf));
+	fbuf.bind_attachment(color0, rendbuf);
 
+	// used to connect texture objects and sampler uniforms together via texture unit.
+	// ensures the correct type of texture is used
+
+	auto texunit = tunits.get<gl::texture_2d>();
+		
 	glc.bind_texture(texunit, tex);
 	prog.set_uniform(tex_uni, texunit);
 

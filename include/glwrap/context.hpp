@@ -187,7 +187,9 @@ public:
 		GLWRAP_EC_CALL(glColorMask)(_mask.x, _mask.y, _mask.z, _mask.w);
 	}
 
-	void color_mask(color_number const& _buf, basic_vec<bool, 4> const& _mask)
+	// TODO: This is not in OpenGL ES
+	template <typename T>
+	void color_mask(fragdata_location<T> const& _buf, basic_vec<bool, 4> const& _mask)
 	{
 		GLWRAP_EC_CALL(glColorMaski)(_buf.get_index(), _mask.x, _mask.y, _mask.z, _mask.w);
 	}
@@ -353,32 +355,35 @@ public:
 		m_primitive_mode = static_cast<GLenum>(_prim);
 	}
 
-	void use_draw_framebuffer(framebuffer_reference _fb)
+	void use_draw_framebuffer(const framebuffer_reference& _fb)
 	{
 		GLWRAP_EC_CALL(glBindFramebuffer)(GL_DRAW_FRAMEBUFFER, _fb.native_handle());
 	}
 
-	void use_read_framebuffer(framebuffer_reference _fb)
+	void use_read_framebuffer(const framebuffer_reference& _fb)
 	{
 		GLWRAP_EC_CALL(glBindFramebuffer)(GL_READ_FRAMEBUFFER, _fb.native_handle());
 	}
 
-	color_number draw_buffer(uint_t _index)
+	// Binds draw and read framebuffer
+	void use_framebuffer(const framebuffer_reference& _fb)
 	{
-		return {_index};
+		GLWRAP_EC_CALL(glBindFramebuffer)(GL_FRAMEBUFFER, _fb.native_handle());
 	}
 
-	color_attach_point color_buffer(uint_t _index)
+	// TODO: kill these:
+/*
+	color_attachment color_buffer(uint_t _index)
 	{
 		return {static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + _index)};
 	}
-
-	attach_point stencil_buffer()
+*/
+	color_attachment stencil_buffer()
 	{
 		return {GL_STENCIL_ATTACHMENT};
 	}
 
-	attach_point depth_buffer()
+	color_attachment depth_buffer()
 	{
 		return {GL_DEPTH_ATTACHMENT};
 	}

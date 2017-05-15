@@ -8,7 +8,8 @@
 namespace gl
 {
 
-// TODO: rename this
+// TODO: rename this to drawbuffer ?
+// TODO: does it make sense for this to have a type
 template <typename T>
 class fragdata_location
 {
@@ -49,7 +50,6 @@ public:
 			
 		fragdata_location<T> ind(m_current_index);
 
-		// TODO: every uniform takes up just one location, right?
 		m_current_index += 1;
 
 		return ind;
@@ -90,60 +90,53 @@ private:
 	{}
 };
 
-// TODO: rename?
-class color_number
+// TODO: rename
+// front/back/stecil/depth attachments
+class color_attachment
 {
-	friend class context;
-
 public:
-	uint_t get_index() const
+	color_attachment(enum_t _index = GL_NONE)
+		: m_index(_index)
+	{}
+
+	// TODO: rename
+	enum_t get_index() const
 	{
 		return m_index;
 	}
 
-private:
-	color_number(uint_t _index)
-		: m_index(_index)
-	{}
-
-	uint_t m_index;
+	enum_t m_index;
 };
 
-class framebuffer;
-
-class attachment
+class color_attachment_enumerator
 {
-	friend class framebuffer;
-
-public:
-	// TODO: lame, change
-	explicit attachment(std::function<void(GLenum, GLenum)> const& _func)
-		: m_func(_func)
-	{}
-
-private:
-	std::function<void(GLenum, GLenum)> m_func;
-};
-
-template <texture_type T>
-typename std::enable_if<2 == texture<T>::dimensions, attachment>::type
-texture_attachment(texture<T>& _tex, int _level)
-{
-	// TODO: don't capture globject reference
-	return attachment([&_tex, _level](GLenum _target, GLenum _attach_point)
+public:	
+	// TODO: really need context?
+	color_attachment_enumerator(context& _context)
+		: m_current_index()
+		, m_max_locations()
 	{
-		GLWRAP_EC_CALL(glFramebufferTexture2D)(_target, _attach_point, detail::texture_traits<T>::target, _tex.native_handle(), _level);
-	});
+		detail::gl_get(GL_MAX_COLOR_ATTACHMENTS, &m_max_locations);
+	}
+
+	color_attachment get()
+	{
+		if (m_current_index >= m_max_locations)
+			throw exception(0);
+			
+		color_attachment ind(GL_COLOR_ATTACHMENT0 + m_current_index);
+
+		m_current_index += 1;
+
+		return ind;
+	}
+
+private:
+	int_t m_current_index;
+	int_t m_max_locations;
 };
 
-inline attachment renderbuffer_attachment(renderbuffer& _rendbuf)
-{
-	// TODO: don't capture globject reference
-	return attachment([&_rendbuf](GLenum _target, GLenum _attach_point)
-	{
-		GLWRAP_EC_CALL(glFramebufferRenderbuffer)(_target, _attach_point, GL_RENDERBUFFER, _rendbuf.native_handle());
-	});
-};
+// TODO: framebuffer parameters: default size and such
 
 class framebuffer : public globject
 {
@@ -154,9 +147,15 @@ class framebuffer : public globject
 	{}
 
 public:
+	framebuffer(framebuffer&&) = default;
+	framebuffer& operator=(framebuffer&&) = default;
+
 	framebuffer(context& _context)
 		: globject(detail::gen_return(glGenFramebuffers))
-	{}
+	{
+		// TODO: this is ugly, actually create the object
+		detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+	}
 
 	~framebuffer()
 	{
@@ -164,86 +163,169 @@ public:
 		GLWRAP_EC_CALL(glDeleteFramebuffers)(1, &nh);
 	}
 
-	void bind_attachment(attach_point const& _point, attachment const& _attach)
+	// TODO: support textures and stuff too
+	// TODO: support depth and stencil attachments
+	void bind_attachment(color_attachment const& _point, renderbuffer const& _attachment)
 	{
-		// ugly..
-		detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+			
+			GLWRAP_EC_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
+		}
+	}
+
+	// TODO: support depth and stencil attachments
+	void unbind_attachment(color_attachment const& _point)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, 0);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+			
+			GLWRAP_EC_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_index(), GL_RENDERBUFFER, 0);
+		}
+	}
+
+	// TODO: support depth and stencil attachments
+	void bind_draw_buffers(const std::vector<color_attachment>& _attachments)
+	{
+		std::vector<enum_t> bufs(_attachments.size());
+		std::transform(_attachments.begin(), _attachments.end(), bufs.begin(), std::mem_fn(&color_attachment::get_index));
 		
-		_attach.m_func(GL_READ_FRAMEBUFFER, _point.get_value());
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glNamedFramebufferDrawBuffers)(native_handle(), bufs.size(), bufs.data());
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
+			
+			GLWRAP_EC_CALL(glDrawBuffers)(bufs.size(), bufs.data());
+		}
 	}
 
-/*
-	void unbind_attachment(attach_point const& _point)
+	// TODO: support depth and stencil attachments
+	void bind_read_buffer(color_attachment const& _attachment)
 	{
-		bind_read();
-		// TODO: is this ok?
-		//GLWRAP_EC_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_value(), GL_RENDERBUFFER, 0);
-		GLWRAP_EC_CALL(glFramebufferTexture2D)(GL_READ_FRAMEBUFFER, _point.get_value(), GL_TEXTURE_2D, 0, 0);
-	}
-*/
-	void bind_draw_buffer(color_number const& _number, color_attach_point const& _attach_point)
-	{
-		auto const index = _number.get_index();
-
-		if (index >= m_draw_buffers.size())
-			m_draw_buffers.resize(index + 1, GL_NONE);
-
-		m_draw_buffers[index] = _attach_point.get_value();
-
-		// TODO: don't do always
-		update_draw_buffers();
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glNamedFramebufferReadBuffer)(native_handle(), _attachment.get_index());
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+			
+			GLWRAP_EC_CALL(glReadBuffer)(_attachment.get_index());
+		}
 	}
 
-	void bind_read_buffer(color_attach_point const& _attach_point)
+	// TODO: other statuses and read status too
+	bool is_draw_complete()
 	{
-		// ugly..
-		detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+		enum_t status = GL_FRAMEBUFFER_UNDEFINED;
 		
-		GLWRAP_EC_CALL(glReadBuffer)(_attach_point.get_value());
-	}
+		if (GL_ARB_direct_state_access)
+		{
+			status = GLWRAP_EC_CALL(glCheckNamedFramebufferStatus)(native_handle(), GL_DRAW_FRAMEBUFFER);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
 
-	void unbind_draw_buffer(color_number const& _number)
-	{
-		auto const index = _number.get_index();
+			status = GLWRAP_EC_CALL(glCheckFramebufferStatus)(GL_DRAW_FRAMEBUFFER);
+		}
 
-		if (index < m_draw_buffers.size())
-			m_draw_buffers[index] = GL_NONE;
-
-		// TODO: don't do always
-		update_draw_buffers();
+		return (GL_FRAMEBUFFER_COMPLETE == status);
 	}
 
 private:
-	void update_draw_buffers()
-	{
-		// ugly..
-		detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
-		
-		GLWRAP_EC_CALL(glDrawBuffers)(m_draw_buffers.size(), m_draw_buffers.data());
-	}
-
-	// TODO: can this be killed?
-	std::vector<GLenum> m_draw_buffers;
 };
 
+// TODO: this should take a color attachment enumerator and bind attachments to fragdatas
+class framebuffer_builder
+{
+public:
+	framebuffer_builder(context&)
+	{}
+
+	// TODO: allow constants: GL_BACK and such
+	template <typename T>
+	void bind_draw_buffer(const fragdata_location<T>& _loc, color_attachment const& _attachment)
+	{
+		uint_t const index = _loc.get_index();
+
+		if (index >= m_draw_buffers.size())
+			m_draw_buffers.resize(index + 1, color_attachment(GL_NONE));
+
+		m_draw_buffers[index] = _attachment;
+	}
+
+	// TODO: needed?
+	template <typename T>
+	void unbind_draw_buffer(const fragdata_location<T>& _loc)
+	{
+		uint_t const index = _loc.get_index();
+
+		if (index < m_draw_buffers.size())
+			m_draw_buffers[index] = color_attachment(GL_NONE);
+
+		// TODO: shrink vector
+	}
+
+	void bind_read_buffer(color_attachment const& _attachment)
+	{
+		m_read_buffer = _attachment;
+	}
+
+	// TODO: needed?
+	void unbind_read_buffer(color_attachment const& _attachment)
+	{
+		m_read_buffer = color_attachment(GL_NONE);
+	}
+
+	framebuffer create_framebuffer(context& _glc) const
+	{
+		framebuffer result(_glc);
+
+		result.bind_draw_buffers(m_draw_buffers);
+		result.bind_read_buffer(m_read_buffer);
+		
+		return std::move(result);
+	}
+
+private:
+	std::vector<color_attachment> m_draw_buffers;
+	color_attachment m_read_buffer;
+};
+
+// TODO: generalize this for any zero-able binding
 class framebuffer_reference
 {
 public:
-	framebuffer_reference(framebuffer const& _fb)
-		: m_fb(_fb.native_handle())
+	// TODO: nullptr is kinda ugly
+	framebuffer_reference(nullptr_t)
+		: m_fb{}
 	{}
 
-	framebuffer_reference(std::nullptr_t)
-		: m_fb(0)
+	framebuffer_reference(const framebuffer& _fb)
+		: m_fb{_fb.native_handle()}
 	{}
 
-	GLuint native_handle() const
+	uint_t native_handle() const
 	{
 		return m_fb;
 	}
 
 private:
-	GLuint m_fb;
+	const uint_t m_fb;
 };
 
 }

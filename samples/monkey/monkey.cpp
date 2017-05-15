@@ -204,16 +204,12 @@ int main()
 
 	gl::vertex_buffer_binding_enumerator vbufs(glc);
 	auto input_loc = vbufs.get<FooVertex>();
-
-	arr.enable_vertex_attribute(pos_attrib);
-	arr.enable_vertex_attribute(norm_attrib);
-	arr.enable_vertex_attribute(texpos_attrib);
 	
-	arr.bind_vertex_attribute(pos_attrib, input_loc | &FooVertex::pos);
-	arr.bind_vertex_attribute(norm_attrib, input_loc | &FooVertex::norm);
-	arr.bind_vertex_attribute(texpos_attrib, input_loc | &FooVertex::texpos);
+	arr.set_attribute_format(pos_attrib, input_loc | &FooVertex::pos);
+	arr.set_attribute_format(norm_attrib, input_loc | &FooVertex::norm);
+	arr.set_attribute_format(texpos_attrib, input_loc | &FooVertex::texpos);
 
-	arr.bind_vertex_buffer(input_loc, verbuf.begin());
+	arr.set_buffer(input_loc, verbuf.begin());
 
 	gl::float_t rotate = 0;
 
