@@ -117,5 +117,21 @@ typedef texture<texture_type::texture_rectangle> texture_rectangle;
 typedef texture<texture_type::texture_cube_map> texture_cube_map;
 typedef texture<texture_type::texture_buffer> texture_buffer;
 
+struct draw_arrays_indirect_cmd
+{
+	uint_t count;
+	uint_t primitive_count;
+	uint_t first;
+	uint_t reserved;
+};
+
+struct draw_elements_indirect_cmd
+{
+	uint_t count;
+	uint_t instance_count;
+	uint_t first_index;
+	uint_t base_vertex;
+	uint_t reserved;
+};
 
 }

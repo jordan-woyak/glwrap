@@ -163,7 +163,9 @@ public:
 		GLWRAP_EC_CALL(glDeleteFramebuffers)(1, &nh);
 	}
 
-	// TODO: support textures and stuff too
+	// TODO: glInvalidateFramebuffer
+
+	// TODO: almost think the implementation of this belongs in renderbuffer
 	// TODO: support depth and stencil attachments
 	void bind_attachment(color_attachment const& _point, renderbuffer const& _attachment)
 	{
@@ -176,6 +178,24 @@ public:
 			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
 			
 			GLWRAP_EC_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
+		}
+	}
+
+	// TODO: almost think the implementation of this belongs in texture
+	// TODO: support depth and stencil attachments
+	// TODO: support 3d and array textures
+	// TODO: I don't like this level interface
+	void bind_attachment(color_attachment const& _point, texture_2d const& _attachment, uint_t _level)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glNamedFramebufferTexture)(native_handle(), _point.get_index(), _attachment.native_handle(), _level);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+			
+			GLWRAP_EC_CALL(glFramebufferTexture2D)(GL_READ_FRAMEBUFFER, _point.get_index(), _attachment.target, _attachment.native_handle(), _level);
 		}
 	}
 

@@ -51,23 +51,7 @@ int main()
 	tex_color.generate_mipmap();
 	tex_spec.generate_mipmap();
 	tex_normal.generate_mipmap();
-
-	tex_color.set_min_filter(gl::texture_filter::linear);
-	tex_color.set_mag_filter(gl::texture_filter::linear);
-
-	//tex_color.generate_mipmap();
-	//gl::detail::tex_parameter<false>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR, glm::vec4());
-	//gl::detail::get_tex_parameter<false, glm::vec4>(GL_TEXTURE_2D,  GL_TEXTURE_BORDER_COLOR);
-
-	tex_spec.set_min_filter(gl::texture_filter::linear);
-	tex_spec.set_mag_filter(gl::texture_filter::linear);
-
-	tex_normal.set_min_filter(gl::texture_filter::linear);
-	tex_normal.set_mag_filter(gl::texture_filter::linear);
 	
-	//tex_color.set_wrap_s(gl::wrap_mode::clamp_to_edge);
-	//tex_color.set_wrap_t(gl::wrap_mode::clamp_to_edge);
-
 	// custom vertex type
 	struct FooVertex
 	{
@@ -233,7 +217,6 @@ int main()
 	glc.use_program(prog);
 	glc.use_vertex_array(arr);
 	glc.use_element_array(indbuf);
-	glc.use_primitive_mode(gl::primitive::triangles);
 
 	auto const proj =
 		gl::perspective(glm::radians(45.f), (float_t)window_size.x / window_size.y, 1.f, 100.f) *
@@ -261,7 +244,7 @@ int main()
 		
 		//std::cout << val << std::endl;
 		
-		glc.draw_elements(0, indices.size());
+		glc.draw_elements(gl::primitive::triangles, 0, indices.size());
 	});
 	
 	dsp.set_resize_func([&](gl::ivec2 const& _size)

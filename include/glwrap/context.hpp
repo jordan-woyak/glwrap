@@ -32,8 +32,8 @@ class context
 
 public:
 	context()
-		: m_primitive_mode(static_cast<GLenum>(primitive::triangles))
-		, m_element_type()
+		: m_element_type()
+		, m_element_type_size()
 #ifndef GLWRAP_NO_SFML
 		, m_sf_window(new sf::RenderWindow)
 #endif
@@ -198,6 +198,17 @@ public:
 	{
 		GLWRAP_EC_CALL(glHint)(static_cast<GLenum>(_target), static_cast<GLenum>(_value));
 	}
+
+	// TODO: function name?
+	void memory_barrier(gl::memory_barrier _barrier)
+	{
+		GLWRAP_EC_CALL(glMemoryBarrier)(static_cast<GLenum>(_barrier));
+	}
+
+	void memory_barrier_by_region(gl::memory_barrier _barrier)
+	{
+		GLWRAP_EC_CALL(glMemoryBarrierByRegion)(static_cast<GLenum>(_barrier));
+	}
 	
 	void enable(capability _cap)
 	{
@@ -278,47 +289,72 @@ public:
 	// TODO: multi draw needed?
 	// TODO: draw range elements [base vertex]
 
-	void draw_arrays(std::size_t _offset, std::size_t _count)
+	void draw_arrays(primitive _mode, int_t _offset, sizei_t _count)
 	{
-		GLWRAP_EC_CALL(glDrawArrays)(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawArrays)(
+			static_cast<enum_t>(_mode),
 			_offset,
 			_count);
 	}
 
-	void draw_arrays_instanced(std::size_t _offset, std::size_t _count, std::size_t _instances)
+	// TODO: allow buffer offset
+	void draw_arrays_indirect(primitive _mode, const draw_arrays_indirect_cmd* _cmd)
 	{
-		GLWRAP_EC_CALL(glDrawArraysInstanced)(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawArraysIndirect)(
+			static_cast<enum_t>(_mode),
+			_cmd);
+	}
+
+	void draw_arrays_instanced(primitive _mode, int_t _offset, sizei_t _count, sizei_t _instances)
+	{
+		GLWRAP_EC_CALL(glDrawArraysInstanced)(
+			static_cast<enum_t>(_mode),
 			_offset,
 			_count,
 			_instances);
 	}
 
-	// TODO: start values need to be adjusted to byte offsets
-
-	void draw_elements(std::size_t _start, std::size_t _count)
+	// TODO: should these just take the element array and bind it?
+	// TODO: good parameter order?
+	void draw_elements(primitive _mode, sizei_t _start, sizei_t _count)
 	{
-		GLWRAP_EC_CALL(glDrawElements)(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawElements)(
+			static_cast<enum_t>(_mode),
 			_count,
 			get_element_type(),
-			reinterpret_cast<void*>((intptr_t)_start));
+			(ubyte_t*)0 + _start * m_element_type_size);
 	}
 
-	void draw_elements_offset(std::size_t _start, std::size_t _count, std::size_t _offset)
+	// TODO: allow buffer offset
+	void draw_elements_indirect(primitive _mode, const draw_elements_indirect_cmd* _cmd)
 	{
-		GLWRAP_EC_CALL(glDrawElementsBaseVertex)(get_primitive_mode(),
-			_count,
+		GLWRAP_EC_CALL(glDrawElementsIndirect)(
+			static_cast<enum_t>(_mode),
 			get_element_type(),
-			reinterpret_cast<void*>((intptr_t)_start),
-			_offset);
+			_cmd);
 	}
 
-	void draw_elements_instanced(std::size_t _start, std::size_t _count, std::size_t _instances)
+	// TODO: should these just take the element array and bind it?
+	// TODO: good parameter order?
+	void draw_elements_instanced(primitive _mode, sizei_t _start, sizei_t _count, sizei_t _instances)
 	{
-		GLWRAP_EC_CALL(glDrawElementsInstanced)(get_primitive_mode(),
+		GLWRAP_EC_CALL(glDrawElementsInstanced)(
+			static_cast<enum_t>(_mode),
 			_count,
 			get_element_type(),
-			reinterpret_cast<void*>((intptr_t)_start),
+			(ubyte_t*)0 + _start * m_element_type_size,
 			_instances);
+	}
+
+	void draw_range_elements(primitive _mode, sizei_t _start, uint_t _min, uint_t _max, sizei_t _count)
+	{
+		GLWRAP_EC_CALL(glDrawRangeElements)(
+			static_cast<enum_t>(_mode),
+			_min,
+			_max,
+			_count,
+			get_element_type(),
+			(ubyte_t*)0 + _start * m_element_type_size);
 	}
 
 	void use_program(program& _prog)
@@ -335,7 +371,7 @@ public:
 	{
 		GLWRAP_EC_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
 	}
-
+	
 	template <typename T>
 	void use_element_array(buffer<T>& _buff)
 	{
@@ -347,12 +383,6 @@ public:
 		GLWRAP_EC_CALL(glBindBuffer)(GL_ELEMENT_ARRAY_BUFFER, _buff.native_handle());
 
 		m_element_type = detail::data_type_enum<T>();
-	}
-
-	// TODO: kill this?
-	void use_primitive_mode(primitive _prim)
-	{
-		m_primitive_mode = static_cast<GLenum>(_prim);
 	}
 
 	void use_draw_framebuffer(const framebuffer_reference& _fb)
@@ -389,11 +419,6 @@ public:
 	}
 
 private:
-	GLenum get_primitive_mode() const
-	{
-		return m_primitive_mode;
-	}
-
 	GLenum get_element_type() const
 	{
 		return m_element_type;
@@ -406,9 +431,8 @@ private:
 	}
 #endif
 
-	// TODO: why do I save this?
-	GLenum m_primitive_mode;
 	GLenum m_element_type;
+	sizei_t m_element_type_size;
 
 #ifndef GLWRAP_NO_SFML
 	std::unique_ptr<sf::RenderWindow> m_sf_window;

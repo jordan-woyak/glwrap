@@ -109,6 +109,9 @@ public:
 	static const texture_type type = Type;
 	static const int dimensions = detail::texture_dims<type>::value;
 
+	// TODO: this is more of a detail..
+	static const enum_t target = detail::texture_traits<type>::target;
+
 	void swap(texture& _other)
 	{
 		globject::swap(_other);
@@ -123,13 +126,15 @@ public:
 	explicit texture(context& _context)
 		: globject(detail::gen_return(glGenTextures))
 	{}
-	
+
+	// TODO: force same internal format for each level
 	template <typename T>
 	void assign(unpack_buffer<T, dimensions> const& _buffer, image_format _ifmt)
 	{
 		// TODO: ugly
 		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
+		// TODO: allow more than level 0
 		detail::gl_tex_image<Type>(0, _ifmt.value, _buffer.m_dims,
 			static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
 	}
@@ -152,6 +157,8 @@ public:
 		}
 	}
 
+	// TODO: storage makes immutable textures. make this more obvious
+	// TexStorage also sets the max mipmap level
 	// TODO: rename
 	void storage(sizei_t _levels, image_format _ifmt, detail::tex_dims<Type> const& _dims)
 	{
@@ -177,6 +184,7 @@ public:
 	}
 
 	// mipmap vs. mipmaps ?
+	// MAX_LEVEL is observed
 	void generate_mipmap()
 	{
 		if (GL_ARB_direct_state_access)
@@ -238,8 +246,6 @@ public:
 	}
 
 private:
-	static const enum_t target = detail::texture_traits<type>::target;
-
 	template <typename T>
 	void set_parameter_raw(GLenum _pname, T _val)
 	{
@@ -256,9 +262,11 @@ public:
 	static const texture_type type = texture_type::texture_buffer;
 	static const int dimensions = detail::texture_dims<type>::value;
 
-	void swap(texture& _other)
+	explicit texture(context& _context)
+		: globject(detail::gen_return(glGenTextures))
 	{
-		globject::swap(_other);
+		// TODO: super ugly
+		detail::scoped_value<detail::parameter::texture<texture_type::texture_buffer>> binding(native_handle());
 	}
 
 	~texture()
@@ -267,25 +275,31 @@ public:
 		GLWRAP_EC_CALL(glDeleteTextures)(1, &nh);
 	}
 
-	explicit texture(context& _context)
-		: globject(detail::gen_return(glGenTextures))
-	{}
+	void swap(texture& _other)
+	{
+		globject::swap(_other);
+	}
 
 	template <typename T>
 	void bind_buffer(buffer<T> const& _buffer)
 	{
-		bind();
-		// TODO: don't hardcode datatype!
-		GLWRAP_EC_CALL(glTexBuffer)(target, GL_RGBA32F, _buffer.native_handle());
+		if (GL_ARB_direct_state_access)
+		{
+			// TODO: don't hardcode datatype!
+			GLWRAP_EC_CALL(glTextureBuffer)(native_handle(), GL_RGBA32F, _buffer.native_handle());
+		}
+		else
+		{
+			// TODO: super ugly
+			detail::scoped_value<detail::parameter::texture<texture_type::texture_buffer>> binding(native_handle());
+			
+			// TODO: don't hardcode datatype!
+			GLWRAP_EC_CALL(glTexBuffer)(target, GL_RGBA32F, _buffer.native_handle());
+		}
 	}
 
 private:
 	static const enum_t target = detail::texture_traits<type>::target;
-
-	void bind() const
-	{
-		GLWRAP_EC_CALL(glBindTexture)(target, native_handle());
-	}
 };
 
 }
