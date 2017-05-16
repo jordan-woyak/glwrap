@@ -156,23 +156,25 @@ int main()
 		"}"
 	);
 
-	// create program
-	gl::program prog(glc);
-
 	auto vert_shader = vshad.create_shader(glc);
 	if (!vert_shader.compile_status())
-		std::cout << "vshad log:\n" << vert_shader.get_log() << std::endl << vert_shader.get_source();
+		std::cout << "vshad log:\n" << vert_shader.get_log() << std::endl;
 
 	auto frag_shader = fshad.create_shader(glc);
 	if (!frag_shader.compile_status())
-		std::cout << "fshad log:\n" << frag_shader.get_log() << std::endl << frag_shader.get_source();
+		std::cout << "fshad log:\n" << frag_shader.get_log() << std::endl;
+
+	// create program pipeline
+	gl::program prog(glc);
 	
 	prog.attach(vert_shader);
 	prog.attach(frag_shader);
+
 	prog.link();
+	
 	std::cout << "program log:\n" << prog.get_log() << std::endl;
 
-	if (!prog.is_good())
+	if (!prog.is_valid())
 		return 1;
 
 	// load vertex data

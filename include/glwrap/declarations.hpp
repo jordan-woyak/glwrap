@@ -64,12 +64,25 @@ class context;
 
 enum class shader_type : GLenum
 {
-	compute = GL_COMPUTE_SHADER,
+	//compute = GL_COMPUTE_SHADER,
 	vertex = GL_VERTEX_SHADER,
-	tess_control = GL_TESS_CONTROL_SHADER,
-	tess_evaluation = GL_TESS_EVALUATION_SHADER,
-	geometry = GL_GEOMETRY_SHADER,
+	//tess_control = GL_TESS_CONTROL_SHADER,
+	//tess_evaluation = GL_TESS_EVALUATION_SHADER,
+	//geometry = GL_GEOMETRY_SHADER,
 	fragment = GL_FRAGMENT_SHADER,
+};
+
+// TODO: allow combinations:
+enum class shader_stage : GLenum
+{
+	//compute = GL_COMPUTE_SHADER_BIT,
+	vertex = GL_VERTEX_SHADER_BIT,
+	//tess_control = GL_TESS_CONTROL_SHADER_BIT,
+	//tess_evaluation = GL_TESS_EVALUATION_SHADER_BIT,
+	//geometry = GL_GEOMETRY_SHADER_BIT,
+	fragment = GL_FRAGMENT_SHADER_BIT,
+
+	all = GL_ALL_SHADER_BITS,
 };
 
 template <shader_type T>
@@ -79,11 +92,11 @@ template <shader_type T>
 class shader_builder;
 
 typedef shader<shader_type::vertex> vertex_shader;
-typedef shader<shader_type::geometry> geometry_shader;
+//typedef shader<shader_type::geometry> geometry_shader;
 typedef shader<shader_type::fragment> fragment_shader;
 
 typedef shader_builder<shader_type::vertex> vertex_shader_builder;
-typedef shader_builder<shader_type::geometry> geometry_shader_builder;
+//typedef shader_builder<shader_type::geometry> geometry_shader_builder;
 typedef shader_builder<shader_type::fragment> fragment_shader_builder;
 
 enum class texture_type : GLenum

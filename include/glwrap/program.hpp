@@ -16,13 +16,31 @@ namespace gl
 
 class context;
 
+// TODO: create a single_stage program template
+// so program_pipeline::use_stages can assume the stage bits
+
 class program : public globject
 {
 public:
+	explicit program(context& _context)
+		: globject(GLWRAP_EC_CALL(glCreateProgram)())
+	{}
+
+	// TODO: make this even more explicit, e.g. detail::adopt_handle
+	explicit program(native_handle_type _handle)
+		: globject(_handle)
+	{}
+	
 	~program()
 	{
 		GLWRAP_EC_CALL(glDeleteProgram)(native_handle());
 	}
+
+	program(program&&) = default;
+	program& operator=(program&&) = default;
+
+	// TODO: GL_PROGRAM_BINARY_RETRIEVABLE_HINT
+	// TODO: GL_PROGRAM_SEPARABLE
 
 	void link()
 	{
@@ -40,10 +58,12 @@ public:
 
 		if (log_length)
 		{
-			std::vector<GLchar> log_buffer(log_length);
-			GLWRAP_EC_CALL(glGetProgramInfoLog)(native_handle(), log_length, NULL, log_buffer.data());
+			// Don't need null termination
+			std::vector<GLchar> buf(log_length - 1);
+			
+			GLWRAP_EC_CALL(glGetProgramInfoLog)(native_handle(), buf.size(), NULL, buf.data());
 
-			log.assign(log_buffer.begin(), log_buffer.end());
+			log.assign(buf.begin(), buf.end());
 		}
 
 		return log;
@@ -61,6 +81,7 @@ public:
 	bool is_valid() const
 	{
 		GLWRAP_EC_CALL(glValidateProgram)(native_handle());
+		
 		GLint status;
 		GLWRAP_EC_CALL(glGetProgramiv)(native_handle(), GL_VALIDATE_STATUS, &status);
 		return (GL_TRUE == status);
@@ -124,10 +145,58 @@ public:
 		GLWRAP_EC_CALL(glAttachShader)(native_handle(), _shad.native_handle());
 	}
 
-	explicit program(context& _context)
-		: globject(GLWRAP_EC_CALL(glCreateProgram)())
-	{}
+private:
+};
 
+class program_pipeline : public globject
+{
+public:
+	explicit program_pipeline(context& _context)
+		: globject(detail::gen_return(glGenProgramPipelines))
+	{}
+	
+	~program_pipeline()
+	{
+		auto const nh = native_handle();
+		GLWRAP_EC_CALL(glDeleteProgramPipelines)(1, &nh);
+	}
+
+	void use_stages(shader_stage _stages, const program& _prog)
+	{
+		GLWRAP_EC_CALL(glUseProgramStages)(native_handle(), static_cast<enum_t>(_stages), _prog.native_handle());
+	}
+
+	std::string get_log() const
+	{
+		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
+
+		int_t log_length;
+		GLWRAP_EC_CALL(glGetProgramPipelineiv)(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
+
+		std::string log;
+
+		if (log_length)
+		{
+			// Don't need null termination
+			std::vector<GLchar> buf(log_length - 1);
+			
+			GLWRAP_EC_CALL(glGetProgramPipelineInfoLog)(native_handle(), buf.size(), NULL, buf.data());
+
+			log.assign(buf.begin(), buf.end());
+		}
+
+		return log;
+	}
+
+	// TODO: rename
+	bool is_valid() const
+	{
+		GLWRAP_EC_CALL(glValidateProgramPipeline)(native_handle());
+		
+		GLint status;
+		GLWRAP_EC_CALL(glGetProgramPipelineiv)(native_handle(), GL_VALIDATE_STATUS, &status);
+		return (GL_TRUE == status);
+	}
 private:
 };
 

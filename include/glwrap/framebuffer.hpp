@@ -142,10 +142,6 @@ class framebuffer : public globject
 {
 	friend class context;
 
-	framebuffer(void*)
-		: globject()
-	{}
-
 public:
 	framebuffer(framebuffer&&) = default;
 	framebuffer& operator=(framebuffer&&) = default;

@@ -362,6 +362,12 @@ public:
 		GLWRAP_EC_CALL(glUseProgram)(_prog.native_handle());
 	}
 
+	// TODO: rename to juse use_program?
+	void use_program_pipeline(program_pipeline& _prog)
+	{
+		GLWRAP_EC_CALL(glBindProgramPipeline)(_prog.native_handle());
+	}
+
 	void use_vertex_array(vertex_array& _vert)
 	{
 		GLWRAP_EC_CALL(glBindVertexArray)(_vert.native_handle());

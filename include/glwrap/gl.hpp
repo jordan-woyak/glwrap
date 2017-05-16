@@ -7,6 +7,7 @@
 #include "uniform.hpp"
 #include "shader.hpp"
 #include "program.hpp"
+#include "shader_builder.hpp"
 
 #ifndef GLWRAP_NO_SFML
 #include "display.hpp"
