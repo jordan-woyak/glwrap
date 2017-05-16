@@ -76,5 +76,12 @@ T* value_ptr(const basic_vec<T, N>& _val)
 
 }
 
+// TODO: this does not belong here:
+// Should this just be a typedef of uvec3?
+struct dispatch_compute_indirect_cmd
+{
+	uvec3 num_groups;
+};
+
 }
 

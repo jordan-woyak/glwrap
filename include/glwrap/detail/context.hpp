@@ -51,9 +51,14 @@ T get_parameter(enum_t _pname)
 	T ret;
 
 	gl_get(_pname, value_ptr(ret));
-	check_unlikely_error();
 
 	return ret;
+}
+
+GLWRAP_FUNC_DECL
+const char* get_string(enum_t _pname)
+{
+	return reinterpret_cast<const char*>(GLWRAP_EC_CALL(glGetString)(_pname));
 }
 
 template <typename T, enum_t P>

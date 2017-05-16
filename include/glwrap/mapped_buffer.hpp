@@ -70,6 +70,7 @@ public:
 		}		
 	}
 
+	// FYI, unmap flushes if GL_MAP_FLUSH_EXPLICIT_BIT is not set
 	~mapped_buffer()
 	{
 		if (!m_buffer)

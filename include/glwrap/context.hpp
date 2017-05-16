@@ -357,6 +357,12 @@ public:
 			(ubyte_t*)0 + _start * m_element_type_size);
 	}
 
+	// TODO: dispatch compute indirect
+	void dispatch_compute(const uvec3& _num_groups)
+	{
+		GLWRAP_EC_CALL(glDispatchCompute)(_num_groups.x, _num_groups.y, _num_groups.z);
+	}
+
 	void use_program(program& _prog)
 	{
 		GLWRAP_EC_CALL(glUseProgram)(_prog.native_handle());
@@ -422,6 +428,26 @@ public:
 	color_attachment depth_buffer()
 	{
 		return {GL_DEPTH_ATTACHMENT};
+	}
+
+	std::string get_vendor_name()
+	{
+		return detail::get_string(GL_VENDOR);
+	}
+
+	std::string get_renderer_name()
+	{
+		return detail::get_string(GL_RENDERER);
+	}
+
+	std::string get_version()
+	{
+		return detail::get_string(GL_VERSION);
+	}
+
+	std::string get_shading_language_version()
+	{
+		return detail::get_string(GL_SHADING_LANGUAGE_VERSION);
 	}
 
 private:

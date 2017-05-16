@@ -83,6 +83,8 @@ void check_error(const char* func_name)
 	}
 }
 
+// TODO: use/kill this?
+// TODO: have varying levels of unlikeliness
 GLWRAP_FUNC_DECL
 void
 check_unlikely_error()
