@@ -64,7 +64,7 @@ class context;
 
 enum class shader_type : GLenum
 {
-	//compute = GL_COMPUTE_SHADER,
+	compute = GL_COMPUTE_SHADER,
 	vertex = GL_VERTEX_SHADER,
 	//tess_control = GL_TESS_CONTROL_SHADER,
 	//tess_evaluation = GL_TESS_EVALUATION_SHADER,
@@ -91,17 +91,16 @@ class shader;
 template <shader_type T>
 class shader_builder;
 
+typedef shader<shader_type::compute> compute_shader;
 typedef shader<shader_type::vertex> vertex_shader;
-//typedef shader<shader_type::geometry> geometry_shader;
 typedef shader<shader_type::fragment> fragment_shader;
 
+typedef shader_builder<shader_type::compute> compute_shader_builder;
 typedef shader_builder<shader_type::vertex> vertex_shader_builder;
-//typedef shader_builder<shader_type::geometry> geometry_shader_builder;
 typedef shader_builder<shader_type::fragment> fragment_shader_builder;
 
 enum class texture_type : GLenum
 {
-
 	texture_1d = GL_TEXTURE_1D, // not in ES
 	texture_2d = GL_TEXTURE_2D,
 	texture_3d = GL_TEXTURE_3D,
