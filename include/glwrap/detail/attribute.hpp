@@ -13,8 +13,7 @@ namespace detail
 
 // TODO: move this elsewhere?
 template <typename T, typename Enable = void>
-struct attrib_traits
-{};
+struct attrib_traits;
 
 // TODO: is_scalar is a bad check, will fail when gl_half and stuff are implemented
 template <typename T>

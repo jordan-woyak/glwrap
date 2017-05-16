@@ -43,8 +43,7 @@ static_assert(sizeof(mat4x2) == sizeof(float) * 8, "Mat4x2 size is not sane.");
 
 // TODO: better name?
 template <typename T, int R, int C>
-struct mat
-{};
+struct mat;
 
 // TODO: all the rest
 template <typename T>
@@ -66,8 +65,7 @@ struct mat<T, 4, 4>
 };
 
 template <typename T, typename Enable = void>
-struct mat_traits
-{};
+struct mat_traits;
 
 template <typename T>
 struct mat_traits<T, typename std::enable_if<is_mat<T>::value>::type>

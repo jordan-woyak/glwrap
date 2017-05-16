@@ -57,8 +57,7 @@ struct texture_dims<texture_type::texture_3d>
 };
 
 template <texture_type T>
-struct texture_traits
-{};
+struct texture_traits;
 
 template <>
 struct texture_traits<texture_type::texture_1d>

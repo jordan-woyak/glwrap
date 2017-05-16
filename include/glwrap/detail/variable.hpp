@@ -25,8 +25,7 @@ typedef std::string type_name_t;
 
 // glsl variable name suffix
 template <typename T, typename Enable = void>
-struct glsl_var_suffix
-{};
+struct glsl_var_suffix;
 
 template <typename T>
 struct glsl_var_suffix<T, typename std::enable_if<std::is_array<T>::value>::type>
@@ -54,8 +53,7 @@ type_name_t get_type_suffix()
 
 // glsl variable type name
 template <typename T, typename Enable = void>
-struct glsl_var_type
-{};
+struct glsl_var_type;
 
 template <typename T>
 type_name_t get_type_name()
@@ -221,8 +219,7 @@ inline type_name_t get_type_name<texture_buffer>()
 
 // TODO: rename
 template <typename T, typename Enable = void>
-struct index_count
-{};
+struct index_count;
 
 template <typename T>
 struct index_count<T, typename std::enable_if<
