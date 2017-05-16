@@ -195,6 +195,7 @@ public:
 	}
 
 	// TODO: support depth and stencil attachments
+	// TODO: should I even expose this function directly? it doesn't reference the fragdata numbers..
 	void bind_draw_buffers(const std::vector<color_attachment>& _attachments)
 	{
 		std::vector<enum_t> bufs(_attachments.size());

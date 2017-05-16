@@ -39,7 +39,7 @@ int main()
 	
 	// define some variables in the program,
 	// they are automatically added to the program source
-	auto mvp_uni = vshad.create_uniform(gl::variable<gl::mat4>("mvp", uniforms));
+	auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
 
 	auto color_attrib = vshad.create_input(gl::variable<gl::vec3>("color", attribs));
 	auto pos_attrib = vshad.create_input(gl::variable<gl::vec2>("position", attribs));
@@ -52,7 +52,7 @@ int main()
 		"{"
 			"col = color.rgb;"
 			"uv = texpos;"
-			"gl_Position = mvp * vec4(position, 0, 1);"
+			"gl_Position = model * vec4(position, 0, 1);"
 		"}"
 	);
 
@@ -91,7 +91,6 @@ int main()
 		std::cout << "program log:\n" << prog.get_log() << std::endl;
 		return 1;
 	}
-		
 
 	// custom vertex type
 	struct FooVertex
@@ -168,9 +167,9 @@ int main()
 		auto const ratio = (float)window_size.y / window_size.x;
 
 		// rotating ortho projection
-		gl::mat4 const modelview = gl::rotate(rotate, 0.f, 0.f, 1.f) *
+		gl::mat4 const model = gl::rotate(rotate, 0.f, 0.f, 1.f) *
 			gl::scale(0.1f * gl::clamp(ratio, ratio, 1), 0.1f / gl::clamp(ratio, 1, ratio), 1.f);
-		prog.set_uniform(mvp_uni, modelview);
+		prog.set_uniform(model_uni, model);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
