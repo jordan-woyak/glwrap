@@ -183,4 +183,20 @@ enum class memory_barrier : GLenum
 	all = GL_ALL_BARRIER_BITS,
 };
 
+// TODO: allow creation of these from the two separate parts?
+enum class buffer_usage
+{
+	stream_draw = GL_STREAM_DRAW,
+	stream_read = GL_STREAM_READ,
+	stream_copy = GL_STREAM_COPY,
+
+	static_draw = GL_STATIC_DRAW,
+	static_read = GL_STATIC_READ,
+	static_copy = GL_STATIC_COPY,
+
+	dynamic_draw = GL_DYNAMIC_DRAW,
+	dynamic_read = GL_DYNAMIC_READ,
+	dynamic_copy = GL_DYNAMIC_COPY,
+};
+
 }

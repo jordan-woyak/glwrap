@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.hpp"
 #include "uniform_block.hpp"
 
 #include "detail/context.hpp"
@@ -86,6 +87,7 @@ using dynamic_buffer_iterator = buffer_iterator<T, detail::dynamic_buffer_alignm
 template <typename T, typename A>
 class buffer;
 
+// TODO: move this into the buffer class?
 template <typename T, typename A>
 class buffer_iterator
 {
@@ -195,10 +197,10 @@ public:
 
 	// TODO: don't hardcode GL_STATIC_DRAW everywhere
 
-	void storage(std::size_t _size)
+	void storage(std::size_t _size, buffer_usage _usage)
 	{
 		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, GL_STATIC_DRAW);
+		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
 	}
 
 	std::size_t size() const
@@ -215,8 +217,9 @@ public:
 		return iterator(native_handle(), 0, m_alignment);
 	}
 
+	// TODO: this is broken for untight-alignments
 	template <typename R>
-	void assign(R&& _range)
+	void assign(R&& _range, buffer_usage _usage)
 	{
 		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
 		auto& contig_range = _range;
@@ -231,10 +234,10 @@ public:
 			"range must contain value_type");
 
 		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, GL_STATIC_DRAW);
+		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, static_cast<enum_t>(_usage));
 	}
-
-	void assign(buffer const& _other)
+	
+	void assign(buffer const& _other, buffer_usage _usage)
 	{
 		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());
 		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
@@ -242,18 +245,17 @@ public:
 		sizei_t sz = 0;
 		GLWRAP_EC_CALL(glGetBufferParameteriv)(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
 
-		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size, nullptr, GL_STATIC_DRAW);
+		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size, nullptr, static_cast<enum_t>(_usage));
 		GLWRAP_EC_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
 	}
 
 private:
-	// TODO: store size?
-
 	sizei_t get_stride() const
 	{
 		return m_alignment.get_stride();
 	}
 
+	// TODO: generate the alignment on the fly?
 	alignment_type m_alignment;
 };
 

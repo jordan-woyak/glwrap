@@ -15,6 +15,9 @@ class context;
 namespace detail
 {
 
+// TODO: allow generic inputs/outputs with generic location and other specifiers
+// TODO: allow adding an input and output to two shader_builders at the same time
+
 template <shader_type, typename>
 struct shader_io_type;
 

@@ -179,11 +179,11 @@ int main()
 
 	// load vertex data
 	gl::buffer<FooVertex> verbuf(glc);
-	verbuf.assign(vertices);
+	verbuf.assign(vertices, gl::buffer_usage::static_draw);
 
 	// load index data
 	gl::buffer<gl::uint_t> indbuf(glc);
-	indbuf.assign(indices);
+	indbuf.assign(indices, gl::buffer_usage::static_draw);
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
