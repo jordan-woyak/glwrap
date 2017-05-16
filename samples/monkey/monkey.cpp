@@ -179,7 +179,11 @@ int main()
 
 	// load vertex data
 	gl::buffer<FooVertex> verbuf(glc);
-	verbuf.assign(vertices, gl::buffer_usage::static_draw);
+
+	//verbuf.assign(vertices, gl::buffer_usage::static_draw);
+	// Using buffer mapping just because
+	verbuf.storage(vertices.size(), gl::buffer_usage::static_draw);
+	std::copy(vertices.begin(), vertices.end(), gl::map_buffer(verbuf).begin());
 
 	// load index data
 	gl::buffer<gl::uint_t> indbuf(glc);

@@ -17,6 +17,7 @@
 #include "query.hpp"
 
 #include "buffer.hpp"
+#include "mapped_buffer.hpp"
 #include "unpack_buffer.hpp"
 
 #include "sampler.hpp"
