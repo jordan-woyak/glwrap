@@ -123,30 +123,57 @@ public:
 	explicit texture(context& _context)
 		: globject(detail::gen_return(glGenTextures))
 	{}
-
-	// TODO: work for NPOT
+	
 	template <typename T>
 	void assign(unpack_buffer<T, dimensions> const& _buffer, image_format _ifmt)
 	{
 		// TODO: ugly
 		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
-		
-		GLWRAP_EC_CALL(glTexImage2D)(target, 0, _ifmt.value, _buffer.m_dims.x, _buffer.m_dims.y,
-			0, static_cast<GLenum>(_buffer.m_pfmt), detail::data_type_enum<T>(), _buffer.m_data);
+
+		detail::gl_tex_image<Type>(0, _ifmt.value, _buffer.m_dims,
+			static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
 	}
 
-	// TODO: level
+	// TODO: rename
+	template <typename T>
+	void sub_assign(detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			detail::gl_texture_sub_image<Type>(native_handle(), 0, _offset, _buffer.m_dims,
+				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
-	// TODO: work for NPOT
-	void storage(basic_vec<int_t, dimensions> const& _dims, image_format _ifmt)
+			detail::gl_tex_sub_image<Type>(0, _offset, _buffer.m_dims,
+				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
+		}
+	}
+
+	// TODO: rename
+	void storage(sizei_t _levels, image_format _ifmt, detail::tex_dims<Type> const& _dims)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			detail::gl_texture_storage<Type>(native_handle(), _levels, _ifmt, _dims);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+
+			detail::gl_tex_storage<Type>(_levels, _ifmt, _dims);
+		}
+	}
+
+	// TODO: rename / can I allow for the "assign" function to do this?
+	void resize(sizei_t _level, image_format _ifmt, detail::tex_dims<Type> const& _dims)
 	{
 		// TODO: ugly
 		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
-		// TODO: for non 2d textures
-		
-		GLWRAP_EC_CALL(glTexImage2D)(target, 0, _ifmt.value, _dims.x, _dims.y,
-			0, GL_RED, GL_BYTE, nullptr);
+		detail::gl_tex_image<Type>(_level, _ifmt.value, _dims, GL_RED, (ubyte_t*)nullptr);
 	}
 
 	// mipmap vs. mipmaps ?

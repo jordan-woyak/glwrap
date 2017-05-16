@@ -88,20 +88,23 @@ typedef shader_builder<shader_type::fragment> fragment_shader_builder;
 
 enum class texture_type : GLenum
 {
-	// TODO: 1d/2d array (not in ES)
-	
-	texture_1d = GL_TEXTURE_1D,
+
+	texture_1d = GL_TEXTURE_1D, // not in ES
 	texture_2d = GL_TEXTURE_2D,
 	texture_3d = GL_TEXTURE_3D,
 
-	texture_rectangle = GL_TEXTURE_RECTANGLE,
+	//texture_1d_array = GL_TEXTURE_1D_ARRAY,
+	texture_2d_array = GL_TEXTURE_2D_ARRAY,
 
-	// TODO: 2d multisample [array]
+	texture_rectangle = GL_TEXTURE_RECTANGLE, // not in ES
 
-	// TODO: cube_map_array
 	texture_cube_map = GL_TEXTURE_CUBE_MAP,
+	//texture_cube_map_array = GL_TEXTURE_CUBE_MAP_ARRAY,
 
-	texture_buffer = GL_TEXTURE_BUFFER,
+	texture_buffer = GL_TEXTURE_BUFFER, // not in ES
+
+	texture_2d_multisample = GL_TEXTURE_2D_MULTISAMPLE,
+	//texture_2d_multisample_array = GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
 };
 
 template <texture_type T>

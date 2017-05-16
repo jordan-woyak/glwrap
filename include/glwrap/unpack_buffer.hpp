@@ -20,7 +20,8 @@ template <typename T, int D>
 class unpack_buffer
 {
 public:
-	unpack_buffer(T const* _data, pixel_format _pfmt, basic_vec<int_t, 2> const& _dims)
+	// TODO: this won't work with 1D formats:
+	unpack_buffer(T const* _data, pixel_format _pfmt, basic_vec<sizei_t, D> const& _dims)
 		: m_data(_data)
 		, m_pfmt(_pfmt)
 		, m_dims(_dims)
@@ -32,11 +33,12 @@ public:
 //private:
 	T const* const m_data;
 	pixel_format const m_pfmt;
-	basic_vec<int_t, 2> const m_dims;
+	basic_vec<sizei_t, D> const m_dims;
 };
 
-template <typename T>
-unpack_buffer<T, 2> unpack(T const* _data, pixel_format _pfmt, basic_vec<int_t, 2> const& _dims)
+template <typename T, typename D>
+auto unpack(T const* _data, pixel_format _pfmt, D const& _dims)
+	-> unpack_buffer<T, detail::vec_traits<D>::dimensions> 
 {
 	return {_data, _pfmt, _dims};
 }

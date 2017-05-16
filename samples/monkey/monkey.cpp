@@ -12,9 +12,9 @@
 
 #include <SFML/Graphics.hpp>
 
-gl::ivec2 getSFImageSize(const sf::Image& img)
+gl::uvec2 getSFImageSize(const sf::Image& img)
 {
-	return gl::ivec2(img.getSize().x, img.getSize().y);
+	return gl::uvec2(img.getSize().x, img.getSize().y);
 }
 
 int main()
