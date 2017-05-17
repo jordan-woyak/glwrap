@@ -67,8 +67,6 @@ public:
 		detail::gl_get(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_max_comb_tunits);
 	}
 
-	// TODO: multiple targets are allowed on each texture unit
-
 	template <typename T>
 	texture_unit<T> get()
 	{
@@ -157,6 +155,7 @@ public:
 		}
 	}
 
+	// TODO: this can only be done once. do it in the constructor
 	// TODO: storage makes immutable textures. make this more obvious
 	// TexStorage also sets the max mipmap level
 	// TODO: rename

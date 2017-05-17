@@ -243,6 +243,14 @@ public:
 			GL_FALSE,
 			0,
 			GL_READ_WRITE,
+
+			// TODO: this format must match exactly the format declared in the shader
+			// (if reads are to be performed)
+
+			// it also needs to match by size (or more safely, by class) with the texture's
+			// internal format
+
+			// TODO: perhaps I could type the texture_unit_location with this format?
 			GL_RGBA32F);
 	}
 

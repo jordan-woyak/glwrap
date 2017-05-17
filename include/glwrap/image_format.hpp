@@ -18,7 +18,7 @@ enum class data_type
 {
 	unsigned_normalized,
 	signed_normalized,
-	float_t,
+	floating_point,
 	signed_integral,
 	unsigned_integral
 };
@@ -49,7 +49,6 @@ inline image_format sized_image_format(base_format _bfmt, int _bits)
 }
 */
 
-#if 0
 inline image_format specific_image_format(base_format _bfmt, data_type _dtype, int _bits)
 {
 	// TODO: initialize elsewhere?
@@ -71,62 +70,56 @@ inline image_format specific_image_format(base_format _bfmt, data_type _dtype, i
 
 	auto const r = base_format::r;
 	auto const rg = base_format::rg;
+	auto const rgb = base_format::rgb;
 	auto const rgba = base_format::rgba;
 
-	//auto const unorm = data_type::unsigned_normalized;
-	auto const flt = data_type::float_t;
+	auto const unorm = data_type::unsigned_normalized;
+	auto const snorm = data_type::signed_normalized;
+	auto const flt = data_type::floating_point;
 	auto const sint = data_type::signed_integral;
 	auto const uint = data_type::unsigned_integral;
+
+#define GLWRAP_FORMAT_DEF(dtype, bitdepth, suffix) \
+	{{r, dtype, bitdepth}, GL_R##bitdepth##suffix}, \
+	{{rg, dtype, bitdepth}, GL_RG##bitdepth##suffix}, \
+	{{rgb, dtype, bitdepth}, GL_RGB##bitdepth##suffix}, \
+	{{rgba, dtype, bitdepth}, GL_RGBA##bitdepth##suffix}, \
 
 	std::map<fmt_params, GLenum> supported_formats =
 	{
 		// unsigned normalized
-		/*
-		{{r, unorm, 8}, GL_R8_UNORM},
-		{{rg, unorm, 8}, GL_RG8_UNORM},
-		{{rgba, unorm, 8}, GL_RGBA8_UNORM},
-		{{r, unorm, 16}, GL_R8_UNORM},
-		{{rg, unorm, 16}, GL_RG8_UNORM},
-		{{rgba, unorm, 16}, GL_RGBA8_UNORM},
-		*/
-
+		GLWRAP_FORMAT_DEF(unorm, 8, )
+		GLWRAP_FORMAT_DEF(unorm, 16, )
+		
+		// signed normalized
+		GLWRAP_FORMAT_DEF(snorm, 8, _SNORM)
+		GLWRAP_FORMAT_DEF(snorm, 16, _SNORM)
+		
 		// float
-		{{r, flt, 16}, GL_R16F},
-		{{rg, flt, 16}, GL_RG16F},
-		{{rgba, flt, 16}, GL_RGBA16F},
-		{{r, flt, 32}, GL_R32F},
-		{{rg, flt, 32}, GL_RG32F},
-		{{rgba, flt, 32}, GL_RGBA32F},
+		GLWRAP_FORMAT_DEF(flt, 16, F)
+		GLWRAP_FORMAT_DEF(flt, 32, F)
 
 		// signed integral
-		{{r, sint, 8}, GL_R8I},
-		{{rg, sint, 8}, GL_RG8I},
-		{{rgba, sint, 8}, GL_RGBA8I},
-		{{r, sint, 16}, GL_R16I},
-		{{rg, sint, 16}, GL_RG16I},
-		{{rgba, sint, 16}, GL_RGBA16I},
-		{{r, sint, 32}, GL_R32I},
-		{{rg, sint, 32}, GL_RG32I},
-		{{rgba, sint, 32}, GL_RGBA32I},
+		GLWRAP_FORMAT_DEF(sint, 8, I)
+		GLWRAP_FORMAT_DEF(sint, 16, I)
+		GLWRAP_FORMAT_DEF(sint, 32, I)
 
 		// unsigned integral
-		{{r, uint, 8}, GL_R8UI},
-		{{rg, uint, 8}, GL_RG8UI},
-		{{rgba, uint, 8}, GL_RGBA8UI},
-		{{r, uint, 16}, GL_R16UI},
-		{{rg, uint, 16}, GL_RG16UI},
-		{{rgba, uint, 16}, GL_RGBA16UI},
-		{{r, uint, 32}, GL_R32UI},
-		{{rg, uint, 32}, GL_RG32UI},
-		{{rgba, uint, 32}, GL_RGBA32UI},
+		GLWRAP_FORMAT_DEF(uint, 8, UI)
+		GLWRAP_FORMAT_DEF(uint, 16, UI)
+		GLWRAP_FORMAT_DEF(uint, 32, UI)
+
+		// TODO: the few odd ones..
 	};
 
+#undef GLWRAP_FORMAT_DEF
+
 	auto it = supported_formats.find({_bfmt, _dtype, _bits});
-	if (it != supported_formats.end());
+	if (it != supported_formats.end())
 		return {it->second};
 
 	// TODO: throw if invalid?
-	return {};
+	return {base_format()};
 }
-#endif
+
 }

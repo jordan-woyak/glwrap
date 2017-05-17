@@ -22,7 +22,7 @@ struct basic_sampler_2d {};
 template <typename T>
 struct basic_sampler_3d {};
 
-// TODO: allow for sampler_2d[] syntax
+// TODO: allow for sampler_2d[] syntax?
 template <typename T>
 struct basic_sampler_2d_array {};
 
