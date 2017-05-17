@@ -53,6 +53,43 @@ typedef basic_sampler_2d_array<uint_t> usampler_2d_array;
 typedef basic_sampler_cube<uint_t> usampler_cube;
 typedef basic_sampler_2dms<uint_t> usampler_2dms;
 
+template <typename T>
+struct basic_image_2d {};
+
+template <typename T>
+struct basic_image_3d {};
+
+// TODO: allow for image_2d[] syntax
+template <typename T>
+struct basic_image_2d_array {};
+
+template <typename T>
+struct basic_image_cube {};
+
+template <typename T>
+struct basic_image_2dms {};
+
+// float images
+typedef basic_image_2d<float_t> image_2d;
+typedef basic_image_3d<float_t> image_3d;
+typedef basic_image_2d_array<float_t> image_2d_array;
+typedef basic_image_cube<float_t> image_cube;
+typedef basic_image_2dms<float_t> image_2dms;
+
+// int images
+typedef basic_image_2d<int_t> iimage_2d;
+typedef basic_image_3d<int_t> iimage_3d;
+typedef basic_image_2d_array<int_t> iimage_2d_array;
+typedef basic_image_cube<int_t> iimage_cube;
+typedef basic_image_2dms<int_t> iimage_2dms;
+
+// uint images
+typedef basic_image_2d<uint_t> uimage_2d;
+typedef basic_image_3d<uint_t> uimage_3d;
+typedef basic_image_2d_array<uint_t> uimage_2d_array;
+typedef basic_image_cube<uint_t> uimage_cube;
+typedef basic_image_2dms<uint_t> uimage_2dms;
+
 namespace detail
 {
 

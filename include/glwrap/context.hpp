@@ -228,6 +228,24 @@ public:
 		GLWRAP_EC_CALL(glBindTexture)(T::target, _texture.native_handle());
 	}
 
+	// TODO: work for more than image_2d
+	void bind_image_texture(texture_unit<image_2d> const& _unit, texture_2d const& _texture)
+	{
+		// TODO: levels
+		// TODO: layer
+		// TODO: access
+		// TODO: format
+		
+		GLWRAP_EC_CALL(glBindImageTexture)(
+			_unit.get_index(),
+			_texture.native_handle(),
+			0,
+			GL_FALSE,
+			0,
+			GL_READ_WRITE,
+			GL_RGBA32F);
+	}
+
 	template <typename T>
 	void bind_sampler(texture_unit<T> const& _unit, sampler const& _sampler)
 	{
