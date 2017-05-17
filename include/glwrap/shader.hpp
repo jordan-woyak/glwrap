@@ -12,14 +12,20 @@ class context;
 
 // TODO: de-templatify
 template <shader_type T>
-class shader : public globject
+class basic_shader : public globject
 {
-	friend class program;
-
 public:
-	explicit shader(context& glc)
+	explicit basic_shader(context& glc)
 		: globject(GLWRAP_EC_CALL(glCreateShader)(static_cast<GLenum>(T)))
 	{}
+
+	basic_shader(basic_shader&&) = default;
+	basic_shader& operator=(basic_shader&&) = default;
+
+	~basic_shader()
+	{
+		GLWRAP_EC_CALL(glDeleteShader)(native_handle());
+	}
 
 	void set_source(const std::string& _src)
 	{

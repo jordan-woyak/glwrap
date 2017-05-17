@@ -86,20 +86,20 @@ enum class shader_stage : GLenum
 };
 
 template <shader_type T>
-class shader;
+class basic_shader;
 
 template <shader_type T>
 class shader_builder;
 
-typedef shader<shader_type::compute> compute_shader;
-typedef shader<shader_type::vertex> vertex_shader;
-typedef shader<shader_type::fragment> fragment_shader;
+typedef basic_shader<shader_type::compute> compute_shader;
+typedef basic_shader<shader_type::vertex> vertex_shader;
+typedef basic_shader<shader_type::fragment> fragment_shader;
 
 typedef shader_builder<shader_type::compute> compute_shader_builder;
 typedef shader_builder<shader_type::vertex> vertex_shader_builder;
 typedef shader_builder<shader_type::fragment> fragment_shader_builder;
 
-enum class texture_type : GLenum
+enum class texture_type : enum_t
 {
 	//texture_1d = GL_TEXTURE_1D, // not in ES
 	texture_2d = GL_TEXTURE_2D,
@@ -119,14 +119,39 @@ enum class texture_type : GLenum
 	//texture_2d_multisample_array = GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
 };
 
-template <texture_type T>
-class texture;
+// TODO: use this or actual types?
+/*
+enum class texture_data_type
+{
+	// also handles normalized integer formats
+	floating,
+	
+	signed_integral,
+	
+	unisgned_integral,
+};
+*/
 
-typedef texture<texture_type::texture_2d> texture_2d;
-typedef texture<texture_type::texture_3d> texture_3d;
-typedef texture<texture_type::texture_2d_array> texture_2d_array;
-typedef texture<texture_type::texture_cube_map> texture_cube_map;
-typedef texture<texture_type::texture_2d_multisample> texture_2d_multisample;
+template <texture_type T, typename D>
+class basic_texture;
+
+typedef basic_texture<texture_type::texture_2d, float_t> texture_2d;
+typedef basic_texture<texture_type::texture_3d, float_t> texture_3d;
+typedef basic_texture<texture_type::texture_2d_array, float_t> texture_2d_array;
+typedef basic_texture<texture_type::texture_cube_map, float_t> texture_cube_map;
+typedef basic_texture<texture_type::texture_2d_multisample, float_t> texture_2d_multisample;
+
+typedef basic_texture<texture_type::texture_2d, int_t> itexture_2d;
+typedef basic_texture<texture_type::texture_3d, int_t> itexture_3d;
+typedef basic_texture<texture_type::texture_2d_array, int_t> itexture_2d_array;
+typedef basic_texture<texture_type::texture_cube_map, int_t> itexture_cube_map;
+typedef basic_texture<texture_type::texture_2d_multisample, int_t> itexture_2d_multisample;
+
+typedef basic_texture<texture_type::texture_2d, uint_t> utexture_2d;
+typedef basic_texture<texture_type::texture_3d, uint_t> utexture_3d;
+typedef basic_texture<texture_type::texture_2d_array, uint_t> utexture_2d_array;
+typedef basic_texture<texture_type::texture_cube_map, uint_t> utexture_cube_map;
+typedef basic_texture<texture_type::texture_2d_multisample, uint_t> utexture_2d_multisample;
 
 struct draw_arrays_indirect_cmd
 {

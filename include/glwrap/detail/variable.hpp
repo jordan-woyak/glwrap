@@ -14,44 +14,51 @@
 namespace gl
 {
 
-// TODO: move the basic_* types into namespace detail
+namespace shader
+{
+
 // empty type defs for use with glsl variables
-template <typename T>
-struct basic_sampler_2d {};
+template <texture_type T, typename D>
+struct basic_sampler {};
+
+// TODO: eliminate some redundancy with macros:
 
 template <typename T>
-struct basic_sampler_3d {};
+using basic_sampler_2d = basic_sampler<texture_type::texture_2d, T>;
+
+template <typename T>
+using basic_sampler_3d = basic_sampler<texture_type::texture_3d, T>;
 
 // TODO: allow for sampler_2d[] syntax?
 template <typename T>
-struct basic_sampler_2d_array {};
+using basic_sampler_2d_array = basic_sampler<texture_type::texture_2d_array, T>;
 
 template <typename T>
-struct basic_sampler_cube {};
+using basic_sampler_cube_map = basic_sampler<texture_type::texture_cube_map, T>;
 
 template <typename T>
-struct basic_sampler_2dms {};
+using basic_sampler_2d_multisample = basic_sampler<texture_type::texture_2d_multisample, T>;
 
 // float samplers
 typedef basic_sampler_2d<float_t> sampler_2d;
 typedef basic_sampler_3d<float_t> sampler_3d;
 typedef basic_sampler_2d_array<float_t> sampler_2d_array;
-typedef basic_sampler_cube<float_t> sampler_cube;
-typedef basic_sampler_2dms<float_t> sampler_2dms;
+typedef basic_sampler_cube_map<float_t> sampler_cube_map;
+typedef basic_sampler_2d_multisample<float_t> sampler_2d_multisample;
 
 // int samplers
 typedef basic_sampler_2d<int_t> isampler_2d;
 typedef basic_sampler_3d<int_t> isampler_3d;
 typedef basic_sampler_2d_array<int_t> isampler_2d_array;
-typedef basic_sampler_cube<int_t> isampler_cube;
-typedef basic_sampler_2dms<int_t> isampler_2dms;
+typedef basic_sampler_cube_map<int_t> isampler_cube;
+typedef basic_sampler_2d_multisample<int_t> isampler_2d_multisample;
 
 // uint samplers
 typedef basic_sampler_2d<uint_t> usampler_2d;
 typedef basic_sampler_3d<uint_t> usampler_3d;
 typedef basic_sampler_2d_array<uint_t> usampler_2d_array;
-typedef basic_sampler_cube<uint_t> usampler_cube;
-typedef basic_sampler_2dms<uint_t> usampler_2dms;
+typedef basic_sampler_cube_map<uint_t> usampler_cube;
+typedef basic_sampler_2d_multisample<uint_t> usampler_2d_multisample;
 
 template <typename T>
 struct basic_image_2d {};
@@ -67,28 +74,30 @@ template <typename T>
 struct basic_image_cube {};
 
 template <typename T>
-struct basic_image_2dms {};
+struct basic_image_2d_ms {};
 
 // float images
 typedef basic_image_2d<float_t> image_2d;
 typedef basic_image_3d<float_t> image_3d;
 typedef basic_image_2d_array<float_t> image_2d_array;
 typedef basic_image_cube<float_t> image_cube;
-typedef basic_image_2dms<float_t> image_2dms;
+typedef basic_image_2d_ms<float_t> image_2d_ms;
 
 // int images
 typedef basic_image_2d<int_t> iimage_2d;
 typedef basic_image_3d<int_t> iimage_3d;
 typedef basic_image_2d_array<int_t> iimage_2d_array;
 typedef basic_image_cube<int_t> iimage_cube;
-typedef basic_image_2dms<int_t> iimage_2dms;
+typedef basic_image_2d_ms<int_t> iimage_2d_ms;
 
 // uint images
 typedef basic_image_2d<uint_t> uimage_2d;
 typedef basic_image_3d<uint_t> uimage_3d;
 typedef basic_image_2d_array<uint_t> uimage_2d_array;
 typedef basic_image_cube<uint_t> uimage_cube;
-typedef basic_image_2dms<uint_t> uimage_2dms;
+typedef basic_image_2d_ms<uint_t> uimage_2d_ms;
+
+}
 
 namespace detail
 {
@@ -257,8 +266,10 @@ struct glsl_var_type<T, typename std::enable_if<detail::is_mat<T>::value>::type>
 	}
 };
 
+// TODO: template to get the sampler/image texture-type suffix
+
 template <typename T>
-struct glsl_var_type<basic_sampler_2d<T>>
+struct glsl_var_type<shader::basic_sampler_2d<T>>
 {
 	static type_name_t name()
 	{
@@ -267,7 +278,7 @@ struct glsl_var_type<basic_sampler_2d<T>>
 };
 
 template <typename T>
-struct glsl_var_type<basic_sampler_3d<T>>
+struct glsl_var_type<shader::basic_sampler_3d<T>>
 {
 	static type_name_t name()
 	{
@@ -276,11 +287,29 @@ struct glsl_var_type<basic_sampler_3d<T>>
 };
 
 template <typename T>
-struct glsl_var_type<basic_sampler_cube<T>>
+struct glsl_var_type<shader::basic_sampler_2d_array<T>>
+{
+	static type_name_t name()
+	{
+		return vec_prefix<T>() + "sampler2DArray";
+	}
+};
+
+template <typename T>
+struct glsl_var_type<shader::basic_sampler_cube_map<T>>
 {
 	static type_name_t name()
 	{
 		return vec_prefix<T>() + "samplerCube";
+	}
+};
+
+template <typename T>
+struct glsl_var_type<shader::basic_sampler_2d_multisample<T>>
+{
+	static type_name_t name()
+	{
+		return vec_prefix<T>() + "sampler2DMS";
 	}
 };
 

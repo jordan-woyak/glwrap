@@ -91,7 +91,7 @@ public:
 		// TODO: ugly
 		static_assert(
 			detail::glslvar::is_valid_glsl_type<P>::value
-			|| std::is_same<P, sampler_2d>::value
+			|| std::is_same<P, shader::sampler_2d>::value
 			, "Invalid Uniform type.");
 		
 		m_header_lines.emplace_back(get_glsl_definition<P>("uniform", _desc));
@@ -118,9 +118,9 @@ public:
 */
 
 	// TODO: should this just take and modify a shader?
-	shader<T> create_shader(context& _glc) const
+	basic_shader<T> create_shader(context& _glc) const
 	{
-		shader<T> result(_glc);
+		basic_shader<T> result(_glc);
 		result.set_source(generate_full_source());
 		result.compile();
 		return result;

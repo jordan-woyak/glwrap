@@ -98,8 +98,8 @@ struct wrap_s : parameter_base<int_t>
 
 }
 
-template <texture_type Type>
-class texture : public globject
+template <texture_type Type, typename DataType>
+class basic_texture : public globject
 {
 	friend class context;
 
@@ -110,18 +110,18 @@ public:
 	// TODO: this is more of a detail..
 	static const enum_t target = detail::texture_traits<type>::target;
 
-	void swap(texture& _other)
+	void swap(basic_texture& _other)
 	{
 		globject::swap(_other);
 	}
 
-	~texture()
+	~basic_texture()
 	{
 		auto const nh = native_handle();
 		GLWRAP_EC_CALL(glDeleteTextures)(1, &nh);
 	}
 
-	explicit texture(context& _context)
+	explicit basic_texture(context& _context)
 		: globject(detail::gen_return(glGenTextures))
 	{}
 

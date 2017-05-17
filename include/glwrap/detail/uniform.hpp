@@ -102,10 +102,10 @@ struct uniform_value
 };
 
 // TODO: support more than 2d..
-template <typename T>
-struct uniform_value<basic_sampler_2d<T>>
+template <texture_type T, typename D>
+struct uniform_value<shader::basic_sampler<T, D>>
 {
-	typedef texture_unit<basic_sampler_2d<T>> type;
+	typedef texture_unit<shader::basic_sampler<T, D>> type;
 	typedef int_t gl_type;
 
 	static gl_type convert_to_gl_type(const type& _val)

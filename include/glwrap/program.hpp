@@ -140,7 +140,7 @@ public:
 
 	// TODO: accept a shader_builder as well?
 	template <shader_type T>
-	void attach(const shader<T>& _shad)
+	void attach(const basic_shader<T>& _shad)
 	{
 		GLWRAP_EC_CALL(glAttachShader)(native_handle(), _shad.native_handle());
 	}
