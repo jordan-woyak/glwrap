@@ -220,8 +220,9 @@ public:
 		GLWRAP_EC_CALL(glDisable)(static_cast<GLenum>(_cap));
 	}
 
+	// TODO: work for more than sampler_2d and type check..
 	template <typename T>
-	void bind_texture(texture_unit<T> const& _unit, T const& _texture)
+	void bind_texture(texture_unit<sampler_2d> const& _unit, T const& _texture)
 	{
 		GLWRAP_EC_CALL(glActiveTexture)(GL_TEXTURE0 + _unit.get_index());
 		GLWRAP_EC_CALL(glBindTexture)(T::target, _texture.native_handle());

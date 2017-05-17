@@ -28,9 +28,11 @@ void gl_texture_parameter(uint_t _texture, enum_t _pname, int_t _value)
 	GLWRAP_EC_CALL(glTextureParameteri)(_texture, _pname, _value);
 }
 
+
 template <texture_type T, typename Enable = void>
 struct texture_dims;
 
+/*
 template <texture_type T>
 struct texture_dims<T, typename std::enable_if<
 	(T == texture_type::texture_1d) ||
@@ -40,11 +42,11 @@ struct texture_dims<T, typename std::enable_if<
 	static const int value = 1;
 	typedef float_t type;
 };
+*/
 
 template <texture_type T>
 struct texture_dims<T, typename std::enable_if<
-	(T == texture_type::texture_2d) ||
-	(T == texture_type::texture_rectangle)
+	(T == texture_type::texture_2d)
 	>::type>
 {
 	static const int value = 2;
@@ -67,12 +69,14 @@ using tex_dims = typename texture_dims<T>::type;
 template <texture_type T>
 struct texture_traits;
 
+/*
 template <>
 struct texture_traits<texture_type::texture_1d>
 {
 	static const enum_t target = GL_TEXTURE_1D;
 	static const enum_t binding = GL_TEXTURE_BINDING_1D;
 };
+* */
 
 template <>
 struct texture_traits<texture_type::texture_2d>
@@ -87,21 +91,14 @@ struct texture_traits<texture_type::texture_3d>
 	static const enum_t target = GL_TEXTURE_3D;
 	static const enum_t binding = GL_TEXTURE_BINDING_3D;
 };
-
-template <>
-struct texture_traits<texture_type::texture_rectangle>
-{
-	static const enum_t target = GL_TEXTURE_RECTANGLE;
-	static const enum_t binding = GL_TEXTURE_BINDING_RECTANGLE;
-};
-
+/*
 template <>
 struct texture_traits<texture_type::texture_buffer>
 {
 	static const enum_t target = GL_TEXTURE_BUFFER;
 	static const enum_t binding = GL_TEXTURE_BINDING_BUFFER;
 };
-
+*/
 namespace parameter
 {
 

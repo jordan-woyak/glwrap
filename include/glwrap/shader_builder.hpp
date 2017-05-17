@@ -91,7 +91,7 @@ public:
 		// TODO: ugly
 		static_assert(
 			detail::glslvar::is_valid_glsl_type<P>::value
-			|| std::is_same<P, texture_2d>::value
+			|| std::is_same<P, sampler_2d>::value
 			, "Invalid Uniform type.");
 		
 		m_header_lines.emplace_back(get_glsl_definition<P>("uniform", _desc));

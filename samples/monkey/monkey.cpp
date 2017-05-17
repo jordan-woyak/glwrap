@@ -86,9 +86,9 @@ int main()
 	gl::fragdata_location_enumerator fragdatas(glc);
 
 	gl::texture_unit_enumerator units(glc);
-	auto tex_color_unit = units.get<gl::texture_2d>();
-	auto tex_spec_unit = units.get<gl::texture_2d>();
-	auto tex_normal_unit = units.get<gl::texture_2d>();
+	auto tex_color_unit = units.get<gl::sampler_2d>();
+	auto tex_spec_unit = units.get<gl::sampler_2d>();
+	auto tex_normal_unit = units.get<gl::sampler_2d>();
 
 	gl::vertex_shader_builder vshad(glc);
 
@@ -126,9 +126,9 @@ int main()
 	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
 	(void)fragdata;
 
-	auto tex_color_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_color", uniforms));
-	auto tex_spec_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_spec", uniforms));
-	auto tex_normal_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex_normal", uniforms));
+	auto tex_color_uni = fshad.create_uniform(gl::variable<gl::sampler_2d>("tex_color", uniforms));
+	auto tex_spec_uni = fshad.create_uniform(gl::variable<gl::sampler_2d>("tex_spec", uniforms));
+	auto tex_normal_uni = fshad.create_uniform(gl::variable<gl::sampler_2d>("tex_normal", uniforms));
 
 	auto diff_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("diff_color", uniforms));
 	auto spec_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("spec_color", uniforms));

@@ -253,6 +253,7 @@ private:
 	}
 };
 
+/*
 template <>
 class texture<texture_type::texture_buffer> : public globject
 {
@@ -301,6 +302,7 @@ public:
 private:
 	static const enum_t target = detail::texture_traits<type>::target;
 };
+*/
 
 }
 

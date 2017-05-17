@@ -101,19 +101,19 @@ typedef shader_builder<shader_type::fragment> fragment_shader_builder;
 
 enum class texture_type : GLenum
 {
-	texture_1d = GL_TEXTURE_1D, // not in ES
+	//texture_1d = GL_TEXTURE_1D, // not in ES
 	texture_2d = GL_TEXTURE_2D,
 	texture_3d = GL_TEXTURE_3D,
 
 	//texture_1d_array = GL_TEXTURE_1D_ARRAY,
 	texture_2d_array = GL_TEXTURE_2D_ARRAY,
 
-	texture_rectangle = GL_TEXTURE_RECTANGLE, // not in ES
+	//texture_rectangle = GL_TEXTURE_RECTANGLE, // not in ES
 
 	texture_cube_map = GL_TEXTURE_CUBE_MAP,
 	//texture_cube_map_array = GL_TEXTURE_CUBE_MAP_ARRAY,
 
-	texture_buffer = GL_TEXTURE_BUFFER, // not in ES
+	//texture_buffer = GL_TEXTURE_BUFFER, // not in ES
 
 	texture_2d_multisample = GL_TEXTURE_2D_MULTISAMPLE,
 	//texture_2d_multisample_array = GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
@@ -122,12 +122,11 @@ enum class texture_type : GLenum
 template <texture_type T>
 class texture;
 
-typedef texture<texture_type::texture_1d> texture_1d;
 typedef texture<texture_type::texture_2d> texture_2d;
 typedef texture<texture_type::texture_3d> texture_3d;
-typedef texture<texture_type::texture_rectangle> texture_rectangle;
+typedef texture<texture_type::texture_2d_array> texture_2d_array;
 typedef texture<texture_type::texture_cube_map> texture_cube_map;
-typedef texture<texture_type::texture_buffer> texture_buffer;
+typedef texture<texture_type::texture_2d_multisample> texture_2d_multisample;
 
 struct draw_arrays_indirect_cmd
 {

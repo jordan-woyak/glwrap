@@ -14,6 +14,45 @@
 namespace gl
 {
 
+// TODO: move the basic_* types into namespace detail
+// empty type defs for use with glsl variables
+template <typename T>
+struct basic_sampler_2d {};
+
+template <typename T>
+struct basic_sampler_3d {};
+
+// TODO: allow for sampler_2d[] syntax
+template <typename T>
+struct basic_sampler_2d_array {};
+
+template <typename T>
+struct basic_sampler_cube {};
+
+template <typename T>
+struct basic_sampler_2dms {};
+
+// float samplers
+typedef basic_sampler_2d<float_t> sampler_2d;
+typedef basic_sampler_3d<float_t> sampler_3d;
+typedef basic_sampler_2d_array<float_t> sampler_2d_array;
+typedef basic_sampler_cube<float_t> sampler_cube;
+typedef basic_sampler_2dms<float_t> sampler_2dms;
+
+// int samplers
+typedef basic_sampler_2d<int_t> isampler_2d;
+typedef basic_sampler_3d<int_t> isampler_3d;
+typedef basic_sampler_2d_array<int_t> isampler_2d_array;
+typedef basic_sampler_cube<int_t> isampler_cube;
+typedef basic_sampler_2dms<int_t> isampler_2dms;
+
+// uint samplers
+typedef basic_sampler_2d<uint_t> usampler_2d;
+typedef basic_sampler_3d<uint_t> usampler_3d;
+typedef basic_sampler_2d_array<uint_t> usampler_2d_array;
+typedef basic_sampler_cube<uint_t> usampler_cube;
+typedef basic_sampler_2dms<uint_t> usampler_2dms;
+
 namespace detail
 {
 
@@ -104,38 +143,38 @@ inline type_name_t get_type_name<double_t>()
 // vectors
 
 template <typename T>
-const char* vec_prefix()
+std::string vec_prefix()
 {
 	static_assert(false && std::is_void<T>::value, "Unsupported vector type");
 	return nullptr;
 }
 
 template <>
-inline const char* vec_prefix<bool_t>()
+inline std::string vec_prefix<bool_t>()
 {
 	return "b";
 }
 
 template <>
-inline const char* vec_prefix<int_t>()
+inline std::string vec_prefix<int_t>()
 {
 	return "i";
 }
 
 template <>
-inline const char* vec_prefix<uint_t>()
+inline std::string vec_prefix<uint_t>()
 {
 	return "u";
 }
 
 template <>
-inline const char* vec_prefix<float_t>()
+inline std::string vec_prefix<float_t>()
 {
 	return "";
 }
 
 template <>
-inline const char* vec_prefix<double_t>()
+inline std::string vec_prefix<double_t>()
 {
 	return "d";
 }
@@ -181,41 +220,32 @@ struct glsl_var_type<T, typename std::enable_if<detail::is_mat<T>::value>::type>
 	}
 };
 
-template <>
-inline type_name_t get_type_name<texture_1d>()
+template <typename T>
+struct glsl_var_type<basic_sampler_2d<T>>
 {
-	return "sampler1D";
-}
+	static type_name_t name()
+	{
+		return vec_prefix<T>() + "sampler2D";
+	}
+};
 
-template <>
-inline type_name_t get_type_name<texture_2d>()
+template <typename T>
+struct glsl_var_type<basic_sampler_3d<T>>
 {
-	return "sampler2D";
-}
+	static type_name_t name()
+	{
+		return vec_prefix<T>() + "sampler3D";
+	}
+};
 
-template <>
-inline type_name_t get_type_name<texture_rectangle>()
+template <typename T>
+struct glsl_var_type<basic_sampler_cube<T>>
 {
-	return "sampler2DRect";
-}
-
-template <>
-inline type_name_t get_type_name<texture_3d>()
-{
-	return "sampler3D";
-}
-
-template <>
-inline type_name_t get_type_name<texture_cube_map>()
-{
-	return "samplerCube";
-}
-
-template <>
-inline type_name_t get_type_name<texture_buffer>()
-{
-	return "samplerBuffer";
-}
+	static type_name_t name()
+	{
+		return vec_prefix<T>() + "samplerCube";
+	}
+};
 
 // TODO: rename
 template <typename T, typename Enable = void>
