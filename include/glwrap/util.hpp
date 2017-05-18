@@ -328,13 +328,16 @@ auto clamp(T&& _val, Min&& _min, Max&& _max) -> typename std::remove_reference<T
 }
 
 // TODO: something better than int for offsets
-template <typename Index, typename State>
-class indexing_iterator
+// TODO: detail namespace
+// TODO: modify an index inside state?
+template <typename State>
+class indexing_iterator : public std::iterator<std::random_access_iterator_tag, typename State::value_type>
 {
 public:
+	typedef typename State::index_type index_type;
 	typedef typename State::value_type value_type;
 	
-	indexing_iterator(Index _index, const State& _state)
+	indexing_iterator(index_type _index, const State& _state)
 		: m_index(_index)
 		, m_state(_state)
 	{}
@@ -377,7 +380,7 @@ public:
 	}
 
 private:
-	Index m_index;
+	index_type m_index;
 	State m_state;
 };
 

@@ -10,7 +10,7 @@ namespace gl
 
 template <typename T, typename A = detail::tight_buffer_alignment<T>>
 class mapped_buffer
-{	
+{
 public:
 	typedef T value_type;
 	typedef A alignment_type;
@@ -110,70 +110,32 @@ public:
 		flush_range(0, m_size);
 	}
 
-	class iterator : public std::iterator<std::random_access_iterator_tag, T>
+private:
+	struct iter_state
 	{
-		friend class mapped_buffer;
-
-	public:
+		typedef sizei_t index_type;
 		typedef T value_type;
-
-		iterator(iterator const& _rhs) = default;
-		iterator& operator=(iterator const& _rhs) = default;
-
-		iterator& operator++()
-		{
-			return *this += 1;
-		}
-
-		iterator& operator+=(sizei_t _offset)
-		{
-			m_ptr += _offset * m_alignment.get_stride();
-			return *this;
-		}
-
-		friend iterator operator+(iterator _lhs, sizei_t _offset)
-		{
-			return _lhs += _offset;
-		}
-
-		value_type& operator*() const
-		{
-			return *reinterpret_cast<T*>(m_ptr);
-		}
-
-		value_type* operator->() const
-		{
-			return m_ptr;
-		}
-
-		bool operator==(iterator const& _rhs) const
-		{
-			return m_ptr == _rhs.m_ptr;
-		}
-
-		bool operator!=(iterator const& _rhs) const
-		{
-			return !(*this == _rhs);
-		}
-
-	private:
-		iterator(ubyte_t* _ptr, alignment_type _alignment)
-			: m_ptr(_ptr)
-			, m_alignment(_alignment)
-		{}
-
+		
 		ubyte_t* m_ptr;
 		alignment_type m_alignment;
+
+		value_type& deref(index_type _index) const
+		{
+			return *reinterpret_cast<value_type*>(m_ptr + _index * m_alignment.get_stride());
+		}
 	};
+
+public:
+	typedef indexing_iterator<iter_state> iterator;
 
 	iterator begin()
 	{
-		return {m_ptr, m_alignment};
+		return {0, iter_state{m_ptr, m_alignment}};
 	}
 
 	iterator end()
 	{
-		return {m_ptr + m_size * get_stride(), m_alignment};
+		return {m_size, iter_state{m_ptr, m_alignment}};
 	}
 
 private:
