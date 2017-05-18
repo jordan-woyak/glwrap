@@ -48,6 +48,19 @@ template <texture_type T, typename D>
 struct is_valid_uniform_type<shader::basic_image<T, D>> : std::true_type
 {};
 
+template <typename T, typename Enable = void>
+struct uniform_location_count
+{
+	static const uint_t value = 1;
+};
+
+template <typename T>
+struct uniform_location_count<T, typename std::enable_if<std::is_array<T>::value>::type>
+{
+	static const uint_t value =
+		uniform_location_count<typename std::remove_extent<T>::type>::value * std::extent<T>::value;
+};
+
 //
 // gl_uniform_v / gl_program_uniform_v
 //
@@ -153,9 +166,12 @@ private:
 };
 */
 
+// TODO: rename this:
 template <typename T, typename Enable = void>
 struct uniform_value
 {
+	// TODO: enable_if for: float,int,uint, vec,ivec,uvec, and float matrices
+	
 	typedef T type;
 	typedef T gl_type;
 
@@ -165,12 +181,37 @@ struct uniform_value
 	}
 };
 
+template <>
+struct uniform_value<bool_t>
+{
+	// TODO: handle bvec too
+	
+	typedef bool_t type;
+
+	// TODO: gl_type can be any of int,uint,float
+	typedef bool_t gl_type;	
+
+	template <typename T>
+	static
+	typename std::enable_if<std::is_same<T, int_t>::value>::type
+	convert_to_gl_type(const T& _val)
+	{
+		return _val;
+	}
+};
+
 // TODO: basic_image
 template <texture_type T, typename D>
 struct uniform_value<shader::basic_sampler<T, D>>
 {
+	// "glUniform1i and glUniform1iv are the only two functions
+	// that may be used to load uniform variables defined as sampler types."
+	
 	typedef texture_unit<shader::basic_sampler<T, D>> type;
 	typedef int_t gl_type;
+
+	static_assert(sizeof(type) == sizeof(gl_type),
+		"sanity check. setting arrays will require this.");
 
 	static gl_type convert_to_gl_type(const type& _val)
 	{
@@ -184,20 +225,23 @@ struct uniform_value<T, typename std::enable_if<std::extent<T>::value>::type>
 	typedef std::array<typename std::remove_extent<T>::type, std::extent<T>::value> type;
 };
 
-template <typename T>
-void set_program_uniform(uint_t _program, int_t _loc, typename uniform_value<T>::gl_type const& _value)
+// TODO: allow setting an entire array or a range of elements in an array
+// with what syntax for the range?
+
+template <typename T, typename V>
+void set_program_uniform(uint_t _program, int_t _loc, V const& _value)
 {
 	// TODO: is the proper check?
 	if (GL_ARB_separate_shader_objects)
 	{
-		gl_program_uniform(_program, _loc, _value);
+		gl_program_uniform(_program, _loc, detail::uniform_value<T>::convert_to_gl_type(_value));
 	}
 	else
 	{
 		// TODO: ugly
 		scoped_value<parameter::program> binding(_program);
 		
-		gl_uniform(_loc, _value);
+		gl_uniform(_loc, detail::uniform_value<T>::convert_to_gl_type(_value));
 	}
 }
 

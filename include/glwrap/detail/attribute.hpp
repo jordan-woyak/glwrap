@@ -9,7 +9,9 @@ namespace gl
 namespace detail
 {
 
-// TODO: arrays:
+// TODO: support arrays and matrices.
+// matrix is just an array of vec<cols>[rows]
+// they can be handled in the same manner
 
 template <typename T, typename Enable = void>
 struct is_valid_attrib_type : std::false_type
@@ -93,6 +95,8 @@ struct attrib_traits;
 template <typename T>
 struct attrib_traits<T, typename std::enable_if<std::is_scalar<T>::value>::type>
 {
+	// size is the "size" parameter given to glAttribFormat
+	// TODO: rename it to element_count or something
 	static const enum_t size = 1;
 	static const enum_t type = detail::data_type_enum<T>();
 	static const bool is_integral = std::is_integral<T>::value;
@@ -133,6 +137,7 @@ template <typename ShaderT, typename InputT, bool Normalize>
 typename std::enable_if<std::is_array<ShaderT>::value>::type
 inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 {
+	// The array element types:
 	typedef typename std::remove_extent<ShaderT>::type shader_type;
 	typedef typename std::remove_extent<InputT>::type input_type;
 	
@@ -165,6 +170,7 @@ template <typename ShaderT, typename InputT, bool Normalize>
 typename std::enable_if<std::is_array<ShaderT>::value>::type
 inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 {
+	// The array element types:
 	typedef typename std::remove_extent<ShaderT>::type shader_type;
 	typedef typename std::remove_extent<InputT>::type input_type;
 	

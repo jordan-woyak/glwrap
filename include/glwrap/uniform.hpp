@@ -58,8 +58,7 @@ public:
 			
 		uniform_location<T> ind(m_current_index);
 
-		// TODO: every uniform takes up just one location, right?
-		m_current_index += 1;
+		m_current_index += detail::uniform_location_count<T>::value;
 
 		return ind;
 	}

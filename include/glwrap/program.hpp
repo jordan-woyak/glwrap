@@ -97,12 +97,22 @@ public:
 		return uniform_block<T>(std::prev(m_uniform_blocks.end()));
 	}
 */
-	// TODO: array support
+
+	// This overload takes a value of the proper type.
+	// It allows for nice syntax: set_uniform(loc, {0, 0, 0});
 	template <typename T>
 	void set_uniform(uniform_location<T>& _uniform, typename detail::uniform_value<T>::type const& _value)
 	{
-		detail::set_program_uniform<T>(native_handle(), _uniform.get_index(),
-			detail::uniform_value<T>::convert_to_gl_type(_value));
+		detail::set_program_uniform<T>(native_handle(), _uniform.get_index(), _value);
+	}
+
+	// This overload takes a value of any other type, sanity checks are done in the details
+	// It allows for bool and bvec to be set from float/int/uvec and vec/ivec/uvec directly.
+	template <typename T, typename V>
+	typename std::enable_if<!std::is_same<V, typename detail::uniform_value<T>::type>::value>::type
+	set_uniform(uniform_location<T>& _uniform, V const& _value)
+	{
+		detail::set_program_uniform<T>(native_handle(), _uniform.get_index(), _value);
 	}
 
 /*
