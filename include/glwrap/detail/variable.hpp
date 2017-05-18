@@ -60,50 +60,49 @@ typedef basic_sampler_2d_array<uint_t> usampler_2d_array;
 typedef basic_sampler_cube_map<uint_t> usampler_cube;
 typedef basic_sampler_2d_multisample<uint_t> usampler_2d_multisample;
 
-template <typename T>
-struct basic_image_2d {};
+template <texture_type T, typename D>
+struct basic_image {};
 
 template <typename T>
-struct basic_image_3d {};
-
-// TODO: allow for image_2d[] syntax
-template <typename T>
-struct basic_image_2d_array {};
+using basic_image_2d = basic_image<texture_type::texture_2d, T>;
 
 template <typename T>
-struct basic_image_cube {};
+using basic_image_3d = basic_image<texture_type::texture_3d, T>;
+
+// TODO: allow for image_2d[] syntax?
+template <typename T>
+using basic_image_2d_array = basic_image<texture_type::texture_2d_array, T>;
 
 template <typename T>
-struct basic_image_2d_ms {};
+using basic_image_cube_map = basic_image<texture_type::texture_cube_map, T>;
+
+template <typename T>
+using basic_image_2d_multisample = basic_image<texture_type::texture_2d_multisample, T>;
 
 // float images
 typedef basic_image_2d<float_t> image_2d;
 typedef basic_image_3d<float_t> image_3d;
 typedef basic_image_2d_array<float_t> image_2d_array;
-typedef basic_image_cube<float_t> image_cube;
-typedef basic_image_2d_ms<float_t> image_2d_ms;
+typedef basic_image_cube_map<float_t> image_cube_map;
+typedef basic_image_2d_multisample<float_t> image_2d_multisample;
 
 // int images
 typedef basic_image_2d<int_t> iimage_2d;
 typedef basic_image_3d<int_t> iimage_3d;
 typedef basic_image_2d_array<int_t> iimage_2d_array;
-typedef basic_image_cube<int_t> iimage_cube;
-typedef basic_image_2d_ms<int_t> iimage_2d_ms;
+typedef basic_image_cube_map<int_t> iimage_cube_map;
+typedef basic_image_2d_multisample<int_t> iimage_2d_multisample;
 
 // uint images
 typedef basic_image_2d<uint_t> uimage_2d;
 typedef basic_image_3d<uint_t> uimage_3d;
 typedef basic_image_2d_array<uint_t> uimage_2d_array;
-typedef basic_image_cube<uint_t> uimage_cube;
-typedef basic_image_2d_ms<uint_t> uimage_2d_ms;
+typedef basic_image_cube_map<uint_t> uimage_cube_map;
+typedef basic_image_2d_multisample<uint_t> uimage_2d_multisample;
 
 }
 
 namespace detail
-{
-
-// TODO: kill this namespace?
-namespace glslvar
 {
 
 typedef std::string type_name_t;
@@ -226,12 +225,12 @@ inline std::string vec_prefix<double_t>()
 }
 
 template <typename T>
-struct glsl_var_type<T, typename std::enable_if<detail::is_vec<T>::value>::type>
+struct glsl_var_type<T, typename std::enable_if<is_vec<T>::value>::type>
 {
 	static type_name_t name()
 	{
-		typedef typename detail::vec_traits<T>::value_type value_type;
-		int const dimensions = detail::vec_traits<T>::dimensions;
+		typedef typename vec_traits<T>::value_type value_type;
+		int const dimensions = vec_traits<T>::dimensions;
 #if 0
 		return (boost::format("%svec%d") % vec_prefix<value_type>() % dimensions).str();
 #else
@@ -243,18 +242,14 @@ struct glsl_var_type<T, typename std::enable_if<detail::is_vec<T>::value>::type>
 };
 
 template <typename T>
-struct glsl_var_type<T, typename std::enable_if<detail::is_mat<T>::value>::type>
+struct glsl_var_type<T, typename std::enable_if<is_mat<T>::value>::type>
 {
 	static type_name_t name()
 	{
-		typedef typename detail::mat_traits<T>::value_type value_type;
+		typedef typename mat_traits<T>::value_type value_type;
 		
-		int const cols = detail::mat_traits<T>::cols;
-		int const rows = detail::mat_traits<T>::rows;
-
-		static_assert(std::is_same<value_type, float_t>::value ||
-			std::is_same<value_type, double_t>::value,
-			"only float and double matrices supported");
+		int const cols = mat_traits<T>::cols;
+		int const rows = mat_traits<T>::rows;
 		
 #if 0
 		return (boost::format("%smat%dx%d") % vec_prefix<value_type>() % cols % rows).str();
@@ -313,69 +308,24 @@ struct glsl_var_type<shader::basic_sampler_2d_multisample<T>>
 	}
 };
 
-// TODO: rename
-template <typename T, typename Enable = void>
-struct index_count;
-
-template <typename T>
-struct index_count<T, typename std::enable_if<
-	std::is_same<T, int_t>::value ||
-	std::is_same<T, uint_t>::value ||
-	std::is_same<T, float_t>::value ||
-	std::is_same<T, double_t>::value
-	, void>::type>
-{
-	static const std::size_t value = 1;
-};
-
-template <typename T>
-struct index_count<T, typename std::enable_if<detail::is_vec<T>::value>::type>
-{
-private:
-	typedef typename detail::vec_traits<T>::value_type value_type;
-
-public:
-	static const std::size_t value = index_count<value_type>::value;
-};
-
-template <typename T>
-struct index_count<T, typename std::enable_if<detail::is_mat<T>::value>::type>
-{
-private:
-	typedef typename detail::mat_traits<T>::value_type value_type;
-	
-public:
-	static const std::size_t value = index_count<value_type>::value * detail::mat_traits<T>::cols;
-};
-
-template <typename T>
-struct index_count<T, typename std::enable_if<std::is_array<T>::value>::type>
-{
-private:
-	typedef typename std::remove_extent<T>::type value_type;
-	
-public:
-	static const std::size_t value = index_count<value_type>::value * std::extent<T>::value;
-};
-
 // TODO: complete and use these
 template <typename T, typename Enable = void>
-struct is_valid_glsl_vec_size : std::false_type
+struct is_valid_vec_size : std::false_type
 {};
 
 template <typename T>
-struct is_valid_glsl_vec_size<T, typename std::enable_if<
+struct is_valid_vec_size<T, typename std::enable_if<
 	(vec_traits<T>::dimensions >= 2) &&
 	(vec_traits<T>::dimensions <= 4)
 	>::type> : std::true_type
 {};
 
 template <typename T, typename Enable = void>
-struct is_valid_glsl_mat_size : std::false_type
+struct is_valid_mat_size : std::false_type
 {};
 
 template <typename T>
-struct is_valid_glsl_mat_size<T, typename std::enable_if<
+struct is_valid_mat_size<T, typename std::enable_if<
 	(mat_traits<T>::rows >= 2) &&
 	(mat_traits<T>::rows <= 4) &&
 	(mat_traits<T>::cols >= 2) &&
@@ -384,11 +334,11 @@ struct is_valid_glsl_mat_size<T, typename std::enable_if<
 {};
 
 template <typename T, typename Enable = void>
-struct is_valid_glsl_vec_value_type : std::false_type
+struct is_valid_vec_value_type : std::false_type
 {};
 
 template <typename T>
-struct is_valid_glsl_vec_value_type<T, typename std::enable_if<
+struct is_valid_vec_value_type<T, typename std::enable_if<
 	std::is_same<typename vec_traits<T>::value_type, bool_t>::value ||
 	std::is_same<typename vec_traits<T>::value_type, int_t>::value ||
 	std::is_same<typename vec_traits<T>::value_type, uint_t>::value ||
@@ -398,22 +348,24 @@ struct is_valid_glsl_vec_value_type<T, typename std::enable_if<
 {};
 
 template <typename T, typename Enable = void>
-struct is_valid_glsl_mat_value_type : std::false_type
+struct is_valid_mat_value_type : std::false_type
 {};
 
 template <typename T>
-struct is_valid_glsl_mat_value_type<T, typename std::enable_if<
+struct is_valid_mat_value_type<T, typename std::enable_if<
 	std::is_same<typename mat_traits<T>::value_type, float_t>::value ||
 	std::is_same<typename mat_traits<T>::value_type, double_t>::value
 	>::type> : std::true_type
 {};
 
+// TODO: put this in the shader namespace?
+
 template <typename T, typename Enable = void>
-struct is_valid_glsl_type : std::false_type
+struct is_valid_shader_variable_type : std::false_type
 {};
 
 template <typename T>
-struct is_valid_glsl_type<T, typename std::enable_if<
+struct is_valid_shader_variable_type<T, typename std::enable_if<
 	std::is_same<T, bool_t>::value ||
 	std::is_same<T, int_t>::value ||
 	std::is_same<T, uint_t>::value ||
@@ -423,27 +375,27 @@ struct is_valid_glsl_type<T, typename std::enable_if<
 {};
 
 template <typename T>
-struct is_valid_glsl_type<T, typename std::enable_if<
+struct is_valid_shader_variable_type<T, typename std::enable_if<
 	is_vec<T>::value &&
-	is_valid_glsl_vec_size<T>::value &&
-	is_valid_glsl_vec_value_type<T>::value
+	is_valid_vec_size<T>::value &&
+	is_valid_vec_value_type<T>::value
 	>::type> : std::true_type
 {};
 
 template <typename T>
-struct is_valid_glsl_type<T, typename std::enable_if<
+struct is_valid_shader_variable_type<T, typename std::enable_if<
 	is_mat<T>::value &&
-	is_valid_glsl_mat_size<T>::value &&
-	is_valid_glsl_mat_value_type<T>::value
+	is_valid_mat_size<T>::value &&
+	is_valid_mat_value_type<T>::value
 	>::type> : std::true_type
 {};
 
 template <typename T>
-struct is_valid_glsl_type<T, typename std::enable_if<
+struct is_valid_shader_variable_type<T, typename std::enable_if<
 	std::is_array<T>::value
-	>::type> : is_valid_glsl_type<typename std::remove_extent<T>::type>
+	>::type> : is_valid_shader_variable_type<typename std::remove_extent<T>::type>
 {};
 
 }
-}
+
 }

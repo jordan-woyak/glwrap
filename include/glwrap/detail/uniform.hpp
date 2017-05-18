@@ -1,10 +1,52 @@
 #pragma once
 
+#include "variable.hpp"
+
 namespace gl
 {
 
 namespace detail
 {
+
+// TODO: arrays:
+
+template <typename T, typename Enable = void>
+struct is_valid_uniform_type : std::false_type
+{};
+
+template <typename T>
+struct is_valid_uniform_type<T, typename std::enable_if<
+	std::is_same<T, bool_t>::value ||
+	std::is_same<T, int_t>::value ||
+	std::is_same<T, uint_t>::value ||
+	std::is_same<T, float_t>::value ||
+	std::is_same<T, double_t>::value
+	>::type> : std::true_type
+{};
+
+template <typename T>
+struct is_valid_uniform_type<T, typename std::enable_if<
+	is_vec<T>::value &&
+	is_valid_vec_size<T>::value &&
+	is_valid_vec_value_type<T>::value
+	>::type> : std::true_type
+{};
+
+template <typename T>
+struct is_valid_uniform_type<T, typename std::enable_if<
+	is_mat<T>::value &&
+	is_valid_mat_size<T>::value &&
+	is_valid_mat_value_type<T>::value
+	>::type> : std::true_type
+{};
+
+template <texture_type T, typename D>
+struct is_valid_uniform_type<shader::basic_sampler<T, D>> : std::true_type
+{};
+
+template <texture_type T, typename D>
+struct is_valid_uniform_type<shader::basic_image<T, D>> : std::true_type
+{};
 
 //
 // gl_uniform_v / gl_program_uniform_v
@@ -89,6 +131,28 @@ void gl_program_uniform(uint_t _program, int_t _loc, const T& _value)
 
 // TODO: bool and bvec
 
+// To be used as a short-lived object to set a bunch of uniforms of a single program
+// Uses glProgramUniform if available or falls back to glUniform
+/*
+class program_uniform_setter
+{
+	program_uniform_setter(uint_t _program)
+		: m_program(_program)
+	{
+		
+	}
+
+	template <typename T>
+	void set(int_t _loc, T _value)
+	{
+		
+	}
+
+private:
+	const uint_t m_program;
+};
+*/
+
 template <typename T, typename Enable = void>
 struct uniform_value
 {
@@ -101,7 +165,7 @@ struct uniform_value
 	}
 };
 
-// TODO: support more than 2d..
+// TODO: basic_image
 template <texture_type T, typename D>
 struct uniform_value<shader::basic_sampler<T, D>>
 {

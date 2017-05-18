@@ -1,6 +1,7 @@
 #pragma once
 
 #include "variable.hpp"
+#include "detail/attribute.hpp"
 
 #include <list>
 
@@ -16,6 +17,8 @@ class attribute_location
 {
 	friend class attribute_location_enumerator;
 
+	static_assert(detail::is_valid_attrib_type<T>::value, "Invalid Attrib Type");
+
 public:
 	int_t get_index() const
 	{
@@ -25,7 +28,7 @@ public:
 	// TODO: this is kinda messy and easy to forget about
 	int_t get_end_index() const
 	{
-		return m_index + detail::glslvar::index_count<T>::value;
+		return m_index + detail::attrib_index_count<T>::value;
 	}
 
 private:
@@ -55,7 +58,7 @@ public:
 	location_type<T> get()
 	{
 		location_type<T> ind(m_current_index);
-		m_current_index += detail::glslvar::index_count<T>::value;
+		m_current_index += detail::attrib_index_count<T>::value;
 
 		if (m_current_index > m_max_vertex_attribs)
 			throw exception(0);

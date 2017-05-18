@@ -25,8 +25,6 @@ struct shader_io_type;
 template <typename T>
 struct shader_io_type<shader_type::vertex, T>
 {
-	static_assert(glslvar::is_valid_glsl_type<T>::value, "Invalid Vertex Input/Output type.");
-
 	typedef attribute_location<T> input_location;
 };
 
@@ -34,7 +32,7 @@ template <typename T>
 struct shader_io_type<shader_type::fragment, T>
 {
 	// TODO: this should be more restrictive
-	static_assert(glslvar::is_valid_glsl_type<T>::value, "Invalid Fragment Output type.");
+	static_assert(is_valid_shader_variable_type<T>::value, "Invalid Fragment Output type.");
 
 	typedef fragdata_location<T> output_location;
 };
@@ -66,8 +64,6 @@ public:
 	typename detail::shader_io_type<T, P>::input_location
 	create_input(const variable_description<P, L>& _desc)
 	{
-		// TODO: check for valid type
-		
 		m_header_lines.emplace_back(get_glsl_definition<P>("in", _desc));
 
 		return _desc.get_location();
@@ -77,8 +73,6 @@ public:
 	typename detail::shader_io_type<T, P>::output_location
 	create_output(const variable_description<P, L>& _desc)
 	{
-		// TODO: check for valid type
-		
 		m_header_lines.emplace_back(get_glsl_definition<P>("out", _desc));
 
 		return _desc.get_location();
@@ -88,12 +82,6 @@ public:
 	template <typename P, typename L>
 	uniform_location<P> create_uniform(const variable_description<P, L>& _desc)
 	{
-		// TODO: ugly
-		static_assert(
-			detail::glslvar::is_valid_glsl_type<P>::value
-			|| std::is_same<P, shader::sampler_2d>::value
-			, "Invalid Uniform type.");
-		
 		m_header_lines.emplace_back(get_glsl_definition<P>("uniform", _desc));
 
 		return _desc.get_location();
@@ -162,9 +150,9 @@ private:
 		return
 			"layout(location = " + std::to_string(_desc.get_location().get_index()) + ") "
 			+ _prefix + " "
-			+ detail::glslvar::get_type_name<P>()
+			+ detail::get_type_name<P>()
 			+ " " + _desc.get_name()
-			+ detail::glslvar::glsl_var_suffix<P>::suffix()
+			+ detail::glsl_var_suffix<P>::suffix()
 			+ ";\n";
 	}
 
