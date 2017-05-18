@@ -327,4 +327,58 @@ auto clamp(T&& _val, Min&& _min, Max&& _max) -> typename std::remove_reference<T
 	return _val < _min ? _min : (_val < _max ? _val : _max);
 }
 
+// TODO: something better than int for offsets
+template <typename Index, typename State>
+class indexing_iterator
+{
+public:
+	typedef typename State::value_type value_type;
+	
+	indexing_iterator(Index _index, const State& _state)
+		: m_index(_index)
+		, m_state(_state)
+	{}
+
+	indexing_iterator& operator++()
+	{
+		return *this += 1;
+	}
+
+	indexing_iterator& operator+=(int _val)
+	{
+		m_index += _val;
+		return *this;
+	}
+
+	value_type& operator*() const
+	{
+		return m_state.deref(m_index);
+	}
+
+	value_type* operator->() const
+	{
+		return &**this;
+	}
+
+	bool operator==(indexing_iterator const& _rhs) const
+	{
+		return m_index == _rhs.m_index;
+	}
+
+	bool operator!=(indexing_iterator const& _rhs) const
+	{
+		return !(*this == _rhs);
+	}
+
+	// TODO: member or free func?
+	friend indexing_iterator operator+(const indexing_iterator& _lhs, int _offset)
+	{
+		return _lhs += _offset;
+	}
+
+private:
+	Index m_index;
+	State m_state;
+};
+
 }
