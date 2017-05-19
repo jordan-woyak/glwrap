@@ -101,24 +101,31 @@ int main()
 
 	auto light_dir_uni = vshad.create_uniform(gl::variable<gl::vec3>("light_dir", uniforms));
 	auto ambient_uni = vshad.create_uniform(gl::variable<gl::vec4>("ambient", uniforms));
+
+	// TESTING
+	auto test_uni = vshad.create_uniform(gl::variable<gl::float_t[4]>("test_var", uniforms));
+	auto test2_uni = vshad.create_uniform(gl::variable<gl::shader::sampler_2d[2]>("test2_var", uniforms));
+	auto test3_uni = vshad.create_uniform(gl::variable<gl::bool_t>("test3_var", uniforms));
+	auto test4_uni = vshad.create_uniform(gl::variable<gl::bool_t[2]>("test4_var", uniforms));
+	auto test5_uni = vshad.create_uniform(gl::variable<gl::float_t[2][2]>("test5_var", uniforms));
 	
 	vshad.set_source(
-		"out vec2 tpos;"
-		"out vec3 vertex_normal, norm_light_dir, Ia, E;"
+		R"(out vec2 tpos;
+		out vec3 vertex_normal, norm_light_dir, Ia, E;
 
-		"void main(void)"
-		"{"
-			"tpos = texpos;"
+		void main(void)
+		{
+			tpos = texpos;
 
-			"norm_light_dir = normalize(light_dir);"
-			"vertex_normal = mat3(model) * norm;"
+			norm_light_dir = normalize(light_dir);
+			vertex_normal = mat3(model) * norm;
 
-			"Ia = ambient.rgb * ambient.a;"
+			Ia = ambient.rgb * ambient.a;
 
-			"E = normalize(mat3(projection) * vec3(0, 0, -1));"
+			E = normalize(mat3(projection) * vec3(0, 0, -1));
 
-			"gl_Position = projection * model * vec4(pos, 1);"
-		"}"
+			gl_Position = projection * model * vec4(pos, 1);
+		})"
 	);
 
 	gl::fragment_shader_builder fshad(glc);
@@ -135,30 +142,30 @@ int main()
 	auto shininess_uni = fshad.create_uniform(gl::variable<gl::float_t>("shininess", uniforms));
 	
 	fshad.set_source(
-		"in vec2 tpos;"
-		"in vec3 vertex_normal, norm_light_dir, Ia, E;"
+		R"(in vec2 tpos;
+		in vec3 vertex_normal, norm_light_dir, Ia, E;
 
-		"void main(void)"
-		"{"
-			"vec3 adjusted_normal = normalize(vertex_normal);"
-			//"vec3 adjusted_normal = normalize(vertex_normal + (texture2D(tex_normal, tpos).rgb * 2 - 1));"
+		void main(void)
+		{
+			vec3 adjusted_normal = normalize(vertex_normal);
+			//vec3 adjusted_normal = normalize(vertex_normal + (texture2D(tex_normal, tpos).rgb * 2 - 1));
 
-			"vec4 mat_color = texture2D(tex_color, tpos);"
+			vec4 mat_color = texture2D(tex_color, tpos);
 			
-			"float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);"
-			"vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;"
+			float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);
+			vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;
 
-			"float mat_spec = texture2D(tex_spec, tpos).r;"
+			float mat_spec = texture2D(tex_spec, tpos).r;
 
-			"vec3 R = reflect(-norm_light_dir, adjusted_normal);"
-			"vec3 Is = spec_color.rgb * spec_color.a * mat_spec * pow(max(dot(R, E), 0.0), shininess);"
+			vec3 R = reflect(-norm_light_dir, adjusted_normal);
+			vec3 Is = spec_color.rgb * spec_color.a * mat_spec * pow(max(dot(R, E), 0.0), shininess);
 
-			"vec3 base = mat_color.rgb;"
+			vec3 base = mat_color.rgb;
 
-			"vec4 final_color = vec4((Ia + Id) * base + Is, mat_color.a);"
+			vec4 final_color = vec4((Ia + Id) * base + Is, mat_color.a);
 
-			"fragdata = final_color;"
-		"}"
+			fragdata = final_color;
+		})"
 	);
 
 	auto vert_shader = vshad.create_shader(glc);
@@ -217,6 +224,12 @@ int main()
 	prog.set_uniform(tex_color_uni, tex_color_unit);
 	prog.set_uniform(tex_spec_uni, tex_spec_unit);
 	prog.set_uniform(tex_normal_uni, tex_normal_unit);
+
+	prog.set_uniform(test_uni, {1.5f, 2.f});
+	prog.set_uniform(test2_uni, {tex_color_unit, tex_spec_unit});
+	prog.set_uniform(test3_uni, true);
+	prog.set_uniform(test4_uni, {false, true});
+	//prog.set_uniform(test5_uni, {});
 
 	glc.bind_texture(tex_color_unit, tex_color);
 	glc.bind_texture(tex_spec_unit, tex_spec);

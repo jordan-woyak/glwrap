@@ -129,74 +129,110 @@ GLWRAP_UNIFORM_MAT_V_DEF(4f, mat4)
 
 #undef GLWRAP_UNIFORM_MAT_V_DEF
 
-// TODO: implement not in terms of gl_uniform_v ?
-template <typename T>
-void gl_uniform(int_t _loc, const T& _value)
-{
-	gl_uniform_v(_loc, 1, &_value);
-}
-
-template <typename T>
-void gl_program_uniform(uint_t _program, int_t _loc, const T& _value)
-{
-	gl_program_uniform_v(_program, _loc, 1, &_value);
-}
-
-// TODO: bool and bvec
-
 // To be used as a short-lived object to set a bunch of uniforms of a single program
-// Uses glProgramUniform if available or falls back to glUniform
-/*
-class program_uniform_setter
+class bindless_uniform_setter
 {
-	program_uniform_setter(uint_t _program)
+public:
+	bindless_uniform_setter(uint_t _program)
 		: m_program(_program)
-	{
-		
-	}
+	{}
 
 	template <typename T>
-	void set(int_t _loc, T _value)
+	void set(int_t _loc, sizei_t _count, const T* _value) const
 	{
-		
+		gl_program_uniform_v(m_program, _loc, _count, _value);
 	}
 
 private:
 	const uint_t m_program;
 };
-*/
 
-// TODO: rename this:
-template <typename T, typename Enable = void>
-struct uniform_value
+// To be used as a short-lived object to set a bunch of uniforms of a single program
+class binding_uniform_setter
 {
-	// TODO: enable_if for: float,int,uint, vec,ivec,uvec, and float matrices
-	
-	typedef T type;
-	typedef T gl_type;
+public:
+	binding_uniform_setter(uint_t _program)
+		: m_binding(_program)
+	{}
 
-	static gl_type convert_to_gl_type(const type& _val)
+	template <typename T>
+	void set(int_t _loc, sizei_t _count, const T* _value) const
 	{
-		return _val;
+		gl_uniform_v(_loc, _count, _value);
+	}
+
+private:
+	const scoped_value<parameter::program> m_binding;
+};
+
+// TODO: rename this and use it to do all the conversion:
+
+template <typename T, typename S, typename I>
+void set_uniforms_from_iterator(S&& setter, int_t _loc, sizei_t _count, I _iter)
+{
+	while (_count)
+	{
+		const T converted_value(*_iter);
+
+		setter.set(_loc, 1, &converted_value);
+
+		++_loc;
+		++_iter;
+		--_count;
+	}
+}
+
+template <typename T, typename Enable = void>
+struct uniform_value;
+
+// int,uint,float types can be uploaded directly
+template <typename T>
+struct uniform_value<T, typename std::enable_if<
+	(std::is_same<int_t, typename underlying_type<T>::type>::value
+	|| std::is_same<uint_t, typename underlying_type<T>::type>::value
+	|| std::is_same<float_t, typename underlying_type<T>::type>::value)
+	&& (is_mat<T>::value || is_vec<T>::value || std::is_scalar<T>::value)
+	>::type>
+{
+	typedef T type;
+
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, const type& _val)
+	{
+		setter.set(_loc, 1, &_val);
+	}
+
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
+	{
+		setter.set(_loc, _count, _val);
 	}
 };
 
-template <>
-struct uniform_value<bool_t>
+// bool,bvec must be converted to int,uint,float types
+template <typename T>
+struct uniform_value<T, typename std::enable_if<
+	std::is_same<bool_t, typename underlying_type<T>::type>::value
+	&& (is_vec<T>::value || std::is_scalar<T>::value)>::type>
 {
-	// TODO: handle bvec too
+	// "Either the i, ui or f variants may be used to provide values
+	// for uniform variables of type bool, bvec2, bvec3, bvec4, or arrays of these."
 	
-	typedef bool_t type;
+	typedef T type;
 
-	// TODO: gl_type can be any of int,uint,float
-	typedef bool_t gl_type;	
+	// TODO: int and float types can also be uploaded for bool
+	// currently everything is converted to uint and arrays are uploaded one at a time..
 
-	template <typename T>
-	static
-	typename std::enable_if<std::is_same<T, int_t>::value>::type
-	convert_to_gl_type(const T& _val)
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, const type& _val)
 	{
-		return _val;
+		convert_and_set(setter, _loc, 1, &_val);
+	}
+
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
+	{
+		set_uniforms_from_iterator<uint_t>(setter, _loc, _count, _val);
 	}
 };
 
@@ -208,21 +244,48 @@ struct uniform_value<shader::basic_sampler<T, D>>
 	// that may be used to load uniform variables defined as sampler types."
 	
 	typedef texture_unit<shader::basic_sampler<T, D>> type;
-	typedef int_t gl_type;
 
-	static_assert(sizeof(type) == sizeof(gl_type),
-		"sanity check. setting arrays will require this.");
-
-	static gl_type convert_to_gl_type(const type& _val)
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, const type& _val)
 	{
-		return _val.get_index();
+		convert_and_set(setter, _loc, 1, &_val);
+	}
+
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
+	{
+		static_assert(sizeof(type) == sizeof(int_t),
+			"sanity check. texture_unit should be binary compatible with int_t.");
+		
+		setter.set(_loc, _count, reinterpret_cast<const int_t*>(_val));
 	}
 };
 
+// Arrays can be uploaded directly if typing is correct
 template <typename T>
-struct uniform_value<T, typename std::enable_if<std::extent<T>::value>::type>
+struct uniform_value<T, typename std::enable_if<std::is_array<T>::value>::type>
 {
-	typedef std::array<typename std::remove_extent<T>::type, std::extent<T>::value> type;
+	typedef typename std::remove_extent<T>::type variable_value_type;
+	typedef typename uniform_value<variable_value_type>::type value_type;
+	
+	typedef std::array<value_type, std::extent<T>::value> type;
+	static const int array_length = std::extent<T>::value;
+
+	//static_assert(is_contiguous<V>::value, "Uniform array must be set by contiguous range.");
+	
+	template <typename S, typename V>
+	static typename std::enable_if<is_contiguous<V>::value>::type
+	convert_and_set(S&& setter, int_t _loc, const V& _val)
+	{
+		uniform_value<variable_value_type>::convert_and_set(setter, _loc, array_length, &*std::begin(_val));
+	}
+
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const value_type* _val)
+	{
+		uniform_value<variable_value_type>::
+			convert_and_set(setter, _loc, _count * array_length, _val);
+	}
 };
 
 // TODO: allow setting an entire array or a range of elements in an array
@@ -230,18 +293,15 @@ struct uniform_value<T, typename std::enable_if<std::extent<T>::value>::type>
 
 template <typename T, typename V>
 void set_program_uniform(uint_t _program, int_t _loc, V const& _value)
-{
+{	
 	// TODO: is the proper check?
 	if (GL_ARB_separate_shader_objects)
 	{
-		gl_program_uniform(_program, _loc, detail::uniform_value<T>::convert_to_gl_type(_value));
+		detail::uniform_value<T>::convert_and_set(bindless_uniform_setter(_program), _loc, _value);
 	}
 	else
 	{
-		// TODO: ugly
-		scoped_value<parameter::program> binding(_program);
-		
-		gl_uniform(_loc, detail::uniform_value<T>::convert_to_gl_type(_value));
+		detail::uniform_value<T>::convert_and_set(binding_uniform_setter(_program), _loc, _value);
 	}
 }
 

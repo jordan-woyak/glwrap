@@ -396,6 +396,44 @@ struct is_valid_shader_variable_type<T, typename std::enable_if<
 	>::type> : is_valid_shader_variable_type<typename std::remove_extent<T>::type>
 {};
 
+// Breaks down a T vec,mat,array or T itself down to T
+template <typename T, typename Enable = void>
+struct underlying_type
+{
+	typedef T type;
+
+	template <typename M>
+	using modify = M;
+};
+
+template <typename T>
+struct underlying_type<T, typename std::enable_if<is_vec<T>::value>::type>
+{
+	typedef typename vec_traits<T>::value_type type;
+
+	template <typename M>
+	using modify = basic_vec<M, vec_traits<T>::dimensions>;
+};
+
+template <typename T>
+struct underlying_type<T, typename std::enable_if<is_mat<T>::value>::type>
+{
+	typedef typename mat_traits<T>::value_type type;
+
+	template <typename M>
+	using modify = basic_mat<M, mat_traits<T>::cols, mat_traits<T>::rows>;
+};
+
+template <typename T>
+struct underlying_type<T, typename std::enable_if<std::is_array<T>::value>::type>
+{
+	typedef typename underlying_type<typename std::remove_extent<T>::type>::type type;
+
+	// TODO: implement if needed:
+	//template <typename M>
+	//using modify = ;
+};
+
 }
 
 }
