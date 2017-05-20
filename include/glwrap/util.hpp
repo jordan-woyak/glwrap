@@ -407,4 +407,38 @@ private:
 	State m_state;
 };
 
+// This is used for atomic counter, transform feedback, and vertex array
+template <template<typename> typename B, typename T>
+class binding_attribute
+{
+public:
+	binding_attribute(int_t _index, uint_t _offset = {})
+		: m_index(_index)
+		, m_offset(_offset)
+	{}
+
+	int_t get_index() const
+	{
+		return m_index;
+	}
+
+	uint_t get_offset() const
+	{
+		return m_offset;
+	}
+
+private:
+	int_t m_index;
+	uint_t m_offset;
+};
+
+template <template<typename> typename B, typename T, typename M>
+binding_attribute<B, M> operator|(binding_attribute<B, T> const& _attr, M T::*_member)
+{
+	// TODO: only do this for types that need aligning:
+	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
+	
+	return binding_attribute<B, M>(_attr.get_index(), _attr.get_offset() + detail::get_member_offset(_member));
+}
+
 }

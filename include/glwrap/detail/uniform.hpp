@@ -1,6 +1,6 @@
 #pragma once
 
-#include "variable.hpp"
+#include "../texture.hpp"
 
 namespace gl
 {

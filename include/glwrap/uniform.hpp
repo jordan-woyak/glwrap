@@ -1,15 +1,9 @@
 #pragma once
 
-#include <list>
-
-#include "variable.hpp"
-#include "texture.hpp"
 #include "detail/uniform.hpp"
 
 namespace gl
 {
-
-class program;
 
 template <typename T>
 class uniform;
@@ -49,6 +43,7 @@ public:
 		: m_current_index()
 		, m_max_uniform_locations()
 	{
+		// TODO: correct parameter?
 		detail::gl_get(GL_MAX_UNIFORM_LOCATIONS, &m_max_uniform_locations);
 	}
 
@@ -68,6 +63,31 @@ public:
 private:
 	int_t m_current_index;
 	int_t m_max_uniform_locations;
+};
+
+template <typename T>
+class uniform_layout
+{
+public:
+	typedef uniform_location<T> location_type;
+
+	uniform_layout(const location_type& _loc)
+		: m_location(_loc)
+	{}
+
+	location_type get_location() const
+	{
+		return m_location;
+	}
+
+	std::string get_string() const
+	{
+		// TODO: optional if -1
+		return "location = " + std::to_string(m_location.get_index());
+	}
+
+private:
+	location_type m_location;
 };
 
 }

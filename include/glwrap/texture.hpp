@@ -63,6 +63,7 @@ public:
 		: m_current_index()
 		, m_max_comb_tunits()
 	{
+		// TODO: correct parameter?
 		detail::gl_get(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_max_comb_tunits);
 	}
 

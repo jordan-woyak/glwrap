@@ -4,6 +4,10 @@
 
 #include "detail/variable.hpp"
 
+#include "attribute.hpp"
+//#include "transform_feedback.hpp"
+#include "uniform.hpp"
+
 namespace gl
 {
 
@@ -12,11 +16,11 @@ class variable_description
 {
 public:
 	typedef T value_type;
-	typedef L location_type;
+	typedef L layout_type;
 
-	variable_description(std::string _name, const location_type& _loc)
+	variable_description(std::string _name, const layout_type& _layout)
 		: m_name(std::move(_name))
-		, m_location(_loc)
+		, m_layout(_layout)
 	{}
 
 	std::string const& get_name() const
@@ -24,21 +28,35 @@ public:
 		return m_name;
 	}
 
-	location_type const& get_location() const
+	layout_type const& get_layout() const
 	{
-		return m_location;
+		return m_layout;
 	}
 
 private:
 	std::string m_name;
-	location_type m_location;
+	layout_type m_layout;
 };
 
-template <typename T, typename L>
-auto variable(std::string _name, L& _enumerator) -> variable_description<T, typename L::template location_type<T>>
+template <typename T>
+auto variable(std::string _name, attribute_location_enumerator& _enum) -> variable_description<T, attribute_layout<T>>
 {
-	return {std::move(_name), _enumerator.template get<T>()};
+	return {std::move(_name), _enum.template get<T>()};
 }
+
+template <typename T>
+auto variable(std::string _name, uniform_location_enumerator& _enum) -> variable_description<T, uniform_layout<T>>
+{
+	return {std::move(_name), _enum.template get<T>()};
+}
+
+/*
+template <typename T>
+auto variable(std::string _name, uniform_location_enumerator& _enum) -> variable_description<T, uniform_layout<T>>
+{
+	return {std::move(_name), _enum.template get<T>()};
+}
+*/
 
 /*
 // TODO: templatify all the location types so this can assume the variable type from the location

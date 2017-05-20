@@ -6,12 +6,14 @@
 #include "traits.hpp"
 #include "../vector.hpp"
 
+#include "../attribute.hpp"
+
 // TODO: move this out of detail/ ?
 
 namespace gl
 {
 
-namespace layout
+namespace block_layout
 {
 
 template <typename T, typename Enable = void>
@@ -46,6 +48,12 @@ struct alignas(sizeof(T) / 3 * 4) std140<T,
 	T value;
 };
 
+}
+
+template <typename T>
+attribute_layout<T> layout(attribute_location_enumerator& _enum)
+{
+	return attribute_layout<T>(_enum.get<T>());
 }
 
 }

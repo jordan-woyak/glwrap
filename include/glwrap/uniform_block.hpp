@@ -4,8 +4,6 @@
 #include <list>
 #include <memory>
 
-#include "variable.hpp"
-
 #include "detail/context.hpp"
 
 namespace gl
@@ -69,6 +67,7 @@ public:
 		: m_current_index()
 		, m_max_uniform_buffer_bindings()
 	{
+		// TODO: correct parameter?
 		detail::gl_get(GL_MAX_UNIFORM_BUFFER_BINDINGS, &m_max_uniform_buffer_bindings);
 	}
 

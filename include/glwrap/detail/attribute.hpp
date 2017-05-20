@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../util.hpp"
+
 #include "variable.hpp"
 
 namespace gl
@@ -12,6 +13,9 @@ namespace detail
 // TODO: matrices.
 // matrix is just an array of vec<cols>[rows]
 // they can be handled in the same manner
+
+
+// TODO: normalize parameter
 
 template <typename T, typename Enable = void>
 struct is_valid_attrib_type : std::false_type
@@ -87,11 +91,6 @@ struct attrib_index_count<T, typename std::enable_if<std::is_array<T>::value>::t
 	static const uint_t value =
 		attrib_index_count<typename std::remove_extent<T>::type>::value * std::extent<T>::value;
 };
-
-// TODO: normalize parameter
-// TODO: doubles
-// TODO: matrices
-// TODO: arrays
 
 // TODO: move this elsewhere?
 template <typename T, typename Enable = void>

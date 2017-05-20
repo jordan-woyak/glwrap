@@ -66,7 +66,7 @@ public:
 	{
 		m_header_lines.emplace_back(get_glsl_definition<P>("in", _desc));
 
-		return _desc.get_location();
+		return _desc.get_layout().get_location();
 	}
 
 	template <typename P, typename L>
@@ -75,7 +75,7 @@ public:
 	{
 		m_header_lines.emplace_back(get_glsl_definition<P>("out", _desc));
 
-		return _desc.get_location();
+		return _desc.get_layout().get_location();
 	}
 
 	// TODO: can probably eliminate L
@@ -84,7 +84,7 @@ public:
 	{
 		m_header_lines.emplace_back(get_glsl_definition<P>("uniform", _desc));
 
-		return _desc.get_location();
+		return _desc.get_layout().get_location();
 	}
 
 /*
@@ -148,7 +148,7 @@ private:
 		// TODO: support fragdata: layout(xfb_buffer = 2, xfb_offset = 0)
 		
 		return
-			"layout(location = " + std::to_string(_desc.get_location().get_index()) + ") "
+			"layout(" + _desc.get_layout().get_string() + ") "
 			+ _prefix + " "
 			+ detail::get_type_name<P>()
 			+ " " + _desc.get_name()

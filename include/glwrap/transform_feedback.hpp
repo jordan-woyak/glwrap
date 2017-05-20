@@ -1,5 +1,10 @@
 #pragma once
 
+#include "detail/context.hpp"
+
+#include "native_handle.hpp"
+#include "buffer.hpp"
+
 namespace gl
 {
 
@@ -31,6 +36,7 @@ public:
 	transform_feedback_binding_enumerator(context& _context)
 		: m_current_index()
 	{
+		// TODO: correct parameter?
 		detail::gl_get(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS, &m_max_tf_buffers);
 	}
 
@@ -79,34 +85,9 @@ private:
 };
 
 template <typename T>
-class transform_feedback_binding_attribute
-{
-public:
-	transform_feedback_binding_attribute(transform_feedback_binding<T> const& _binding)
-		: m_index(_binding.get_index())
-		, m_offset()
-	{}	
-	
-	transform_feedback_binding_attribute(int_t _index, uint_t _offset)
-		: m_index(_index)
-		, m_offset(_offset)
-	{}
+using transform_feedback_binding_attribute = binding_attribute<transform_feedback_binding, T>;
 
-	int_t get_index() const
-	{
-		return m_index;
-	}
-
-	int_t get_offset() const
-	{
-		return m_offset;
-	}
-
-private:
-	int_t m_index;
-	uint_t m_offset;
-};
-
+// TODO: make this not needed
 template <typename T, typename M>
 transform_feedback_binding_attribute<M> operator|(transform_feedback_binding<T> const& _binding, M T::*_member)
 {
@@ -114,16 +95,6 @@ transform_feedback_binding_attribute<M> operator|(transform_feedback_binding<T> 
 	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
 	
 	return transform_feedback_binding_attribute<M>(_binding.get_index(), detail::get_member_offset(_member));
-}
-
-// TODO: make this not needed
-template <typename T, typename M>
-transform_feedback_binding_attribute<M> operator|(transform_feedback_binding_attribute<T> const& _attr, M T::*_member)
-{
-	// TODO: only do this for types that need aligning:
-	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
-	
-	return transform_feedback_binding_attribute<M>(_attr.get_index(), _attr.get_offset() + detail::get_member_offset(_member));
 }
 
 // TODO: alignment

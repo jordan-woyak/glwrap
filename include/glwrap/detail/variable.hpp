@@ -11,6 +11,9 @@
 
 #include "traits.hpp"
 
+#include "../matrix.hpp"
+#include "../vector.hpp"
+
 namespace gl
 {
 

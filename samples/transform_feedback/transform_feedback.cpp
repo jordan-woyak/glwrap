@@ -43,6 +43,7 @@ int main()
 
 	auto vert_shader = vshad.create_shader(glc);
 	std::cout << "vshad log:\n" << vert_shader.get_log() << std::endl;
+	//std::cout << "vshad src:\n" << vert_shader.get_source() << std::endl;
 
 	// create a program
 	gl::program prog(glc);

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "variable.hpp"
 #include "detail/attribute.hpp"
+#include "detail/variable.hpp"
+#include "detail/context.hpp"
 
 #include <list>
 
@@ -45,6 +46,7 @@ public:
 		: m_current_index()
 		, m_max_vertex_attribs()
 	{
+		// TODO: correct parameter?
 		detail::gl_get(GL_MAX_VERTEX_ATTRIBS, &m_max_vertex_attribs);
 	}
 
@@ -63,6 +65,31 @@ public:
 private:
 	int_t m_current_index;
 	int_t m_max_vertex_attribs;
+};
+
+template <typename T>
+class attribute_layout
+{
+public:
+	typedef attribute_location<T> location_type;
+
+	attribute_layout(const location_type& _loc)
+		: m_location(_loc)
+	{}
+
+	location_type get_location() const
+	{
+		return m_location;
+	}
+
+	std::string get_string() const
+	{
+		// TODO: optional if -1
+		return "location = " + std::to_string(m_location.get_index());
+	}
+
+private:
+	location_type m_location;
 };
 
 }
