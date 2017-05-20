@@ -87,16 +87,6 @@ private:
 template <typename T>
 using transform_feedback_binding_attribute = binding_attribute<transform_feedback_binding, T>;
 
-// TODO: make this not needed
-template <typename T, typename M>
-transform_feedback_binding_attribute<M> operator|(transform_feedback_binding<T> const& _binding, M T::*_member)
-{
-	// TODO: only do this for types that need aligning:
-	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
-	
-	return transform_feedback_binding_attribute<M>(_binding.get_index(), detail::get_member_offset(_member));
-}
-
 // TODO: alignment
 // TODO: name
 class transform_feedback_descriptor

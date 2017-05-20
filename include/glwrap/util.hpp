@@ -441,4 +441,14 @@ binding_attribute<B, M> operator|(binding_attribute<B, T> const& _attr, M T::*_m
 	return binding_attribute<B, M>(_attr.get_index(), _attr.get_offset() + detail::get_member_offset(_member));
 }
 
+// TODO: make this not needed
+template <template<typename> typename B, typename T, typename M>
+binding_attribute<B, M> operator|(B<T> const& _binding, M T::*_member)
+{
+	// TODO: only do this for types that need aligning:
+	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
+	
+	return binding_attribute<B, M>(_binding.get_index(), detail::get_member_offset(_member));
+}
+
 }

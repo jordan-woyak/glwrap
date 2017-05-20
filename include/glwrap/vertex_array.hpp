@@ -61,16 +61,6 @@ private:
 template <typename T>
 using vertex_buffer_binding_attribute = binding_attribute<vertex_buffer_binding, T>;
 
-// TODO: make this not needed
-template <typename T, typename M>
-vertex_buffer_binding_attribute<M> operator|(vertex_buffer_binding<T> const& _binding, M T::*_member)
-{
-	// TODO: only do this for types that need aligning:
-	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
-	
-	return vertex_buffer_binding_attribute<M>(_binding.get_index(), detail::get_member_offset(_member));
-}
-
 class vertex_array : public globject
 {
 public:
