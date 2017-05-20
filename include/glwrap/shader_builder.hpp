@@ -129,9 +129,9 @@ private:
 	// instead of building one big string
 	std::string generate_full_source() const
 	{
-		std::string src = "#version 330\n";
-		src += "#extension GL_ARB_explicit_uniform_location : require\n";
-		src += "#extension GL_ARB_explicit_attrib_location : require\n";
+		std::string src = "#version 310 es\n";
+		//src += "#extension GL_ARB_explicit_uniform_location : require\n";
+		//src += "#extension GL_ARB_explicit_attrib_location : require\n";
 		for (auto& line : m_header_lines)
 			src += line;
 		src += m_source;

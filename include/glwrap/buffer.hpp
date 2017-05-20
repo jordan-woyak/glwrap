@@ -177,6 +177,9 @@ class buffer : public globject
 	friend class context;
 
 public:
+
+	// TODO: require T is a POD-type
+
 	typedef T value_type;
 	typedef A alignment_type;
 
@@ -194,11 +197,10 @@ public:
 		auto const nh = native_handle();
 		GLWRAP_EC_CALL(glDeleteBuffers)(1, &nh);
 	}
-
-	// TODO: don't hardcode GL_STATIC_DRAW everywhere
-
+	
 	void storage(std::size_t _size, buffer_usage _usage)
 	{
+		// TODO: call glBufferStorage directly if available
 		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
 		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
 	}

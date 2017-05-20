@@ -3,10 +3,12 @@
 
 #include <cstdint>
 #include <vector>
+#include <list>
 
 #include <GL/glew.h>
 
 #include "vector.hpp"
+#include "exception.hpp"
 
 namespace gl
 {

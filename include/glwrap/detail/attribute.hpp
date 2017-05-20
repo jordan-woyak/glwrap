@@ -44,6 +44,12 @@ struct is_valid_attrib_type<T, typename std::enable_if<
 	>::type> : std::true_type
 {};
 
+template <typename T>
+struct is_valid_attrib_type<T, typename std::enable_if<
+	std::is_array<T>::value
+	>::type> : is_valid_attrib_type<typename std::remove_extent<T>::type>
+{};
+
 // TODO: index resource count == *2 for doubles
 // implement this against comparison to GL_MAX_VERTEX_ATTRIBS
 

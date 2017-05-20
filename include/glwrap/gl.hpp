@@ -3,6 +3,8 @@
 
 #include "declarations.hpp"
 
+#include "detail/layout.hpp"
+
 #include "exception.hpp"
 #include "uniform.hpp"
 #include "shader.hpp"

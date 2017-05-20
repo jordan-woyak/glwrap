@@ -163,7 +163,7 @@ public:
 	}
 */
 
-	// TODO: require unpack_buffer is of the proper type
+	// TODO: require unpack_buffer is of the proper type and has the right number of components
 
 	template <typename T>
 	void load_subimage(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
