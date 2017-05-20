@@ -98,6 +98,9 @@ struct wrap_s : parameter_base<int_t>
 
 }
 
+// TODO: pair the texture type with the data type
+// the pair of them appears all over the place
+
 template <texture_type Type, typename DataType>
 class basic_texture : public globject
 {
@@ -109,6 +112,8 @@ public:
 
 	// TODO: this is more of a detail..
 	static const enum_t target = detail::texture_traits<type>::target;
+
+	typedef typename internal_format<DataType>::enum_type internal_format_type;
 
 	void swap(basic_texture& _other)
 	{
@@ -123,68 +128,69 @@ public:
 
 	explicit basic_texture(context& _context)
 		: globject(detail::gen_return(glGenTextures))
-	{}
+	{
+		// TODO: ugly, actually create the object:
+		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+	}
 
+	// TODO: this can only be done once. do it in the constructor?
+	// TODO: storage makes immutable textures. make this more obvious
+	// TexStorage also sets the max mipmap level
+	void define_storage(sizei_t _levels, internal_format_type _ifmt, detail::tex_dims<Type> const& _dims)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			detail::gl_texture_storage<Type>(native_handle(), _levels, static_cast<enum_t>(_ifmt), _dims);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+
+			detail::gl_tex_storage<Type>(_levels, static_cast<enum_t>(_ifmt), _dims);
+		}
+	}
+/*
 	// TODO: force same internal format for each level
 	template <typename T>
-	void assign(unpack_buffer<T, dimensions> const& _buffer, image_format _ifmt)
+	void load_image(int_t _level, unpack_buffer<T, dimensions> const& _buffer, internal_format_type _ifmt)
 	{
 		// TODO: ugly
 		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
 		// TODO: allow more than level 0
-		detail::gl_tex_image<Type>(0, _ifmt.value, _buffer.m_dims,
+		detail::gl_tex_image<Type>(_level, static_cast<enum_t>(_ifmt), _buffer.m_dims,
 			static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
 	}
-
-	// TODO: rename
+*/
 	template <typename T>
-	void sub_assign(detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
+	void load_subimage(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			detail::gl_texture_sub_image<Type>(native_handle(), 0, _offset, _buffer.m_dims,
+			detail::gl_texture_sub_image<Type>(native_handle(), _level, _offset, _buffer.m_dims,
 				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
-			detail::gl_tex_sub_image<Type>(0, _offset, _buffer.m_dims,
+			detail::gl_tex_sub_image<Type>(_level, _offset, _buffer.m_dims,
 				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
 		}
 	}
 
-	// TODO: this can only be done once. do it in the constructor
-	// TODO: storage makes immutable textures. make this more obvious
-	// TexStorage also sets the max mipmap level
-	// TODO: rename
-	void storage(sizei_t _levels, image_format _ifmt, detail::tex_dims<Type> const& _dims)
-	{
-		if (GL_ARB_direct_state_access)
-		{
-			detail::gl_texture_storage<Type>(native_handle(), _levels, _ifmt, _dims);
-		}
-		else
-		{
-			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
-
-			detail::gl_tex_storage<Type>(_levels, _ifmt, _dims);
-		}
-	}
-
+/*
 	// TODO: rename / can I allow for the "assign" function to do this?
-	void resize(sizei_t _level, image_format _ifmt, detail::tex_dims<Type> const& _dims)
+	void resize(sizei_t _level, internal_format_type _ifmt, detail::tex_dims<Type> const& _dims)
 	{
 		// TODO: ugly
 		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
-		detail::gl_tex_image<Type>(_level, _ifmt.value, _dims, GL_RED, (ubyte_t*)nullptr);
+		detail::gl_tex_image<Type>(_level, static_cast<enum_t>(_ifmt), _dims, GL_RED, (ubyte_t*)nullptr);
 	}
-
-	// mipmap vs. mipmaps ?
+*/
 	// MAX_LEVEL is observed
-	void generate_mipmap()
+	void generate_mipmaps()
 	{
 		if (GL_ARB_direct_state_access)
 		{

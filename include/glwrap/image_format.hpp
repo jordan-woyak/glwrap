@@ -23,6 +23,76 @@ enum class data_type
 	unsigned_integral
 };
 
+#define GLWRAP_ENUM_DEF(dtype, bitdepth, suffix) \
+	r##bitdepth##dtype = GL_R##bitdepth##suffix, \
+	rg##bitdepth##dtype = GL_RG##bitdepth##suffix, \
+	rgb##bitdepth##dtype = GL_RGB##bitdepth##suffix, \
+	rgba##bitdepth##dtype = GL_RGBA##bitdepth##suffix, \
+
+enum class normalized_internal_format
+{
+	GLWRAP_ENUM_DEF(u, 8, )
+	GLWRAP_ENUM_DEF(u, 16, )
+
+	GLWRAP_ENUM_DEF(s, 8, _SNORM)
+	GLWRAP_ENUM_DEF(s, 16, _SNORM)
+
+	GLWRAP_ENUM_DEF(f, 16, F)
+	GLWRAP_ENUM_DEF(f, 32, F)
+};
+
+enum class signed_internal_format
+{
+	GLWRAP_ENUM_DEF(i, 8, I)
+	GLWRAP_ENUM_DEF(i, 16, I)
+	GLWRAP_ENUM_DEF(i, 32, I)
+};
+
+enum class unsigned_internal_format
+{
+	GLWRAP_ENUM_DEF(ui, 8, UI)
+	GLWRAP_ENUM_DEF(ui, 16, UI)
+	GLWRAP_ENUM_DEF(ui, 32, UI)
+};
+
+#undef GLWRAP_ENUM_DEF
+
+// TODO: kill this template?
+template <typename DataType>
+struct internal_format;
+
+template <>
+struct internal_format<float_t>
+{
+	typedef normalized_internal_format enum_type;
+	
+	enum_type value;
+};
+
+template <>
+struct internal_format<int_t>
+{
+	typedef signed_internal_format enum_type;
+	
+	enum_type value;
+};
+
+template <>
+struct internal_format<uint_t>
+{
+	typedef unsigned_internal_format enum_type;
+	
+	enum_type value;
+};
+
+/*
+template <typename DataType>
+internal_format<DataType> get_internal_format()
+{
+	return {};
+}
+*/
+
 struct image_format
 {
 	image_format(base_format _bfmt)
@@ -83,7 +153,7 @@ inline image_format specific_image_format(base_format _bfmt, data_type _dtype, i
 	{{r, dtype, bitdepth}, GL_R##bitdepth##suffix}, \
 	{{rg, dtype, bitdepth}, GL_RG##bitdepth##suffix}, \
 	{{rgb, dtype, bitdepth}, GL_RGB##bitdepth##suffix}, \
-	{{rgba, dtype, bitdepth}, GL_RGBA##bitdepth##suffix}, \
+	{{rgba, dtype, bitdepth}, GL_RGBA##bitdepth##suffix},
 
 	std::map<fmt_params, GLenum> supported_formats =
 	{

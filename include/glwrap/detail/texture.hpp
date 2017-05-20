@@ -134,19 +134,17 @@ void set_texture_parameter(uint_t _texture, enum_t _pname, T _value)
 
 // glTexStorage*
 
-template <texture_type TexType, typename DataType>
+template <texture_type TexType>
 typename std::enable_if<2 == texture_dims<TexType>::value>::type
-gl_tex_storage(int_t _levels, int_t _internal_format,
-	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
+gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
 	GLWRAP_EC_CALL(glTexStorage2D)(texture_traits<TexType>::target, _levels, _internal_format,
 		_dims.x, _dims.y);
 }
 
-template <texture_type TexType, typename DataType>
+template <texture_type TexType>
 typename std::enable_if<3 == texture_dims<TexType>::value>::type
-gl_tex_storage(int_t _levels, int_t _internal_format,
-	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
+gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
 	GLWRAP_EC_CALL(glTexStorage3D)(texture_traits<TexType>::target, _levels, _internal_format,
 		_dims.x, _dims.y, _dims.z);
@@ -154,22 +152,19 @@ gl_tex_storage(int_t _levels, int_t _internal_format,
 
 // glTextureStorage*
 
-// TODO: kinda ugly that these two need the texture_type just to get the dimension type
-template <texture_type TexType, typename DataType>
+template <texture_type TexType>
 typename std::enable_if<2 == texture_dims<TexType>::value>::type
-gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format,
-	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
+gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
-	GLWRAP_EC_CALL(glTextureStorage2D)(_texture, texture_traits<TexType>::target, _levels, _internal_format,
+	GLWRAP_EC_CALL(glTextureStorage2D)(_texture, _levels, _internal_format,
 		_dims.x, _dims.y);
 }
 
-template <texture_type TexType, typename DataType>
+template <texture_type TexType>
 typename std::enable_if<3 == texture_dims<TexType>::value>::type
-gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format,
-	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
+gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
-	GLWRAP_EC_CALL(glTextureStorage3D)(_texture, texture_traits<TexType>::target, _levels, _internal_format,
+	GLWRAP_EC_CALL(glTextureStorage3D)(_texture, _levels, _internal_format,
 		_dims.x, _dims.y, _dims.z);
 }
 

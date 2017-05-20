@@ -40,22 +40,34 @@ int main()
 
 	sf::Image texdata;
 	if (texdata.loadFromFile("color.png"))
-		tex_color.assign(gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba,
-		getSFImageSize(texdata)), gl::base_format::rgb);
+	{
+		auto sz = getSFImageSize(texdata);
+
+		tex_color.define_storage(1, gl::normalized_internal_format::rgb8u, sz);
+		tex_color.load_subimage(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
+	}
 	else
 		std::cerr << "failed to load color.png" << std::endl;
 
 	if (texdata.loadFromFile("spec.png"))
-		tex_spec.assign(gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba,
-		getSFImageSize(texdata)), gl::base_format::r);
+	{
+		auto sz = getSFImageSize(texdata);
+
+		tex_spec.define_storage(1, gl::normalized_internal_format::rgb8u, sz);
+		tex_spec.load_subimage(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
+	}
 
 	if (texdata.loadFromFile("normal.png"))
-		tex_normal.assign(gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba,
-		getSFImageSize(texdata)), gl::base_format::rgb);
+	{
+		auto sz = getSFImageSize(texdata);
 
-	tex_color.generate_mipmap();
-	tex_spec.generate_mipmap();
-	tex_normal.generate_mipmap();
+		tex_normal.define_storage(1, gl::normalized_internal_format::rgb8u, sz);
+		tex_normal.load_subimage(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
+	}
+
+	tex_color.generate_mipmaps();
+	tex_spec.generate_mipmaps();
+	tex_normal.generate_mipmaps();
 	
 	// custom vertex type
 	struct FooVertex
