@@ -241,7 +241,7 @@ int main()
 	prog.set_uniform(test2_uni, {tex_color_unit, tex_spec_unit});
 	prog.set_uniform(test3_uni, true);
 	prog.set_uniform(test4_uni, {false, true});
-	//prog.set_uniform(test5_uni, {});
+	prog.set_uniform(test5_uni, {});
 
 	glc.bind_texture(tex_color_unit, tex_color);
 	glc.bind_texture(tex_spec_unit, tex_spec);

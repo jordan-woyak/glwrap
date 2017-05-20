@@ -166,15 +166,20 @@ private:
 };
 
 // TODO: rename this and use it to do all the conversion:
+// TODO: rename convert_and_set
 
+template <typename T, typename Enable = void>
+struct uniform_value;
+
+// Iterates a range of values, attempting to convert to the proper uploadable type
 template <typename T, typename S, typename I>
-void set_uniforms_from_iterator(S&& setter, int_t _loc, sizei_t _count, I _iter)
+static void set_uniforms_from_iterator(S&& setter, int_t _loc, sizei_t _count, I _iter)
 {
 	while (_count)
 	{
-		const T converted_value(*_iter);
+		const typename uniform_value<T>::type converted_value(*_iter);
 
-		setter.set(_loc, 1, &converted_value);
+		uniform_value<T>::convert_and_set(setter, _loc, 1, &converted_value);
 
 		++_loc;
 		++_iter;
@@ -182,10 +187,6 @@ void set_uniforms_from_iterator(S&& setter, int_t _loc, sizei_t _count, I _iter)
 	}
 }
 
-template <typename T, typename Enable = void>
-struct uniform_value;
-
-// int,uint,float types can be uploaded directly
 template <typename T>
 struct uniform_value<T, typename std::enable_if<
 	(std::is_same<int_t, typename underlying_type<T>::type>::value
@@ -196,16 +197,18 @@ struct uniform_value<T, typename std::enable_if<
 {
 	typedef T type;
 
-	template <typename S>
-	static void convert_and_set(S&& setter, int_t _loc, const type& _val)
-	{
-		setter.set(_loc, 1, &_val);
-	}
-
+	// int,uint,float types can be uploaded directly when already the proper type:
 	template <typename S>
 	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
 	{
 		setter.set(_loc, _count, _val);
+	}
+
+	// Attempt conversion if needed:
+	template <typename S, typename V>
+	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const V* _val)
+	{
+		set_uniforms_from_iterator<T>(setter, _loc, _count, _val);
 	}
 };
 
@@ -217,22 +220,31 @@ struct uniform_value<T, typename std::enable_if<
 {
 	// "Either the i, ui or f variants may be used to provide values
 	// for uniform variables of type bool, bvec2, bvec3, bvec4, or arrays of these."
-	
-	typedef T type;
 
-	// TODO: int and float types can also be uploaded for bool
-	// currently everything is converted to uint and arrays are uploaded one at a time..
+	// Kinda ugly, the "preferred" type is a uint version of T
+	//typedef T type;
+	typedef typename underlying_type<T>::template modify<uint_t> type;
 
-	template <typename S>
-	static void convert_and_set(S&& setter, int_t _loc, const type& _val)
+	template <typename S, typename V>
+	static typename std::enable_if<
+			std::is_same<V, type>::value
+			|| std::is_same<V, typename underlying_type<T>::template modify<int_t>>::value
+			|| std::is_same<V, typename underlying_type<T>::template modify<float_t>>::value
+		>::type
+	convert_and_set(S&& setter, int_t _loc, sizei_t _count, const V* _val)
 	{
-		convert_and_set(setter, _loc, 1, &_val);
+		setter.set(_loc, _count, _val);
 	}
 
-	template <typename S>
-	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
+	template <typename S, typename V>
+	static typename std::enable_if<
+			!(std::is_same<V, type>::value
+			|| std::is_same<V, typename underlying_type<T>::template modify<int_t>>::value
+			|| std::is_same<V, typename underlying_type<T>::template modify<float_t>>::value)
+		>::type
+	convert_and_set(S&& setter, int_t _loc, sizei_t _count, const V* _val)
 	{
-		set_uniforms_from_iterator<uint_t>(setter, _loc, _count, _val);
+		set_uniforms_from_iterator<T>(setter, _loc, _count, _val);
 	}
 };
 
@@ -245,12 +257,7 @@ struct uniform_value<shader::basic_sampler<T, D>>
 	
 	typedef texture_unit<shader::basic_sampler<T, D>> type;
 
-	template <typename S>
-	static void convert_and_set(S&& setter, int_t _loc, const type& _val)
-	{
-		convert_and_set(setter, _loc, 1, &_val);
-	}
-
+	// texture_uint value can be interpreted as an int and uploaded:
 	template <typename S>
 	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
 	{
@@ -261,7 +268,7 @@ struct uniform_value<shader::basic_sampler<T, D>>
 	}
 };
 
-// Arrays can be uploaded directly if typing is correct
+// Arrays
 template <typename T>
 struct uniform_value<T, typename std::enable_if<std::is_array<T>::value>::type>
 {
@@ -271,22 +278,25 @@ struct uniform_value<T, typename std::enable_if<std::is_array<T>::value>::type>
 	typedef std::array<value_type, std::extent<T>::value> type;
 	static const int array_length = std::extent<T>::value;
 
-	//static_assert(is_contiguous<V>::value, "Uniform array must be set by contiguous range.");
-	
+	// Pass contiguous arrays to the underlying type handler:
 	template <typename S, typename V>
-	static typename std::enable_if<is_contiguous<V>::value>::type
-	convert_and_set(S&& setter, int_t _loc, const V& _val)
+	static
+		//typename std::enable_if<is_contiguous<V>::value>::type
+		void
+		convert_and_set(S&& setter, int_t _loc, sizei_t _count, const V* _val)
 	{
-		uniform_value<variable_value_type>::convert_and_set(setter, _loc, array_length, &*std::begin(_val));
-	}
-
-	template <typename S>
-	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const value_type* _val)
-	{
+		static_assert(is_contiguous<V>::value, "Uniform arrays currently must be set by contiguous range.");
+		
 		uniform_value<variable_value_type>::
-			convert_and_set(setter, _loc, _count * array_length, _val);
+			convert_and_set(setter, _loc, _count * array_length, &*std::begin(*_val));
 	}
 };
+
+template <typename S, typename T>
+static void set_uniform(S&& setter, int_t _loc, sizei_t _count, const T* _val)
+{
+	setter.set(_loc, _count, _val);
+}
 
 // TODO: allow setting an entire array or a range of elements in an array
 // with what syntax for the range?
@@ -297,11 +307,11 @@ void set_program_uniform(uint_t _program, int_t _loc, V const& _value)
 	// TODO: is the proper check?
 	if (GL_ARB_separate_shader_objects)
 	{
-		detail::uniform_value<T>::convert_and_set(bindless_uniform_setter(_program), _loc, _value);
+		detail::uniform_value<T>::convert_and_set(bindless_uniform_setter(_program), _loc, 1, &_value);
 	}
 	else
 	{
-		detail::uniform_value<T>::convert_and_set(binding_uniform_setter(_program), _loc, _value);
+		detail::uniform_value<T>::convert_and_set(binding_uniform_setter(_program), _loc, 1, &_value);
 	}
 }
 
