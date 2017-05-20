@@ -85,7 +85,7 @@ int main()
 		{10, 499, {5, 7}},
 		{89, 30, {6, 8}},
 		{120, 7, {7, 9}}
-	});
+	}, gl::buffer_usage::static_draw);
 
 	// Holds the state of our vertex formats and input buffers:
 	gl::vertex_array input_vertices(glc);
@@ -106,7 +106,7 @@ int main()
 
 	// output buffer
 	gl::buffer<Output> output_buffer(glc);
-	output_buffer.storage(input_buffer.size() * operands.size());
+	output_buffer.storage(input_buffer.size() * operands.size(), gl::buffer_usage::static_read);
 
 	gl::transform_feedback tfeedback(glc);
 	tfeedback.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
@@ -115,7 +115,6 @@ int main()
 	glc.use_program(prog);
 	glc.use_transform_feedback(tfeedback);
 	glc.use_vertex_array(input_vertices);
-	glc.use_primitive_mode(gl::primitive::points);
 
 	// transform feedback
 	glc.start_transform_feedback(gl::primitive::points);
@@ -123,7 +122,7 @@ int main()
 	for (auto operand : operands)
 	{
 		prog.set_uniform(operand1_uni, operand);
-		glc.draw_arrays(0, input_buffer.size());
+		glc.draw_arrays(gl::primitive::points, 0, input_buffer.size());
 	}
 
 	glc.stop_transform_feedback();

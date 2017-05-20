@@ -25,12 +25,6 @@ public:
 		return m_index;
 	}
 
-	// TODO: this is kinda messy and easy to forget about
-	int_t get_end_index() const
-	{
-		return m_index + detail::attrib_index_count<T>::value;
-	}
-
 private:
 	attribute_location(int_t _index)
 		: m_index(_index)

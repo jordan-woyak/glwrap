@@ -35,7 +35,6 @@ enum class swizzle_value : GLenum
 
 class context;
 
-// TODO: rename attribute_location?
 template <typename T>
 class texture_unit
 {

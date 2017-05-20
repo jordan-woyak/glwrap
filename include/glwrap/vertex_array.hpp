@@ -154,27 +154,17 @@ public:
 		
 		if (GL_ARB_direct_state_access)
 		{
-			// TODO: this is ugly
-			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
-			{
-				GLWRAP_EC_CALL(glVertexArrayAttribBinding)(native_handle(), index, _binding.get_index());
-				GLWRAP_EC_CALL(glEnableVertexArrayAttrib)(native_handle(), index);
-			}
-
+			detail::gl_vertex_array_attrib_binding<ShaderType>(native_handle(), _attrib.get_index(), _binding.get_index());
 			detail::gl_vertex_array_attrib_format<ShaderType, InputType, false>(native_handle(), _attrib.get_index(), _binding.get_offset());
+			detail::gl_enable_vertex_array_attrib<ShaderType>(native_handle(), _attrib.get_index());
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 
-			// TODO: this is ugly
-			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
-			{
-				GLWRAP_EC_CALL(glVertexAttribBinding)(index, _binding.get_index());
-				GLWRAP_EC_CALL(glEnableVertexAttribArray)(index);
-			}
-
+			detail::gl_vertex_attrib_binding<ShaderType>(_attrib.get_index(), _binding.get_index());
 			detail::gl_vertex_attrib_format<ShaderType, InputType, false>(_attrib.get_index(), _binding.get_offset());
+			detail::gl_enable_vertex_attrib_array<ShaderType>(_attrib.get_index());
 		}
 	}
 
@@ -198,20 +188,17 @@ public:
 	// automatically enabled, currently
 /*
 	template <typename T>
-	void enable_attribute(const attribute_location<T>& _attrib)
+	void disable_attribute(const attribute_location<T>& _attrib)
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
-				GLWRAP_EC_CALL(glEnableVertexArrayAttrib)(native_handle(), index);
+			detail::gl_enable_vertex_array_attrib<T>(native_handle(), index);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 
-			// TODO: this is ugly
-			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
-				GLWRAP_EC_CALL(glEnableVertexAttribArray)(index);
+			detail::gl_enable_vertex_attrib_array<T>(index);
 		}
 	}
 */
@@ -221,17 +208,13 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			// TODO: this is ugly
-			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
-				GLWRAP_EC_CALL(glDisableVertexArrayAttrib)(native_handle(), index);
+			detail::gl_disable_vertex_array_attrib<T>(native_handle(), index);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 
-			// TODO: this is ugly
-			for (auto index = _attrib.get_index(); index != _attrib.get_end_index(); ++index)
-				GLWRAP_EC_CALL(glDisableVertexAttribArray)(index);
+			detail::gl_disable_vertex_attrib_array<T>(index);
 		}
 	}
 

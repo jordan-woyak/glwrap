@@ -9,7 +9,7 @@ namespace gl
 namespace detail
 {
 
-// TODO: support arrays and matrices.
+// TODO: matrices.
 // matrix is just an array of vec<cols>[rows]
 // they can be handled in the same manner
 
@@ -154,6 +154,33 @@ inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 		gl_vertex_attrib_format<shader_type, input_type, Normalize>(_index + index_count * i, _offset + sizeof(input_type) * i);
 }
 
+template <typename ShaderT>
+inline void gl_vertex_attrib_binding(uint_t _index, uint_t _binding)
+{
+	const uint_t index_count = detail::attrib_index_count<ShaderT>::value;
+
+	for (uint_t i = 0; i != index_count; ++i)
+		GLWRAP_EC_CALL(glVertexAttribBinding)(_index + i, _binding);
+}
+
+template <typename ShaderT>
+inline void gl_enable_vertex_attrib_array(uint_t _index)
+{
+	const uint_t index_count = detail::attrib_index_count<ShaderT>::value;
+
+	for (uint_t i = 0; i != index_count; ++i)
+		GLWRAP_EC_CALL(glEnableVertexAttribArray)(_index + i);
+}
+
+template <typename ShaderT>
+inline void gl_disable_vertex_attrib_array(uint_t _index)
+{
+	const uint_t index_count = detail::attrib_index_count<ShaderT>::value;
+
+	for (uint_t i = 0; i != index_count; ++i)
+		GLWRAP_EC_CALL(glDisableVertexAttribArray)(_index + i);
+}
+
 template <typename ShaderT, typename InputT, bool Normalize>
 typename std::enable_if<!attrib_traits<ShaderT>::is_integral>::type
 inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
@@ -185,6 +212,33 @@ inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 
 	for (uint_t i = 0; i != length; ++i)
 		gl_vertex_array_attrib_format<shader_type, input_type, Normalize>(_vao, _index + index_count * i, _offset + sizeof(input_type) * i);
+}
+
+template <typename ShaderT>
+inline void gl_vertex_array_attrib_binding(GLuint _vao, uint_t _index, uint_t _binding)
+{
+	const uint_t index_count = detail::attrib_index_count<ShaderT>::value;
+
+	for (uint_t i = 0; i != index_count; ++i)
+		GLWRAP_EC_CALL(glVertexArrayAttribBinding)(_vao, _index + i, _binding);
+}
+
+template <typename ShaderT>
+inline void gl_enable_vertex_array_attrib(GLuint _vao, uint_t _index)
+{
+	const uint_t index_count = detail::attrib_index_count<ShaderT>::value;
+
+	for (uint_t i = 0; i != index_count; ++i)
+		GLWRAP_EC_CALL(glEnableVertexArrayAttrib)(_vao, _index + i);
+}
+
+template <typename ShaderT>
+inline void gl_disable_vertex_array_attrib(GLuint _vao, uint_t _index)
+{
+	const uint_t index_count = detail::attrib_index_count<ShaderT>::value;
+
+	for (uint_t i = 0; i != index_count; ++i)
+		GLWRAP_EC_CALL(glDisableVertexArrayAttrib)(_vao, _index + i);
 }
 
 /*
