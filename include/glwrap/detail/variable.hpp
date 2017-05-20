@@ -103,6 +103,14 @@ typedef basic_image_2d_array<uint_t> uimage_2d_array;
 typedef basic_image_cube_map<uint_t> uimage_cube_map;
 typedef basic_image_2d_multisample<uint_t> uimage_2d_multisample;
 
+// Decorator template for atomic counters
+// Currently only used internally for typename string generation: atomic_uint
+template <typename T>
+struct atomic
+{
+	T val;
+};
+
 }
 
 namespace detail
@@ -311,7 +319,15 @@ struct glsl_var_type<shader::basic_sampler_2d_multisample<T>>
 	}
 };
 
-// TODO: complete and use these
+template <typename T>
+struct glsl_var_type<shader::atomic<T>>
+{
+	static type_name_t name()
+	{
+		return "atomic_" + get_type_name<T>();
+	}
+};
+
 template <typename T, typename Enable = void>
 struct is_valid_vec_size : std::false_type
 {};

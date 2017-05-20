@@ -32,5 +32,6 @@
 
 #include "uniform_block.hpp"
 #include "transform_feedback.hpp"
+#include "atomic_counter.hpp"
 
 #include "context.hpp"

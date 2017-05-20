@@ -80,7 +80,8 @@ public:
 
 	// TODO: can probably eliminate L
 	template <typename P, typename L>
-	uniform_location<P> create_uniform(const variable_description<P, L>& _desc)
+	auto create_uniform(const variable_description<P, L>& _desc)
+		-> typename variable_description<P, L>::layout_type::location_type
 	{
 		m_header_lines.emplace_back(get_glsl_definition<P>("uniform", _desc));
 
@@ -129,9 +130,14 @@ private:
 	// instead of building one big string
 	std::string generate_full_source() const
 	{
-		std::string src = "#version 330\n";
+		std::string src;
+
+		src += "#version 430\n";
+		//src += "#version " + glc.get_shading_language_version();
+
 		src += "#extension GL_ARB_explicit_uniform_location : require\n";
 		src += "#extension GL_ARB_explicit_attrib_location : require\n";
+		//src += "#extension ARB_shader_atomic_counters : require\n";
 		for (auto& line : m_header_lines)
 			src += line;
 		src += m_source;

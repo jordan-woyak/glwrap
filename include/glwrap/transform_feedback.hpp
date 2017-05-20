@@ -8,7 +8,7 @@
 namespace gl
 {
 
-// TODO: name?
+// TODO: name? transform_feedback_buffer_binding ?
 template <typename T>
 class transform_feedback_binding
 {

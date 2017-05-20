@@ -12,7 +12,7 @@ namespace gl
 
 class context;
 
-// TODO: name?
+// TODO: name? just vertex_binding?
 template <typename T>
 class vertex_buffer_binding
 {

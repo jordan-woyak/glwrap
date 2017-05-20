@@ -18,6 +18,12 @@ int main()
 	// define some variables in the shader,
 	// they are automatically added to the program source
 
+	struct MyCounterType
+	{
+		gl::uint_t counter1;
+		gl::uint_t counter2;
+	};
+
 	gl::attribute_location_enumerator attribs(glc);
 
 	gl::vertex_shader_builder vshad(glc);
@@ -33,17 +39,26 @@ int main()
 		gl::variable_description<gl::float_t, int>("output1", 0);
 		//vshad.create_output<gl::variable<gl::float_t>("output1"));
 
+	//gl::atomic_counter_binding_enumerator counters(glc);
+	//auto counter_loc = counters.get<MyCounterType>();
+
+	//vshad.create_uniform(gl::variable("counter1", counter_loc | &MyCounterType::counter1));
+	//vshad.create_uniform(gl::variable("counter2", counter_loc | &MyCounterType::counter2));
+
 	vshad.set_source(
-		"out float output1;"
-		"void main(void)"
-		"{"
-			"output1 = float(input1) * float(input2) + operand1 + (input3[0] + input3[1]) / 2.0;"
-		"}"
+R"(out float output1;
+void main(void)
+{
+	output1 = float(input1) * float(input2) + operand1 + (input3[0] + input3[1]) / 2.0;
+
+	//atomicCounterIncrement(counter1);
+	//atomicCounterDecrement(counter2);
+})"
 	);
 
 	auto vert_shader = vshad.create_shader(glc);
 	std::cout << "vshad log:\n" << vert_shader.get_log() << std::endl;
-	//std::cout << "vshad src:\n" << vert_shader.get_source() << std::endl;
+	std::cout << "vshad src:\n" << vert_shader.get_source() << std::endl;
 
 	// create a program
 	gl::program prog(glc);

@@ -5,8 +5,10 @@
 #include "detail/variable.hpp"
 
 #include "attribute.hpp"
-//#include "transform_feedback.hpp"
 #include "uniform.hpp"
+#include "atomic_counter.hpp"
+//#include "transform_feedback.hpp"
+
 
 namespace gl
 {
@@ -38,25 +40,29 @@ private:
 	layout_type m_layout;
 };
 
+// Vertex Attribs
 template <typename T>
 auto variable(std::string _name, attribute_location_enumerator& _enum) -> variable_description<T, attribute_layout<T>>
 {
 	return {std::move(_name), _enum.template get<T>()};
 }
 
+// Uniforms
 template <typename T>
 auto variable(std::string _name, uniform_location_enumerator& _enum) -> variable_description<T, uniform_layout<T>>
 {
 	return {std::move(_name), _enum.template get<T>()};
 }
 
-/*
+// Atomic Counters
 template <typename T>
-auto variable(std::string _name, uniform_location_enumerator& _enum) -> variable_description<T, uniform_layout<T>>
+auto variable(std::string _name, const atomic_counter_binding_attribute<T>& _attrib)
+	-> variable_description<shader::atomic<T>, atomic_counter_layout<T>>
 {
-	return {std::move(_name), _enum.template get<T>()};
+	static_assert(std::is_same<T, gl::uint_t>::value, "Atomic counters must be of type: uint.");
+	
+	return {std::move(_name), _attrib};
 }
-*/
 
 /*
 // TODO: templatify all the location types so this can assume the variable type from the location

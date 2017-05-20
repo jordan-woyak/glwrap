@@ -187,6 +187,8 @@ public:
 
 	friend class mapped_buffer<T, A>;
 
+	// TODO: allow creation of a buffer directly from a vector/array
+
 	explicit buffer(context& _context)
 		: globject(detail::gen_return(glGenBuffers))
 		, m_alignment(sizeof(value_type))

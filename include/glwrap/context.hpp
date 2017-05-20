@@ -409,6 +409,14 @@ public:
 	{
 		GLWRAP_EC_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
 	}
+
+	// TODO: iterator type doesn't need to be static
+	template <typename T, sizei_t S>
+	void bind_buffer(atomic_counter_binding<T> const& _binding, const static_buffer_iterator<T, S>& _iter)
+	{
+		GLWRAP_EC_CALL(glBindBufferRange)(GL_ATOMIC_COUNTER_BUFFER, _binding.get_index(),
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, sizeof(T));
+	}
 	
 	template <typename T>
 	void use_element_array(buffer<T>& _buff)

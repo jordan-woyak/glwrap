@@ -48,12 +48,12 @@ public:
 	}
 
 	template <typename T>
-	uniform_location<T> get()
+	location_type<T> get()
 	{
 		if (m_current_index >= m_max_uniform_locations)
 			throw exception(0);
 			
-		uniform_location<T> ind(m_current_index);
+		location_type<T> ind(m_current_index);
 
 		m_current_index += detail::uniform_location_count<T>::value;
 
