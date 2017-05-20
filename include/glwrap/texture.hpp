@@ -162,6 +162,9 @@ public:
 			static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
 	}
 */
+
+	// TODO: require unpack_buffer is of the proper type
+
 	template <typename T>
 	void load_subimage(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
 	{

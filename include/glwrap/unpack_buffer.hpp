@@ -36,6 +36,8 @@ public:
 	basic_vec<sizei_t, D> const m_dims;
 };
 
+// TODO: allow for {} syntax for dimensions
+
 template <typename T, typename D>
 auto unpack(T const* _data, pixel_format _pfmt, D const& _dims)
 	-> unpack_buffer<T, detail::vec_traits<D>::dimensions> 

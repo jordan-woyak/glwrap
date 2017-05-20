@@ -115,11 +115,13 @@ int main()
 	auto ambient_uni = vshad.create_uniform(gl::variable<gl::vec4>("ambient", uniforms));
 
 	// TESTING
+#if 0
 	auto test_uni = vshad.create_uniform(gl::variable<gl::float_t[4]>("test_var", uniforms));
 	auto test2_uni = vshad.create_uniform(gl::variable<gl::shader::sampler_2d[2]>("test2_var", uniforms));
 	auto test3_uni = vshad.create_uniform(gl::variable<gl::bool_t>("test3_var", uniforms));
 	auto test4_uni = vshad.create_uniform(gl::variable<gl::bool_t[2]>("test4_var", uniforms));
 	auto test5_uni = vshad.create_uniform(gl::variable<gl::float_t[2][2]>("test5_var", uniforms));
+#endif
 	
 	vshad.set_source(
 		R"(out vec2 tpos;
@@ -237,11 +239,13 @@ int main()
 	prog.set_uniform(tex_spec_uni, tex_spec_unit);
 	prog.set_uniform(tex_normal_uni, tex_normal_unit);
 
+#if 0
 	prog.set_uniform(test_uni, {1.5f, 2.f});
 	prog.set_uniform(test2_uni, {tex_color_unit, tex_spec_unit});
 	prog.set_uniform(test3_uni, true);
 	prog.set_uniform(test4_uni, {false, true});
 	prog.set_uniform(test5_uni, {});
+#endif
 
 	glc.bind_texture(tex_color_unit, tex_color);
 	glc.bind_texture(tex_spec_unit, tex_spec);

@@ -27,7 +27,9 @@ int main()
 		0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,
 		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 	};
-	tex.assign(gl::unpack(texdata.data(), gl::pixel_format::r, {8, 8}), gl::base_format::r);
+
+	tex.define_storage(1, gl::normalized_internal_format::r8u, {8, 8});
+	tex.load_subimage(0, {}, gl::unpack(texdata.data(), gl::pixel_format::r, gl::ivec2{8, 8}));
 
 	gl::vertex_shader_builder vshad(glc);
 
@@ -58,7 +60,7 @@ int main()
 
 	gl::fragment_shader_builder fshad(glc);
 
-	auto tex_uni = fshad.create_uniform(gl::variable<gl::texture_2d>("tex", uniforms));
+	auto tex_uni = fshad.create_uniform(gl::variable<gl::shader::sampler_2d>("tex", uniforms));
 	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
 
 	fshad.set_source(
@@ -110,7 +112,7 @@ int main()
 		{{9, -9}, {1, 1}, {0, 0, 1}},
 		{{9, 9}, {1, 0}, {0, 0, 0}},
 	};
-	verbuf.assign(verts);
+	verbuf.assign(verts, gl::buffer_usage::static_draw);
 	}
 
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
@@ -142,7 +144,7 @@ int main()
 	// used to connect texture objects and sampler uniforms together via texture unit.
 	// ensures the correct type of texture is used
 
-	auto texunit = tunits.get<gl::texture_2d>();
+	auto texunit = tunits.get<gl::shader::sampler_2d>();
 		
 	glc.bind_texture(texunit, tex);
 	prog.set_uniform(tex_uni, texunit);
@@ -159,7 +161,6 @@ int main()
 
 	glc.use_program(prog);
 	glc.use_vertex_array(arr);
-	glc.use_primitive_mode(gl::primitive::triangle_fan);
 	glc.use_read_framebuffer(fbuf);
 
 	dsp.set_display_func([&]
@@ -176,7 +177,7 @@ int main()
 
 		glc.use_draw_framebuffer(fbuf);
 		glc.clear_color({1, 1, 1, 1});
-		glc.draw_arrays(0, 4);
+		glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
 
 		glc.use_draw_framebuffer(nullptr);
 		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);

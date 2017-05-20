@@ -21,6 +21,8 @@ class uniform_location
 {
 	friend class uniform_location_enumerator;
 
+	static_assert(detail::is_valid_uniform_type<T>::value, "Invalid Uniform Type");
+
 public:
 	int_t get_index() const
 	{

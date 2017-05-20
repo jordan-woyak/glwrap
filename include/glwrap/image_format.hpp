@@ -12,6 +12,8 @@ enum class base_format
 	rgb = GL_RGB,
 	rgba = GL_RGBA,
 	d = GL_DEPTH_COMPONENT
+
+	// TODO: GL_RGBA_INTEGER and family need to be used for non-normalized formats
 };
 
 enum class data_type
