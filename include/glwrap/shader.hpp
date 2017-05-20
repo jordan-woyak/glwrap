@@ -35,22 +35,9 @@ public:
 
 	std::string get_source() const
 	{
-		GLint src_length = 0;
-		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_SHADER_SOURCE_LENGTH, &src_length);
-
-		std::string src;
-
-		if (src_length)
-		{
-			// Don't need null termination
-			std::vector<GLchar> buf(src_length - 1);
-			
-			GLWRAP_EC_CALL(glGetShaderSource)(native_handle(), buf.size(), nullptr, buf.data());
-			
-			src.assign(buf.begin(), buf.end());
-		}
-
-		return src;
+		return detail::get_shader_string(native_handle(),
+			GLWRAP_EC_CALL(glGetShaderiv), GL_SHADER_SOURCE_LENGTH,
+			GLWRAP_EC_CALL(glGetShaderSource));
 	}
 
 	void compile()
@@ -67,24 +54,9 @@ public:
 
 	std::string get_log() const
 	{
-		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
-
-		GLint log_length = 0;
-		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
-
-		std::string log;
-
-		if (log_length)
-		{
-			// Don't need null termination
-			std::vector<GLchar> buf(log_length - 1);
-			
-			GLWRAP_EC_CALL(glGetShaderInfoLog)(native_handle(), buf.size(), nullptr, buf.data());
-
-			log.assign(buf.begin(), buf.end());
-		}
-
-		return log;
+		return detail::get_shader_string(native_handle(),
+			GLWRAP_EC_CALL(glGetShaderiv), GL_INFO_LOG_LENGTH,
+			GLWRAP_EC_CALL(glGetShaderInfoLog));
 	}
 
 private:

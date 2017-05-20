@@ -49,24 +49,9 @@ public:
 
 	std::string get_log() const
 	{
-		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
-
-		GLint log_length;
-		GLWRAP_EC_CALL(glGetProgramiv)(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
-
-		std::string log;
-
-		if (log_length)
-		{
-			// Don't need null termination
-			std::vector<GLchar> buf(log_length - 1);
-			
-			GLWRAP_EC_CALL(glGetProgramInfoLog)(native_handle(), buf.size(), NULL, buf.data());
-
-			log.assign(buf.begin(), buf.end());
-		}
-
-		return log;
+		return detail::get_shader_string(native_handle(),
+			GLWRAP_EC_CALL(glGetProgramiv), GL_INFO_LOG_LENGTH,
+			GLWRAP_EC_CALL(glGetProgramInfoLog));
 	}
 
 	// TODO: rename
@@ -178,24 +163,9 @@ public:
 
 	std::string get_log() const
 	{
-		//GLWRAP_EC_CALL(glValidateProgram)(native_handle());
-
-		int_t log_length;
-		GLWRAP_EC_CALL(glGetProgramPipelineiv)(native_handle(), GL_INFO_LOG_LENGTH, &log_length);
-
-		std::string log;
-
-		if (log_length)
-		{
-			// Don't need null termination
-			std::vector<GLchar> buf(log_length - 1);
-			
-			GLWRAP_EC_CALL(glGetProgramPipelineInfoLog)(native_handle(), buf.size(), NULL, buf.data());
-
-			log.assign(buf.begin(), buf.end());
-		}
-
-		return log;
+		return detail::get_shader_string(native_handle(),
+			GLWRAP_EC_CALL(glGetProgramPipelineiv), GL_INFO_LOG_LENGTH,
+			GLWRAP_EC_CALL(glGetProgramPipelineInfoLog));
 	}
 
 	// TODO: rename

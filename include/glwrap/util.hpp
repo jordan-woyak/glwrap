@@ -310,6 +310,27 @@ constexpr std::intptr_t get_member_offset(M T::*_member)
 	return reinterpret_cast<std::intptr_t>(&(static_cast<const T*>(nullptr)->*_member));
 }
 
+template <typename LFunc, typename GFunc>
+std::string get_shader_string(uint_t _handle, LFunc&& _len_func, enum_t _param, GFunc&& _get_func)
+{
+	int_t str_length = {};
+	_len_func(_handle, _param, &str_length);
+
+	std::string str;
+
+	if (str_length)
+	{
+		std::vector<GLchar> buf(str_length);
+
+		sizei_t ret_length = {};
+		_get_func(_handle, buf.size(), &ret_length, buf.data());
+
+		str.assign(buf.begin(), buf.begin() + ret_length);
+	}
+
+	return str;
+}
+
 }
 
 /*
