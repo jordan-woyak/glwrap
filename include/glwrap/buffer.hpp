@@ -100,7 +100,7 @@ public:
 
 	buffer_iterator& operator+=(std::size_t _val)
 	{
-		m_buffer_offset += _val * get_stride();
+		m_offset += _val * get_stride();
 		return *this;
 	}
 
@@ -110,9 +110,8 @@ public:
 	}
 
 	// TODO: this should be private
-	buffer_iterator(uint_t _buffer, ubyte_t* _buffer_offset, const alignment_type& _alignment, uint_t _member_offset = {})
-		: m_buffer_offset(_buffer_offset)
-		, m_member_offset(_member_offset)
+	buffer_iterator(uint_t _buffer, ubyte_t* _offset, const alignment_type& _alignment)
+		: m_offset(_offset)
 		, m_alignment(_alignment)
 		, m_buffer(_buffer)
 	{}
@@ -124,18 +123,7 @@ public:
 	
 	ubyte_t* get_offset() const
 	{
-		return m_buffer_offset + m_member_offset;
-	}
-
-	// TODO: this is a confusing name compared to get_offset
-	ubyte_t* get_buffer_offset() const
-	{
-		return m_buffer_offset;
-	}
-
-	uint_t get_member_offset() const
-	{
-		return m_member_offset;
+		return m_offset;
 	}
 
 	sizei_t get_stride() const
@@ -149,24 +137,10 @@ public:
 	}
 
 private:
-	// Offsets are kept separately so I can match iterators
-	// from the same buffer area for transform feedback
-	ubyte_t* m_buffer_offset;
-	uint_t m_member_offset;
-
+	ubyte_t* m_offset;
 	alignment_type m_alignment;
 	uint_t m_buffer;
 };
-
-
-template <typename T, typename M, typename A>
-buffer_iterator<M, A> operator|(buffer_iterator<T, A> const& _iter, M T::*_member)
-{
-	auto const member_offset = detail::get_member_offset(_member);
-	return
-		buffer_iterator<M, A>(_iter.get_buffer(), _iter.get_buffer_offset(),
-		_iter.get_alignment(), _iter.get_member_offset() + member_offset);
-}
 
 template <typename T, typename A>
 class mapped_buffer;
