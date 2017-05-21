@@ -50,7 +50,7 @@ public:
 		//int const w = glutCreateWindow("");
 		//glutHideWindow();
 
-		glewInit();
+		//glewInit();
 
 		//glutDestroyWindow(w);
 #endif
@@ -493,7 +493,128 @@ public:
 		return detail::get_string(GL_SHADING_LANGUAGE_VERSION);
 	}
 
+	// TODO: allow customization of the debug level
+	void enable_debugging()
+	{
+		if (GL_KHR_debug)
+		{
+			GLWRAP_EC_CALL(glDebugMessageCallback)(&context::debug_message_callback, this);
+			GLWRAP_EC_CALL(glDebugMessageControl)(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
+			GLWRAP_EC_CALL(glEnable)(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			GLWRAP_EC_CALL(glEnable)(GL_DEBUG_OUTPUT);
+		}
+	}
+
+	void disable_debugging()
+	{
+		if (GL_KHR_debug)
+		{
+			GLWRAP_EC_CALL(glDisable)(GL_DEBUG_OUTPUT);
+		}
+	}
+
 private:
+	void debug_message_handler(
+		GLenum _source,
+		GLenum _type,
+		GLuint _id,
+		GLenum _severity,
+		GLsizei _length,
+		const GLchar* _message) const
+	{
+		std::string msg("Debug: ");
+
+		msg += "source: ";
+		switch (_source)
+		{
+		case GL_DEBUG_SOURCE_API:
+			msg += "API";
+			break;
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+			msg += "WINDOW_SYSTEM";
+			break;
+		case GL_DEBUG_SOURCE_SHADER_COMPILER:
+			msg += "SHADER_COMPILER";
+			break;
+		case GL_DEBUG_SOURCE_THIRD_PARTY:
+			msg += "THIRD_PARTY";
+			break;
+		case GL_DEBUG_SOURCE_APPLICATION:
+			msg += "APPLICATION";
+			break;
+		case GL_DEBUG_SOURCE_OTHER:
+			msg += "OTHER";
+			break;
+		default:
+			msg += "UNKNOWN";
+			break;
+		}
+		
+		msg += ", type: ";
+		switch (_type)
+		{
+		case GL_DEBUG_TYPE_ERROR:
+			msg += "ERROR";
+			break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			msg += "DEPRECATED_BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			msg += "UNDEFINED_BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_PORTABILITY:
+			msg += "PORTABILITY";
+			break;
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			msg += "PERFORMANCE";
+			break;
+			// TODO: marker, push-group, pop-group
+		case GL_DEBUG_TYPE_OTHER:
+			msg += "OTHER";
+			break;
+		default:
+			msg += "UNKNOWN";
+			break;
+		}
+
+		msg += ", id: " + std::to_string(_id);
+		
+		msg += ", severity: ";
+		switch (_severity)
+		{
+		case GL_DEBUG_SEVERITY_LOW:
+			msg += "LOW";
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			msg += "MEDIUM";
+			break;
+		case GL_DEBUG_SEVERITY_HIGH:
+			msg += "HIGH";
+			break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			msg += "NOTIFICATION";
+			break;
+		default:
+			msg += "UNKNOWN";
+			break;
+		}
+		
+		std::cerr << msg << ", msg: " << std::string(_message, _length) << std::endl;
+	}
+
+	static void debug_message_callback(
+		GLenum _source,
+		GLenum _type,
+		GLuint _id,
+		GLenum _severity,
+		GLsizei _length,
+		const GLchar* _message,
+		const void* _userParam)
+	{
+		static_cast<const context*>(_userParam)->debug_message_handler
+			(_source, _type, _id, _severity, _length, _message);
+	}
+
 	GLenum get_element_type() const
 	{
 		return m_element_type;

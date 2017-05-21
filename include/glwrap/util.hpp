@@ -79,7 +79,7 @@ void check_error(const char* func_name)
 #if 0
 		throw ex;
 #else
-		std::cerr << "error: " << ex.get_string() << " : " << func_name << std::endl;
+		std::cerr << "glGetError: " << ex.get_string() << " : " << func_name << std::endl;
 		exit(1);
 #endif
 	}
