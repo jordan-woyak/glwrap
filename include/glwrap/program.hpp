@@ -154,6 +154,12 @@ public:
 		GLWRAP_EC_CALL(glAttachShader)(native_handle(), _shad.native_handle());
 	}
 
+	template <shader_type T>
+	void detach(const basic_shader<T>& _shad)
+	{
+		GLWRAP_EC_CALL(glDetachShader)(native_handle(), _shad.native_handle());
+	}
+
 private:
 };
 

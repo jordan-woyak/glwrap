@@ -250,7 +250,7 @@ public:
 			// internal format
 
 			// TODO: perhaps I could type the texture_unit_location with this format?
-			GL_RGBA32F);
+			GL_RGBA8);
 	}
 
 	template <typename T>
@@ -259,6 +259,7 @@ public:
 		GLWRAP_EC_CALL(glBindSampler)(_unit.get_index(), _sampler.native_handle());
 	}
 
+	// TODO: allow bind to take a nullptr or something instead of this.
 	template <typename T>
 	void unbind_sampler(texture_unit<T> const& _unit)
 	{
@@ -501,6 +502,11 @@ public:
 	std::string get_shading_language_version()
 	{
 		return detail::get_string(GL_SHADING_LANGUAGE_VERSION);
+	}
+
+	void release_shader_compiler()
+	{
+		GLWRAP_EC_CALL(glReleaseShaderCompiler)();
 	}
 
 	// TODO: allow customization of the debug level
