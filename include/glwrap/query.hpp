@@ -18,14 +18,13 @@ namespace detail
 
 struct query_obj
 {
-	static void create_objs(sizei_t _n, uint_t* _objs)
+	static void create_objs(enum_t _type, sizei_t _n, uint_t* _objs)
 	{
-		//if (GL_ARB_direct_state_access)
-		//{
-			// TODO: fix this, target..
-			//GLWRAP_EC_CALL(glCreateQueries)(_n, _objs);
-		//}
-		//else
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateQueries)(_type, _n, _objs);
+		}
+		else
 		{
 			GLWRAP_EC_CALL(glGenQueries)(_n, _objs);
 		}
@@ -43,18 +42,19 @@ class query : public detail::globject<detail::query_obj>
 {
 public:
 	explicit query(context&, query_type _type)
-		: m_type(_type)
+		: detail::globject<detail::query_obj>(static_cast<enum_t>(_type))
+		, m_type(_type)
 	{}
 
 	void start()
 	{
-		GLWRAP_EC_CALL(glBeginQuery)(static_cast<GLenum>(m_type), native_handle());
+		GLWRAP_EC_CALL(glBeginQuery)(static_cast<enum_t>(m_type), native_handle());
 	}
 
 	void stop()
 	{
 		// TODO: stupid stupid
-		GLWRAP_EC_CALL(glEndQuery)(static_cast<GLenum>(m_type));
+		GLWRAP_EC_CALL(glEndQuery)(static_cast<enum_t>(m_type));
 	}
 
 	uint64_t result() const
@@ -65,6 +65,7 @@ public:
 	}
 
 private:
+	// TODO: kill this state:
 	query_type m_type;
 };
 

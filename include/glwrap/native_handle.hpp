@@ -5,6 +5,9 @@
 namespace gl
 {
 
+struct adopt_handle_t {};
+constexpr adopt_handle_t adopt_handle {}; 
+
 namespace detail
 {
 
@@ -21,14 +24,14 @@ public:
 	}
 
 protected:
-	explicit native_handle_base()
+	template <typename... T>
+	explicit native_handle_base(T&&... _args)
 		: m_native_handle()
 	{
-		obj_generator::create_objs(1, &m_native_handle);
+		obj_generator::create_objs(std::forward<T>(_args)..., 1, &m_native_handle);
 	}
 
-	// TODO: make this more explicit with a dummy parameter
-	explicit native_handle_base(native_handle_type _handle)
+	explicit native_handle_base(native_handle_type _handle, adopt_handle_t)
 		: m_native_handle(_handle)
 	{}
 

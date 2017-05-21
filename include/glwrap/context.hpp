@@ -31,7 +31,7 @@ class context
 	friend class display;
 
 public:
-	context()
+	explicit context()
 		: m_element_type()
 		, m_element_type_size()
 #ifndef GLWRAP_NO_SFML
@@ -309,7 +309,7 @@ public:
 
 	sync fence_sync(sync_condition _cond, bitfield_t _flags)
 	{
-		return {GLWRAP_EC_CALL(glFenceSync)(static_cast<GLenum>(_cond), _flags)};
+		return sync{_cond, _flags};
 	}
 
 	// TODO: multi draw needed?

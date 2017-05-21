@@ -10,9 +10,12 @@ namespace detail
 
 struct sync_obj
 {
-	static void create_objs(sizei_t _n, GLsync* _objs)
+	static void create_objs(enum_t _cond, bitfield_t _flags, sizei_t _n, GLsync* _objs)
 	{
-		// TODO: this existing isn't sensible
+		while (_n--)
+		{
+			*(_objs++) = GLWRAP_EC_CALL(glFenceSync)(_cond, _flags);
+		}
 	}
 
 	static void delete_objs(sizei_t _n, GLsync* _objs)
@@ -55,8 +58,8 @@ public:
 	}
 
 private:
-	sync(GLsync _handle)
-		: native_handle_base<GLsync, detail::sync_obj>(_handle)
+	explicit sync(sync_condition _cond, bitfield_t _flags)
+		: native_handle_base<native_handle_type, detail::sync_obj>(static_cast<GLenum>(_cond), _flags)
 	{}
 };
 

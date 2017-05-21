@@ -49,9 +49,8 @@ public:
 	explicit program(context&)
 	{}
 
-	// TODO: make this even more explicit, e.g. detail::adopt_handle
-	explicit program(native_handle_type _handle)
-		: detail::globject<detail::program_obj>(_handle)
+	explicit program(native_handle_type _handle, adopt_handle_t _a)
+		: detail::globject<detail::program_obj>(_handle, _a)
 	{}
 
 	// TODO: GL_PROGRAM_BINARY_RETRIEVABLE_HINT

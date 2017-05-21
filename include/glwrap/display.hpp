@@ -20,7 +20,7 @@ class display
 {
 public:
 #ifdef USE_SFML
-	display(context& _context, const ivec2& _size)
+	explicit display(context& _context, const ivec2& _size)
 		: m_sf_window(_context.get_window())
 	{
 		m_sf_window.Create({_size.x, _size.y}, "");
