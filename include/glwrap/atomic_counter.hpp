@@ -1,35 +1,23 @@
 #pragma once
 
-#include "texture.hpp"
-#include "detail/uniform.hpp"
-
 namespace gl
 {
 
-template <typename T>
-class uniform;
-
-class atomic_counter_binding_enumerator;
-
-// TODO: name ? atomic_counter_buffer_binding ?
-template <typename T>
-class atomic_counter_binding
+namespace detail
 {
-	friend class atomic_counter_binding_enumerator;
 
-public:
-	int_t get_index() const
-	{
-		return m_index;
-	}
+struct atomic_counter_index
+{};
 
-private:
-	atomic_counter_binding(int_t _index)
-		: m_index(_index)
-	{}
+}
 
-	int_t m_index;
-};
+// TODO: name
+template <typename T>
+using atomic_counter_binding = detail::buffer_index<detail::atomic_counter_index, T>;
+
+// TODO: ugly
+template <typename T>
+using atomic_counter_binding_attribute = detail::buffer_index_attribute<detail::atomic_counter_index, T>;
 
 // TODO: name?
 class atomic_counter_binding_enumerator
@@ -64,9 +52,6 @@ private:
 	int_t m_current_index;
 	int_t m_max_bindings;
 };
-
-template <typename T>
-using atomic_counter_binding_attribute = binding_attribute<atomic_counter_binding, T>;
 
 template <typename T>
 class atomic_counter_layout

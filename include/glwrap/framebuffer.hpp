@@ -8,78 +8,7 @@
 namespace gl
 {
 
-// TODO: rename this to drawbuffer ?
-// TODO: does it make sense for this to have a type
-template <typename T>
-class fragdata_location
-{
-public:
-	fragdata_location(int_t _index)
-		: m_index(_index)
-	{}
-
-
-	int_t get_index() const
-	{
-		return m_index;
-	}
-
-	int_t m_index;
-};
-
-// TODO: rename this
-class fragdata_location_enumerator
-{
-public:
-	template <typename T>
-	using location_type = fragdata_location<T>;
-	
-	// TODO: really need context?
-	fragdata_location_enumerator(context& _context)
-		: m_current_index()
-		, m_max_locations()
-	{
-		detail::gl_get(GL_MAX_DRAW_BUFFERS, &m_max_locations);
-	}
-
-	template <typename T>
-	fragdata_location<T> get()
-	{
-		if (m_current_index >= m_max_locations)
-			throw exception(0);
-			
-		fragdata_location<T> ind(m_current_index);
-
-		m_current_index += 1;
-
-		return ind;
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_locations;
-};
-
-class program;
-
-struct attach_point
-{
-	friend class context;
-
-public:
-	GLenum get_value() const
-	{
-		return m_attachment;
-	}
-
-protected:
-	attach_point(GLenum _attachment)
-		: m_attachment(_attachment)
-	{}
-
-	GLenum m_attachment;
-};
-
+// TODO: kill?
 struct color_attach_point : attach_point
 {
 	friend class context;

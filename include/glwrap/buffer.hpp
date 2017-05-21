@@ -183,8 +183,6 @@ public:
 	typedef T value_type;
 	typedef A alignment_type;
 
-	typedef buffer_iterator<T, A> iterator;
-
 	friend class mapped_buffer<T, A>;
 
 	// TODO: allow creation of a buffer directly from a vector/array
@@ -216,9 +214,39 @@ public:
 		return sz / get_stride();
 	}
 
+private:
+	// TODO: use indexing_iterator
+/*
+	struct iter_state
+	{
+		typedef ubyte_t* index_type;
+		typedef int value_type;
+		
+		// Offsets are kept separately so I can match iterators
+		// from the same buffer area for transform feedback
+		//ubyte_t* m_buffer_offset;
+		uint_t m_member_offset;
+
+		alignment_type m_alignment;
+		uint_t m_buffer;
+
+		value_type& deref(index_type _index) const
+		{
+			// TODO: implement
+
+			throw exception();
+		}
+	};
+*/
+
+public:
+	//typedef indexing_iterator<iter_state> iterator;
+	typedef buffer_iterator<T, A> iterator;
+
 	iterator begin()
 	{
-		return iterator(native_handle(), 0, m_alignment);
+		//return {nullptr, iter_state{0, m_alignment, native_handle()}};
+		return {native_handle(), 0, m_alignment};
 	}
 
 	// TODO: this is broken for untight-alignments

@@ -58,6 +58,24 @@ namespace detail
 	
 static const bool_t IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED = GL_FALSE;
 
+/*
+enum class buffer_target
+{
+	array = GL_ARRAY_BUFFER,
+	atomic_counter = GL_ATOMIC_COUNTER_BUFFER,
+	copy_read = GL_COPY_READ_BUFFER,
+	copy_write = GL_COPY_WRITE_BUFFER,
+	draw_indirect = GL_DRAW_INDIRECT_BUFFER,
+	dispatch_indirect = GL_DISPATCH_INDIRECT_BUFFER,
+	element_array = GL_ELEMENT_ARRAY_BUFFER,
+	pixel_pack = GL_PIXEL_PACK_BUFFER,
+	pixel_unpack = GL_PIXEL_UNPACK_BUFFER,
+	shader_storage = GL_SHADER_STORAGE_BUFFER,
+	transform_feedback = GL_TRANSFORM_FEEDBACK_BUFFER,
+	uniform = GL_UNIFORM_BUFFER,
+};
+*/
+
 }
 
 class context;

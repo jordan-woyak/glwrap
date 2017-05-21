@@ -12,25 +12,20 @@ namespace gl
 
 class context;
 
+namespace detail
+{
+
+struct vertex_buffer_index
+{};
+
+}
+
 // TODO: name? just vertex_binding?
 template <typename T>
-class vertex_buffer_binding
-{
-	friend class vertex_buffer_binding_enumerator;
+using vertex_buffer_binding = detail::buffer_index<detail::vertex_buffer_index, T>;
 
-public:
-	int_t get_index() const
-	{
-		return m_index;
-	}
-
-private:
-	vertex_buffer_binding(int_t _index)
-		: m_index(_index)
-	{}
-
-	int_t m_index;
-};
+template <typename T>
+using vertex_buffer_binding_attribute = detail::buffer_index_attribute<detail::vertex_buffer_index, T>;
 
 // TODO: name?
 class vertex_buffer_binding_enumerator
@@ -50,16 +45,13 @@ public:
 		if (m_current_index == m_max_vertex_attrib_bindings)
 			throw exception(0);
 
-		return {m_current_index++};
+		return vertex_buffer_binding<T>(m_current_index++);
 	}
 
 private:
 	int_t m_current_index;
 	int_t m_max_vertex_attrib_bindings;
 };
-
-template <typename T>
-using vertex_buffer_binding_attribute = binding_attribute<vertex_buffer_binding, T>;
 
 class vertex_array : public globject
 {

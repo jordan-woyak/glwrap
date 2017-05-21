@@ -407,17 +407,49 @@ private:
 	State m_state;
 };
 
-// This is used for atomic counter, transform feedback, and vertex array
-template <template<typename> typename B, typename T>
-class binding_attribute
+namespace detail
+{
+
+template <typename I, typename B, typename T>
+class typed_index
 {
 public:
-	binding_attribute(int_t _index, uint_t _offset = {})
+	typedef I index_type;
+	typedef B binding_type;
+	typedef T value_type;
+
+	typed_index(index_type _index)
+		: m_index(_index)
+	{}
+
+	index_type get_index() const
+	{
+		return m_index;
+	}
+
+private:
+	index_type m_index;
+};
+
+template <typename B, typename T>
+using buffer_index = typed_index<uint_t, B, T>;
+
+// This is used for atomic counter, transform feedback, and vertex array
+// TODO: rename
+template <typename I, typename B, typename T>
+class typed_index_attribute
+{
+public:
+	typedef I index_type;
+	typedef B binding_type;
+	typedef T value_type;
+
+	typed_index_attribute(index_type _index, uint_t _offset = {})
 		: m_index(_index)
 		, m_offset(_offset)
 	{}
 
-	int_t get_index() const
+	index_type get_index() const
 	{
 		return m_index;
 	}
@@ -428,27 +460,32 @@ public:
 	}
 
 private:
-	int_t m_index;
+	index_type m_index;
 	uint_t m_offset;
 };
 
-template <template<typename> typename B, typename T, typename M>
-binding_attribute<B, M> operator|(binding_attribute<B, T> const& _attr, M T::*_member)
+template <typename B, typename T>
+using buffer_index_attribute = typed_index_attribute<uint_t, B, T>;
+
+template <typename I, typename B, typename T, typename M>
+typed_index_attribute<I, B, M> operator|(typed_index_attribute<I, B, T> const& _attr, M T::*_member)
 {
 	// TODO: only do this for types that need aligning:
 	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
 	
-	return binding_attribute<B, M>(_attr.get_index(), _attr.get_offset() + detail::get_member_offset(_member));
+	return typed_index_attribute<I, B, M>(_attr.get_index(), _attr.get_offset() + detail::get_member_offset(_member));
 }
 
 // TODO: make this not needed
-template <template<typename> typename B, typename T, typename M>
-binding_attribute<B, M> operator|(B<T> const& _binding, M T::*_member)
+template <typename I, typename B, typename T, typename M>
+typed_index_attribute<I, B, M> operator|(typed_index<I, B, T> const& _binding, M T::*_member)
 {
 	// TODO: only do this for types that need aligning:
 	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
 	
-	return binding_attribute<B, M>(_binding.get_index(), detail::get_member_offset(_member));
+	return typed_index_attribute<I, B, M>(_binding.get_index(), detail::get_member_offset(_member));
+}
+
 }
 
 }

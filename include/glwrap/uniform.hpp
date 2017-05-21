@@ -5,31 +5,16 @@
 namespace gl
 {
 
-template <typename T>
-class uniform;
-
-class uniform_location_enumerator;
-
-template <typename T>
-class uniform_location
+namespace detail
 {
-	friend class uniform_location_enumerator;
 
-	static_assert(detail::is_valid_uniform_type<T>::value, "Invalid Uniform Type");
+struct uniform_index
+{};
 
-public:
-	int_t get_index() const
-	{
-		return m_index;
-	}
+}
 
-private:
-	uniform_location(int_t _index)
-		: m_index(_index)
-	{}
-
-	int_t m_index;
-};
+template <typename T>
+using uniform_location = detail::buffer_index<detail::uniform_index, T>;
 
 // TODO: name?
 class uniform_location_enumerator

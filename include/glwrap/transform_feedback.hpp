@@ -8,25 +8,21 @@
 namespace gl
 {
 
+namespace detail
+{
+
+struct transform_feedback_index
+{};
+
+}
+
 // TODO: name? transform_feedback_buffer_binding ?
 template <typename T>
-class transform_feedback_binding
-{
-	friend class transform_feedback_binding_enumerator;
+using transform_feedback_binding = detail::buffer_index<detail::transform_feedback_index, T>;
 
-public:
-	int_t get_index() const
-	{
-		return m_index;
-	}
-
-private:
-	transform_feedback_binding(int_t _index)
-		: m_index(_index)
-	{}
-
-	int_t m_index;
-};
+// TODO: ugly
+template <typename T>
+using transform_feedback_binding_attribute = detail::buffer_index_attribute<detail::transform_feedback_index, T>;
 
 // TODO: name?
 class transform_feedback_binding_enumerator
@@ -83,9 +79,6 @@ public:
 
 private:
 };
-
-template <typename T>
-using transform_feedback_binding_attribute = binding_attribute<transform_feedback_binding, T>;
 
 // TODO: alignment
 // TODO: name

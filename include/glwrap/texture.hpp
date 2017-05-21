@@ -35,24 +35,16 @@ enum class swizzle_value : GLenum
 
 class context;
 
-template <typename T>
-class texture_unit
+namespace detail
 {
-	friend class texture_unit_enumerator;
 
-public:
-	int_t get_index() const
-	{
-		return m_index;
-	}
+struct texture_unit_index
+{};
 
-private:
-	texture_unit(int_t _index)
-		: m_index(_index)
-	{}
+}
 
-	int_t m_index;
-};
+template <typename T>
+using texture_unit = detail::buffer_index<detail::texture_unit_index, T>;
 
 // TODO: name?
 class texture_unit_enumerator
@@ -73,7 +65,7 @@ public:
 		if (m_current_index == m_max_comb_tunits)
 			throw exception(0);
 
-		return {m_current_index++};
+		return texture_unit<T>(m_current_index++);
 	}
 
 private:

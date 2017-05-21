@@ -7,6 +7,7 @@
 #include "attribute.hpp"
 #include "uniform.hpp"
 #include "atomic_counter.hpp"
+#include "fragdata.hpp"
 //#include "transform_feedback.hpp"
 
 
@@ -43,6 +44,13 @@ private:
 // Vertex Attribs
 template <typename T>
 auto variable(std::string _name, attribute_location_enumerator& _enum) -> variable_description<T, attribute_layout<T>>
+{
+	return {std::move(_name), _enum.template get<T>()};
+}
+
+// Fragdatas
+template <typename T>
+auto variable(std::string _name, fragdata_location_enumerator& _enum) -> variable_description<T, fragdata_layout<T>>
 {
 	return {std::move(_name), _enum.template get<T>()};
 }

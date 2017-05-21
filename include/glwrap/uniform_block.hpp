@@ -37,27 +37,14 @@ private:
 	std::map<std::size_t, std::shared_ptr<variable_base>> m_members;
 };
 */
+
+struct uniform_block_index
+{};
+
 }
 
-// TODO: name?
 template <typename T>
-class uniform_block_location
-{
-	friend class uniform_block_location_enumerator;
-
-public:
-	int_t get_index() const
-	{
-		return m_index;
-	}
-
-private:
-	uniform_block_location(int_t _index)
-		: m_index(_index)
-	{}
-
-	int_t m_index;
-};
+using uniform_block_location = detail::buffer_index<detail::uniform_block_index, T>;
 
 class uniform_block_location_enumerator
 {
