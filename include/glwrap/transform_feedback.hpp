@@ -50,20 +50,38 @@ private:
 	int_t m_max_tf_buffers;
 };
 
+namespace detail
+{
+
+struct transform_feedback_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateTransformFeedbacks)(_n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenTransformFeedbacks)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteTransformFeedbacks)(_n, _objs);
+	}
+};
+
+}
+
 class context;
 
-class transform_feedback : public globject
+class transform_feedback : public detail::globject<detail::transform_feedback_obj>
 {
 public:
-	explicit transform_feedback(context& _context)
-		: globject(detail::gen_return(glGenTransformFeedbacks))
+	explicit transform_feedback(context&)
 	{}
-
-	~transform_feedback()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteTransformFeedbacks)(1, &nh);
-	}
 
 	template <typename T, sizei_t S>
 	void bind_buffer(transform_feedback_binding<T> const& _binding, const static_buffer_iterator<T, S>& _iter, sizei_t _size)

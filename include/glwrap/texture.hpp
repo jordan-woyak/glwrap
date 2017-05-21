@@ -90,11 +90,37 @@ struct wrap_s : parameter_base<int_t>
 
 }
 
+namespace detail
+{
+
+template <texture_type Type>
+struct texture_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateTextures)(static_cast<enum_t>(Type), _n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenTextures)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteTextures)(_n, _objs);
+	}
+};
+
+}
+
 // TODO: pair the texture type with the data type
 // the pair of them appears all over the place
 
 template <texture_type Type, typename DataType>
-class basic_texture : public globject
+class basic_texture : public detail::globject<detail::texture_obj<Type>>
 {
 	friend class context;
 
@@ -107,23 +133,8 @@ public:
 
 	typedef typename internal_format<DataType>::enum_type internal_format_type;
 
-	void swap(basic_texture& _other)
-	{
-		globject::swap(_other);
-	}
-
-	~basic_texture()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteTextures)(1, &nh);
-	}
-
-	explicit basic_texture(context& _context)
-		: globject(detail::gen_return(glGenTextures))
-	{
-		// TODO: ugly, actually create the object:
-		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
-	}
+	explicit basic_texture(context&)
+	{}
 
 	// TODO: this can only be done once. do it in the constructor?
 	// TODO: storage makes immutable textures. make this more obvious
@@ -132,11 +143,11 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			detail::gl_texture_storage<Type>(native_handle(), _levels, static_cast<enum_t>(_ifmt), _dims);
+			detail::gl_texture_storage<Type>(this->native_handle(), _levels, static_cast<enum_t>(_ifmt), _dims);
 		}
 		else
 		{
-			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+			detail::scoped_value<detail::parameter::texture<Type>> binding(this->native_handle());
 
 			detail::gl_tex_storage<Type>(_levels, static_cast<enum_t>(_ifmt), _dims);
 		}
@@ -162,12 +173,12 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			detail::gl_texture_sub_image<Type>(native_handle(), _level, _offset, _buffer.m_dims,
+			detail::gl_texture_sub_image<Type>(this->native_handle(), _level, _offset, _buffer.m_dims,
 				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
 		}
 		else
 		{
-			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+			detail::scoped_value<detail::parameter::texture<Type>> binding(this->native_handle());
 
 			detail::gl_tex_sub_image<Type>(_level, _offset, _buffer.m_dims,
 				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
@@ -189,12 +200,12 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glGenerateTextureMipmap)(native_handle());
+			GLWRAP_EC_CALL(glGenerateTextureMipmap)(this->native_handle());
 		}
 		else
 		{
 			// TODO: ugly
-			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+			detail::scoped_value<detail::parameter::texture<Type>> binding(this->native_handle());
 			
 			GLWRAP_EC_CALL(glGenerateMipmap)(target);
 		}
@@ -249,60 +260,9 @@ private:
 	template <typename T>
 	void set_parameter_raw(GLenum _pname, T _val)
 	{
-		detail::set_texture_parameter<type>(native_handle(), _pname, _val);
+		detail::set_texture_parameter<type>(this->native_handle(), _pname, _val);
 	}
 };
-
-/*
-template <>
-class texture<texture_type::texture_buffer> : public globject
-{
-	friend class context;
-
-public:
-	static const texture_type type = texture_type::texture_buffer;
-	static const int dimensions = detail::texture_dims<type>::value;
-
-	explicit texture(context& _context)
-		: globject(detail::gen_return(glGenTextures))
-	{
-		// TODO: super ugly
-		detail::scoped_value<detail::parameter::texture<texture_type::texture_buffer>> binding(native_handle());
-	}
-
-	~texture()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteTextures)(1, &nh);
-	}
-
-	void swap(texture& _other)
-	{
-		globject::swap(_other);
-	}
-
-	template <typename T>
-	void bind_buffer(buffer<T> const& _buffer)
-	{
-		if (GL_ARB_direct_state_access)
-		{
-			// TODO: don't hardcode datatype!
-			GLWRAP_EC_CALL(glTextureBuffer)(native_handle(), GL_RGBA32F, _buffer.native_handle());
-		}
-		else
-		{
-			// TODO: super ugly
-			detail::scoped_value<detail::parameter::texture<texture_type::texture_buffer>> binding(native_handle());
-			
-			// TODO: don't hardcode datatype!
-			GLWRAP_EC_CALL(glTexBuffer)(target, GL_RGBA32F, _buffer.native_handle());
-		}
-	}
-
-private:
-	static const enum_t target = detail::texture_traits<type>::target;
-};
-*/
 
 }
 

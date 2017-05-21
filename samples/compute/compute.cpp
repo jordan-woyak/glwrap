@@ -63,6 +63,8 @@ void main(void)
 	{
 		//uint i = data1.length();
 		atomicExchange(data1[1], 5);
+
+		data1[3] = data1.length();
 	}
 
 	if (gl_LocalInvocationIndex < operand1)

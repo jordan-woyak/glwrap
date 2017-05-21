@@ -5,19 +5,35 @@
 namespace gl
 {
 
+namespace detail
+{
+
+struct sync_obj
+{
+	static void create_objs(sizei_t _n, GLsync* _objs)
+	{
+		// TODO: this existing isn't sensible
+	}
+
+	static void delete_objs(sizei_t _n, GLsync* _objs)
+	{
+		while (_n--)
+		{
+			GLWRAP_EC_CALL(glDeleteSync)(*(_objs++));
+		}
+	}
+};
+
+}
+
 class context;
 
 // TODO: name?
-class sync : public native_handle_base<GLsync>
+class sync : public detail::native_handle_base<GLsync, detail::sync_obj>
 {
 	friend class context;
 
 public:
-	~sync()
-	{
-		GLWRAP_EC_CALL(glDeleteSync)(native_handle());
-	}
-
 	// allow timeout for in the future ?
 	void wait()
 	{
@@ -40,7 +56,7 @@ public:
 
 private:
 	sync(GLsync _handle)
-		: native_handle_base<GLsync>(_handle)
+		: native_handle_base<GLsync, detail::sync_obj>(_handle)
 	{}
 };
 

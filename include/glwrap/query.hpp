@@ -13,19 +13,38 @@ enum class query_type : GLenum
 	//time_elapsed = GL_TIME_ELAPSED
 };
 
-class query : public globject
+namespace detail
+{
+
+struct query_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		//if (GL_ARB_direct_state_access)
+		//{
+			// TODO: fix this, target..
+			//GLWRAP_EC_CALL(glCreateQueries)(_n, _objs);
+		//}
+		//else
+		{
+			GLWRAP_EC_CALL(glGenQueries)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteQueries)(_n, _objs);
+	}
+};
+
+}
+
+class query : public detail::globject<detail::query_obj>
 {
 public:
-	query(context& _context, query_type _type)
-		: globject(detail::gen_return(glGenQueries))
-		, m_type(_type)
+	explicit query(context&, query_type _type)
+		: m_type(_type)
 	{}
-
-	~query()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteQueries)(1, &nh);
-	}
 
 	void start()
 	{

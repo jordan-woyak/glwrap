@@ -171,8 +171,33 @@ buffer_iterator<M, A> operator|(buffer_iterator<T, A> const& _iter, M T::*_membe
 template <typename T, typename A>
 class mapped_buffer;
 
+namespace detail
+{
+
+struct buffer_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateBuffers)(_n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenBuffers)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteBuffers)(_n, _objs);
+	}
+};
+
+}
+
 template <typename T, typename A = detail::tight_buffer_alignment<T>>
-class buffer : public globject
+class buffer : public detail::globject<detail::buffer_obj>
 {
 	friend class context;
 
@@ -187,16 +212,9 @@ public:
 
 	// TODO: allow creation of a buffer directly from a vector/array
 
-	explicit buffer(context& _context)
-		: globject(detail::gen_return(glGenBuffers))
-		, m_alignment(sizeof(value_type))
+	explicit buffer(context&)
+		: m_alignment(sizeof(value_type))
 	{}
-
-	~buffer()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteBuffers)(1, &nh);
-	}
 	
 	void storage(std::size_t _size, buffer_usage _usage)
 	{

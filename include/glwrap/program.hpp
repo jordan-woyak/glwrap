@@ -19,25 +19,40 @@ class context;
 // TODO: create a single_stage program template
 // so program_pipeline::use_stages can assume the stage bits
 
-class program : public globject
+namespace detail
+{
+
+struct program_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		while (_n--)
+		{
+			*(_objs++) = GLWRAP_EC_CALL(glCreateProgram)();
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		while (_n--)
+		{
+			GLWRAP_EC_CALL(glDeleteProgram)(*(_objs++));
+		}
+	}
+};
+
+}
+
+class program : public detail::globject<detail::program_obj>
 {
 public:
-	explicit program(context& _context)
-		: globject(GLWRAP_EC_CALL(glCreateProgram)())
+	explicit program(context&)
 	{}
 
 	// TODO: make this even more explicit, e.g. detail::adopt_handle
 	explicit program(native_handle_type _handle)
-		: globject(_handle)
+		: detail::globject<detail::program_obj>(_handle)
 	{}
-	
-	~program()
-	{
-		GLWRAP_EC_CALL(glDeleteProgram)(native_handle());
-	}
-
-	program(program&&) = default;
-	program& operator=(program&&) = default;
 
 	// TODO: GL_PROGRAM_BINARY_RETRIEVABLE_HINT
 	// TODO: GL_PROGRAM_SEPARABLE
@@ -143,18 +158,36 @@ public:
 private:
 };
 
-class program_pipeline : public globject
+namespace detail
+{
+
+struct program_pipeline_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateProgramPipelines)(_n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenProgramPipelines)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteProgramPipelines)(_n, _objs);
+	}
+};
+
+}
+
+class program_pipeline : public detail::globject<detail::program_pipeline_obj>
 {
 public:
-	explicit program_pipeline(context& _context)
-		: globject(detail::gen_return(glGenProgramPipelines))
+	explicit program_pipeline(context&)
 	{}
-	
-	~program_pipeline()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteProgramPipelines)(1, &nh);
-	}
 
 	void use_stages(shader_stage _stages, const program& _prog)
 	{

@@ -5,23 +5,38 @@ namespace gl
 
 class context;
 
+namespace detail
+{
+
+struct renderbuffer_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateRenderbuffers)(_n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenRenderbuffers)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteRenderbuffers)(_n, _objs);
+	}
+};
+
+}
+
 // TODO: depth and stencil renderbuffers
 
-class renderbuffer : public globject
+class renderbuffer : public detail::globject<detail::renderbuffer_obj>
 {
 public:
-	renderbuffer(context& _context)
-		: globject(detail::gen_return(glGenRenderbuffers))
-	{
-		// TODO: this is ugly, actually create the object
-		detail::scoped_value<detail::parameter::renderbuffer> binding(native_handle());
-	}
-
-	~renderbuffer()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteRenderbuffers)(1, &nh);
-	}
+	explicit renderbuffer(context&)
+	{}
 
 	// TODO: internal format
 	void storage(ivec2 const& _dims, sizei_t _samples = 0)

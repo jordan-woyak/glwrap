@@ -53,21 +53,36 @@ private:
 	int_t m_max_vertex_attrib_bindings;
 };
 
-class vertex_array : public globject
+namespace detail
 {
-public:
-	explicit vertex_array(context& _context)
-		: globject(detail::gen_return(glGenVertexArrays))
+
+struct vertex_array_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
 	{
-		// TODO: this is ugly, actually create the vertex array:
-		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateVertexArrays)(_n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenVertexArrays)(_n, _objs);
+		}
 	}
 
-	~vertex_array()
+	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteVertexArrays)(1, &nh);
+		GLWRAP_EC_CALL(glDeleteVertexArrays)(_n, _objs);
 	}
+};
+
+}
+
+class vertex_array : public detail::globject<detail::vertex_array_obj>
+{
+public:
+	explicit vertex_array(context&)
+	{}
 
 /*
 	// TODO: kill
@@ -102,9 +117,12 @@ public:
 		
 		if (GL_ARB_direct_state_access)
 		{
-			detail::gl_vertex_array_attrib_binding<ShaderType>(native_handle(), _attrib.get_index(), _binding.get_index());
-			detail::gl_vertex_array_attrib_format<ShaderType, InputType, false>(native_handle(), _attrib.get_index(), _binding.get_offset());
-			detail::gl_enable_vertex_array_attrib<ShaderType>(native_handle(), _attrib.get_index());
+			detail::gl_vertex_array_attrib_binding<ShaderType>
+				(native_handle(), _attrib.get_index(), _binding.get_index());
+			detail::gl_vertex_array_attrib_format<ShaderType, InputType, false>
+				(native_handle(), _attrib.get_index(), _binding.get_offset());
+			detail::gl_enable_vertex_array_attrib<ShaderType>
+				(native_handle(), _attrib.get_index());
 		}
 		else
 		{

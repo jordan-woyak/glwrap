@@ -67,26 +67,36 @@ private:
 
 // TODO: framebuffer parameters: default size and such
 
-class framebuffer : public globject
+namespace detail
 {
-	friend class context;
 
+struct framebuffer_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateFramebuffers)(_n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenFramebuffers)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteFramebuffers)(_n, _objs);
+	}
+};
+
+}
+
+class framebuffer : public detail::globject<detail::framebuffer_obj>
+{
 public:
-	framebuffer(framebuffer&&) = default;
-	framebuffer& operator=(framebuffer&&) = default;
-
-	framebuffer(context& _context)
-		: globject(detail::gen_return(glGenFramebuffers))
-	{
-		// TODO: this is ugly, actually create the object
-		detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
-	}
-
-	~framebuffer()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteFramebuffers)(1, &nh);
-	}
+	explicit framebuffer(context&)
+	{}
 
 	// TODO: glInvalidateFramebuffer
 

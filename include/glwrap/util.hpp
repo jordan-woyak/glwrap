@@ -133,15 +133,6 @@ gl_function_caller<R, Args...> make_gl_function_caller(R(*_func)(Args...), const
 	return {_func, _name};
 }
 
-// TODO: move this
-typedef decltype(glGenBuffers) glgenfunc;
-inline GLuint gen_return(glgenfunc _glFunc)
-{
-	GLuint name;
-	GLWRAP_EC_CALL(_glFunc)(1, &name);
-	return name;
-}
-
 template <typename T, typename Enable = void>
 struct is_gl_integral : std::false_type
 {};

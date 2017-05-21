@@ -5,12 +5,15 @@
 namespace gl
 {
 
-// TODO: put the handle Gen/Delete inside this class via templates
-template <typename N>
+namespace detail
+{
+
+template <typename N, typename Generator>
 class native_handle_base
 {
 public:
 	typedef N native_handle_type;
+	typedef Generator obj_generator;
 
 	native_handle_type native_handle() const
 	{
@@ -18,14 +21,25 @@ public:
 	}
 
 protected:
-	explicit native_handle_base(native_handle_type _native_handle)
-		: m_native_handle(_native_handle)
+	explicit native_handle_base()
+		: m_native_handle()
+	{
+		obj_generator::create_objs(1, &m_native_handle);
+	}
+
+	// TODO: make this more explicit with a dummy parameter
+	explicit native_handle_base(native_handle_type _handle)
+		: m_native_handle(_handle)
 	{}
+
+	~native_handle_base()
+	{
+		obj_generator::delete_objs(1, &m_native_handle);
+	}
 
 	native_handle_base(const native_handle_base&) = delete;
 	native_handle_base& operator=(const native_handle_base&) = delete;
 
-protected:
 	native_handle_base(native_handle_base&& _other)
 		: m_native_handle()
 	{
@@ -48,6 +62,9 @@ private:
 	native_handle_type m_native_handle;
 };
 
-typedef native_handle_base<GLuint> globject;
+template <typename Generator>
+using globject = native_handle_base<GLuint, Generator>;
+
+}
 
 }

@@ -26,18 +26,36 @@ enum class texture_filter : GLenum
 	linear_mipmap_linear = GL_LINEAR_MIPMAP_LINEAR,
 };
 
-class sampler : public globject
+namespace detail
+{
+
+struct sampler_obj
+{
+	static void create_objs(sizei_t _n, uint_t* _objs)
+	{
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_EC_CALL(glCreateSamplers)(_n, _objs);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGenSamplers)(_n, _objs);
+		}
+	}
+
+	static void delete_objs(sizei_t _n, uint_t* _objs)
+	{
+		GLWRAP_EC_CALL(glDeleteSamplers)(_n, _objs);
+	}
+};
+
+}
+
+class sampler : public detail::globject<detail::sampler_obj>
 {
 public:
-	sampler(context& _context)
-		: globject(detail::gen_return(glGenSamplers))
+	explicit sampler(context&)
 	{}
-
-	~sampler()
-	{
-		auto const nh = native_handle();
-		GLWRAP_EC_CALL(glDeleteSamplers)(1, &nh);
-	}
 
 	void set_wrap_s(wrap_mode _mode)
 	{
