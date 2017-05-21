@@ -127,7 +127,12 @@ struct glsl_var_suffix<T, typename std::enable_if<std::is_array<T>::value>::type
 {
 	static type_name_t suffix()
 	{
-		return "[" + std::to_string(std::extent<T>::value) + "]";
+		std::string ext;
+
+		if (std::extent<T>::value)
+			ext = std::to_string(std::extent<T>::value);
+		
+		return "[" + ext + "]";
 	}
 };
 

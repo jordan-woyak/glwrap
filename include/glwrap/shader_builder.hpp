@@ -88,6 +88,23 @@ public:
 		return _desc.get_layout().get_location();
 	}
 
+	template <typename P, typename L>
+	auto create_storage(const variable_description<P, L>& _desc)
+		-> typename variable_description<P, L>::layout_type::location_type
+	{
+		std::string def =
+			"layout(" + _desc.get_layout().get_string() + ") buffer "
+			+ _desc.get_name() + "_block { "
+			+ detail::get_type_name<P>()
+			+ " " + _desc.get_name()
+			+ detail::glsl_var_suffix<P>::suffix()
+			+ "; };\n";
+		
+		m_header_lines.emplace_back(def);
+
+		return _desc.get_layout().get_location();
+	}
+
 /*
 	template <typename P>
 	typename detail::shader_io_type<T, P>::input_type

@@ -45,6 +45,11 @@ int main()
 	cshad.create_uniform(gl::variable("counter1", counter_loc | &MyCounterType::counter1));
 	cshad.create_uniform(gl::variable("counter2", counter_loc | &MyCounterType::counter2));
 
+	gl::shader_storage_location_enumerator storages(glc);
+	//auto storage_loc = storages.get<gl::int_t>();
+
+	auto storage_loc = cshad.create_storage(gl::variable<gl::int_t[]>("data1", storages));
+
 	cshad.set_source(
 R"(
 
@@ -54,9 +59,19 @@ layout(local_size_x = 100, local_size_y = 10) in;
 
 void main(void)
 {
+	if (0 == gl_LocalInvocationIndex)
+	{
+		//uint i = data1.length();
+		atomicExchange(data1[1], 5);
+	}
+
 	if (gl_LocalInvocationIndex < operand1)
 	{
 		atomicCounterIncrement(counter1);
+
+		// Just testing stuff
+		memoryBarrier();
+		
 		atomicCounterDecrement(counter2);
 	}
 })"
@@ -64,12 +79,16 @@ void main(void)
 
 	auto comp_shader = cshad.create_shader(glc);
 	std::cout << "cshad log:\n" << comp_shader.get_log() << std::endl;
-	//std::cout << "cshad src:\n" << comp_shader.get_source() << std::endl;
+	if (!comp_shader.compile_status())
+		std::cout << "cshad src:\n" << comp_shader.get_source() << std::endl;
 	
 	gl::program prog(glc);
 	prog.attach(comp_shader);
 	prog.link();
 	std::cout << "program log:\n" << prog.get_log() << std::endl;
+
+	if (!prog.is_good())
+		return 1;
 
 	std::vector<gl::float_t> operands =
 	{
@@ -78,6 +97,11 @@ void main(void)
 
 	gl::buffer<MyCounterType> counter_buffer(glc);
 	counter_buffer.assign(std::vector<MyCounterType>(operands.size()), gl::buffer_usage::static_read);
+
+	gl::buffer<gl::int_t> storage_buffer(glc);
+	storage_buffer.assign(std::vector<gl::int_t>(32), gl::buffer_usage::static_read);
+
+	glc.bind_buffer(storage_loc, storage_buffer.begin(), 32);
 
 	// Compute
 	glc.use_program(prog);
@@ -99,4 +123,13 @@ void main(void)
 	// print results
 	for (auto& counters : gl::map_buffer(counter_buffer))
 		std::cout << counters.counter1 << "\t" << counters.counter2 << std::endl;
+
+	std::cout << std::endl;
+
+	glc.memory_barrier(gl::memory_barrier::buffer_update);
+
+	for (auto& datum : gl::map_buffer(storage_buffer))
+		std::cout << datum << ' ';
+
+	std::cout << std::endl;
 }

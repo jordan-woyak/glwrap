@@ -33,5 +33,6 @@
 #include "uniform_block.hpp"
 #include "transform_feedback.hpp"
 #include "atomic_counter.hpp"
+#include "shader_storage.hpp"
 
 #include "context.hpp"

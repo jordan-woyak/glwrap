@@ -410,12 +410,21 @@ public:
 		GLWRAP_EC_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
 	}
 
-	// TODO: iterator type doesn't need to be static
+	// TODO: iterator needs to be atomic counter aligned
 	template <typename T, sizei_t S>
 	void bind_buffer(atomic_counter_binding<T> const& _binding, const static_buffer_iterator<T, S>& _iter)
 	{
 		GLWRAP_EC_CALL(glBindBufferRange)(GL_ATOMIC_COUNTER_BUFFER, _binding.get_index(),
-			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, sizeof(T));
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
+	}
+
+	// TODO: iterator needs to be shader storage aligned
+	// TODO: end iterator might be more sensible
+	template <typename T, sizei_t S>
+	void bind_buffer(shader_storage_location<T[]> const& _binding, const static_buffer_iterator<T, S>& _iter, sizei_t _size)
+	{
+		GLWRAP_EC_CALL(glBindBufferRange)(GL_SHADER_STORAGE_BUFFER, _binding.get_index(),
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _size);
 	}
 	
 	template <typename T>

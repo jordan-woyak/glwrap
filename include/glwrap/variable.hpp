@@ -8,12 +8,15 @@
 #include "uniform.hpp"
 #include "atomic_counter.hpp"
 #include "fragdata.hpp"
+#include "shader_storage.hpp"
 //#include "transform_feedback.hpp"
 
 
 namespace gl
 {
 
+// TODO: variable_description should just hold the name
+// not the location..
 template <typename T, typename L>
 class variable_description
 {
@@ -57,7 +60,8 @@ auto variable(std::string _name, fragdata_location_enumerator& _enum) -> variabl
 
 // Uniforms
 template <typename T>
-auto variable(std::string _name, uniform_location_enumerator& _enum) -> variable_description<T, uniform_layout<T>>
+auto variable(std::string _name, uniform_location_enumerator& _enum)
+	-> variable_description<T, uniform_layout<T>>
 {
 	return {std::move(_name), _enum.template get<T>()};
 }
@@ -70,6 +74,17 @@ auto variable(std::string _name, const atomic_counter_binding_attribute<T>& _att
 	static_assert(std::is_same<T, gl::uint_t>::value, "Atomic counters must be of type: uint.");
 	
 	return {std::move(_name), _attrib};
+}
+
+// Shader Storage
+template <typename T>
+auto variable(std::string _name, shader_storage_location_enumerator& _enum)
+	-> variable_description<T, shader_storage_layout<T>>
+{
+	static_assert(std::is_array<T>::value && 0 == std::extent<T>::value,
+		"Shader storage currently only supports arrays of indeterminate length.");
+	
+	return {std::move(_name), _enum.template get<T>()};
 }
 
 /*
