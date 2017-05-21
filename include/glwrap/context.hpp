@@ -280,6 +280,16 @@ public:
 		GLWRAP_EC_CALL(glBeginTransformFeedback)(static_cast<GLenum>(_mode));
 	}
 
+	void pause_transform_feedback()
+	{
+		GLWRAP_EC_CALL(glPauseTransformFeedback)();
+	}
+
+	void resume_transform_feedback()
+	{
+		GLWRAP_EC_CALL(glResumeTransformFeedback)();
+	}
+
 	void stop_transform_feedback()
 	{
 		GLWRAP_EC_CALL(glEndTransformFeedback)();
