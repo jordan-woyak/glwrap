@@ -41,7 +41,10 @@ int main()
 	
 	// define some variables in the program,
 	// they are automatically added to the program source
-	auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
+	//auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
+
+	// Just testing matrix attribs
+	auto model_attrib = vshad.create_input(gl::variable<gl::mat4>("model", attribs));
 
 	auto color_attrib = vshad.create_input(gl::variable<gl::vec3>("color", attribs));
 	auto pos_attrib = vshad.create_input(gl::variable<gl::vec2>("position", attribs));
@@ -115,16 +118,29 @@ int main()
 	verbuf.assign(verts, gl::buffer_usage::static_draw);
 	}
 
+	// TODO: currently attribs must be members of a struct..
+	struct FooMat
+	{
+		gl::mat4 mat;
+	};
+
+	gl::buffer<FooMat> matbuf(glc);
+	matbuf.storage(1, gl::buffer_usage::static_draw);
+
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<FooVertex>();
+	auto mat_loc = vbuflocs.get<FooMat>();
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
 	arr.set_attribute_format(pos_attrib, input_loc | &FooVertex::pos);
 	arr.set_attribute_format(texpos_attrib, input_loc | &FooVertex::texpos);
 	arr.set_attribute_format(color_attrib, input_loc | &FooVertex::color);
-
 	arr.set_buffer(input_loc, verbuf.begin());
+
+	arr.set_attribute_format(model_attrib, mat_loc | &FooMat::mat);
+	arr.set_buffer(mat_loc, matbuf.begin());
+	arr.set_divisor(mat_loc, 1);
 
 	gl::color_attachment_enumerator col_attachments(glc);
 	auto color0 = col_attachments.get();
@@ -170,7 +186,9 @@ int main()
 		// rotating ortho projection
 		gl::mat4 const model = gl::rotate(rotate, 0.f, 0.f, 1.f) *
 			gl::scale(0.1f * gl::clamp(ratio, ratio, 1), 0.1f / gl::clamp(ratio, 1, ratio), 1.f);
-		prog.set_uniform(model_uni, model);
+
+		//prog.set_uniform(model_uni, model);
+		matbuf.assign_range((FooMat[]){ {model} }, 0);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;

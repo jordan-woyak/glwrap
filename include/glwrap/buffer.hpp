@@ -268,6 +268,29 @@ public:
 	}
 
 	// TODO: this is broken for untight-alignments
+	// TODO: rename
+	// TODO: parameter order?
+	template <typename R>
+	void assign_range(R&& _range, sizei_t _offset)
+	{
+		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
+		auto& contig_range = _range;
+
+		auto const begin = std::begin(contig_range);
+		auto const size = std::distance(begin, std::end(contig_range));
+
+		static_assert(detail::is_contiguous<R>::value,
+			"range must be contiguous");
+
+		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
+			"range must contain value_type");
+
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_EC_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, _offset * get_stride(), size * get_stride(), &*begin);
+	}
+
+	// TODO: this is broken for untight-alignments
+	// TODO: rename
 	template <typename R>
 	void assign(R&& _range, buffer_usage _usage)
 	{

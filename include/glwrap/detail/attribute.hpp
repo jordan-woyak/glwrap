@@ -10,11 +10,6 @@ namespace gl
 namespace detail
 {
 
-// TODO: matrices.
-// matrix is just an array of vec<cols>[rows]
-// they can be handled in the same manner
-
-
 // TODO: normalize parameter
 
 template <typename T, typename Enable = void>
@@ -147,10 +142,27 @@ inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 	typedef typename std::remove_extent<InputT>::type input_type;
 	
 	const uint_t length = std::extent<ShaderT>::value;
+	// Index count per element
 	const uint_t index_count = detail::attrib_index_count<shader_type>::value;
 
 	for (uint_t i = 0; i != length; ++i)
-		gl_vertex_attrib_format<shader_type, input_type, Normalize>(_index + index_count * i, _offset + sizeof(input_type) * i);
+		gl_vertex_attrib_format<shader_type, input_type, Normalize>
+			(_index + index_count * i, _offset + sizeof(input_type) * i);
+}
+
+template <typename ShaderT, typename InputT, bool Normalize>
+typename std::enable_if<is_mat<ShaderT>::value>::type
+inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
+{
+	// Matrices are treated as a Cols-length array of vecs
+	
+	typedef typename ShaderT::col_type shader_col_type;
+	typedef typename InputT::col_type input_col_type;
+	
+	constexpr uint_t length = mat_traits<ShaderT>::cols;
+	
+	gl_vertex_attrib_format<shader_col_type[length], input_col_type[length], Normalize>
+		(_index, _offset);
 }
 
 template <typename ShaderT>
@@ -207,10 +219,27 @@ inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 	typedef typename std::remove_extent<InputT>::type input_type;
 	
 	const uint_t length = std::extent<ShaderT>::value;
+	// Index count per element
 	const uint_t index_count = detail::attrib_index_count<shader_type>::value;
 
 	for (uint_t i = 0; i != length; ++i)
-		gl_vertex_array_attrib_format<shader_type, input_type, Normalize>(_vao, _index + index_count * i, _offset + sizeof(input_type) * i);
+		gl_vertex_array_attrib_format<shader_type, input_type, Normalize>
+			(_vao, _index + index_count * i, _offset + sizeof(input_type) * i);
+}
+
+template <typename ShaderT, typename InputT, bool Normalize>
+typename std::enable_if<is_mat<ShaderT>::value>::type
+inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
+{
+	// Matrices are treated as a Cols-length array of vecs
+	
+	typedef typename ShaderT::col_type shader_col_type;
+	typedef typename InputT::col_type input_col_type;
+	
+	constexpr uint_t length = mat_traits<ShaderT>::cols;
+	
+	gl_vertex_array_attrib_format<shader_col_type[length], input_col_type[length], Normalize>
+		(_vao, _index, _offset);
 }
 
 template <typename ShaderT>
