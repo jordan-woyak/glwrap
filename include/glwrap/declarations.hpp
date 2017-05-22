@@ -175,7 +175,7 @@ typedef basic_texture<texture_type::texture_2d_multisample, uint_t> utexture_2d_
 struct draw_arrays_indirect_cmd
 {
 	uint_t count;
-	uint_t primitive_count;
+	uint_t instance_count;
 	uint_t first;
 	uint_t base_instance; // reserved on ES
 };

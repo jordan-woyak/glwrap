@@ -478,6 +478,7 @@ typed_index_attribute<I, B, M> operator|(typed_index<I, B, T> const& _binding, M
 template <typename T, typename A>
 class buffer_iterator;
 
+/*
 template <typename T>
 class optional_buffer_ptr
 {
@@ -509,6 +510,7 @@ private:
 	uint_t m_buffer;
 	const T* m_ptr;
 };
+*/
 
 }
 

@@ -323,7 +323,7 @@ public:
 		return sync{_cond, _flags};
 	}
 
-	// TODO: multi draw needed?
+	// TODO: multi draw
 	// TODO: draw range elements [base vertex]
 
 	void draw_arrays(primitive _mode, int_t _offset, sizei_t _count)
@@ -334,14 +334,32 @@ public:
 			_count);
 	}
 
-	// TODO: this fails with non-buffer pointers, shouldn't that be valid?
-	void draw_arrays_indirect(primitive _mode, const detail::optional_buffer_ptr<draw_arrays_indirect_cmd>& _cmd)
+	// TODO: should I break MultiDraw into its own function?
+	template <typename A>
+	void draw_arrays_indirect(primitive _mode, buffer_iterator<draw_arrays_indirect_cmd, A> _cmd,
+		sizei_t _drawcount = 1)
 	{
 		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
-		
-		GLWRAP_EC_CALL(glDrawArraysIndirect)(
-			static_cast<enum_t>(_mode),
-			_cmd.get_ptr());
+
+		if (GL_ARB_multi_draw_indirect)
+		{
+			GLWRAP_EC_CALL(glMultiDrawArraysIndirect)(
+				static_cast<enum_t>(_mode),
+				_cmd.get_offset(),
+				_drawcount,
+				_cmd.get_stride());
+		}
+		else
+		{
+			while (_drawcount--)
+			{
+				GLWRAP_EC_CALL(glDrawArraysIndirect)(
+					static_cast<enum_t>(_mode),
+					_cmd.get_offset());
+
+					++_cmd;
+			}
+		}
 	}
 
 	void draw_arrays_instanced(primitive _mode, int_t _offset, sizei_t _count, sizei_t _instances)
@@ -364,15 +382,34 @@ public:
 			(ubyte_t*)0 + _start * m_element_type_size);
 	}
 
-	// TODO: this fails with non-buffer pointers, shouldn't that be valid?
-	void draw_elements_indirect(primitive _mode, const detail::optional_buffer_ptr<draw_elements_indirect_cmd>& _cmd)
+	// TODO: should I break MultiDraw into its own function?
+	template <typename A>
+	void draw_elements_indirect(primitive _mode, buffer_iterator<draw_elements_indirect_cmd, A> _cmd,
+		sizei_t _drawcount = 1)
 	{
 		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
-		
-		GLWRAP_EC_CALL(glDrawElementsIndirect)(
-			static_cast<enum_t>(_mode),
-			get_element_type(),
-			_cmd.get_ptr());
+
+		if (GL_ARB_multi_draw_indirect)
+		{
+			GLWRAP_EC_CALL(glMultiDrawElementsIndirect)(
+				static_cast<enum_t>(_mode),
+				get_element_type(),
+				_cmd.get_offset(),
+				_drawcount,
+				_cmd.get_stride());
+		}
+		else
+		{		
+			while (_drawcount--)
+			{
+				GLWRAP_EC_CALL(glDrawElementsIndirect)(
+					static_cast<enum_t>(_mode),
+					get_element_type(),
+					_cmd.get_offset());
+
+					++_cmd;
+			}
+		}
 	}
 
 	// TODO: should these just take the element array and bind it?
@@ -404,11 +441,12 @@ public:
 	}
 
 	// TODO: uvec3 is fine or have an actual cmd struct?
-	void dispatch_compute_indirect(const detail::optional_buffer_ptr<uvec3>& _cmd)
+	template <typename A>
+	void dispatch_compute_indirect(const buffer_iterator<uvec3, A>& _cmd)
 	{
 		detail::scoped_value<detail::parameter::dispatch_indirect_buffer> binding(_cmd.get_buffer());
 		
-		GLWRAP_EC_CALL(glDispatchComputeIndirect)(_cmd.get_ptr() - (uvec3*)0);
+		GLWRAP_EC_CALL(glDispatchComputeIndirect)(_cmd.get_offset() - (ubyte_t*)0);
 	}
 
 	void use_program(program& _prog)

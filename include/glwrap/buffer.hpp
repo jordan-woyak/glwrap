@@ -98,6 +98,11 @@ public:
 	typedef T value_type;
 	typedef A alignment_type;
 
+	buffer_iterator& operator++()
+	{
+		return *this +=1;
+	}
+
 	buffer_iterator& operator+=(std::size_t _val)
 	{
 		m_offset += _val * get_stride();
