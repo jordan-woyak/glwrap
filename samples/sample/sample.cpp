@@ -186,7 +186,7 @@ int main()
 
 	gl::draw_arrays_indirect_cmd draw_cmd = {};
 	draw_cmd.count = 4;
-	draw_cmd.primitive_count = 1;
+	draw_cmd.instance_count = 1;
 	draw_cmd.first = 0;
 
 	cmdbuf.assign_range((gl::draw_arrays_indirect_cmd[]){ {draw_cmd} }, 0);

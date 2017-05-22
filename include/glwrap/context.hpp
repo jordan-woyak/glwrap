@@ -323,8 +323,8 @@ public:
 		return sync{_cond, _flags};
 	}
 
-	// TODO: multi draw
-	// TODO: draw range elements [base vertex]
+	// TODO: multi draw (with looping fallback on ES)
+	// TODO: draw range elements base vertex // not on ES
 
 	void draw_arrays(primitive _mode, int_t _offset, sizei_t _count)
 	{
@@ -498,6 +498,7 @@ public:
 		GLWRAP_EC_CALL(glBindBuffer)(GL_ELEMENT_ARRAY_BUFFER, _buff.native_handle());
 
 		m_element_type = detail::data_type_enum<T>();
+		m_element_type_size = sizeof(T);
 	}
 
 	void use_draw_framebuffer(const framebuffer_reference& _fb)
