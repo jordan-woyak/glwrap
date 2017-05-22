@@ -4,7 +4,7 @@
 #include "native_handle.hpp"
 #include "constants.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 class context;

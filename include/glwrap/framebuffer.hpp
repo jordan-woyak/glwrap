@@ -5,7 +5,7 @@
 #include "texture.hpp"
 #include "renderbuffer.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 // TODO: kill?

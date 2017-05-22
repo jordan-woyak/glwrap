@@ -105,6 +105,10 @@ void main(void)
 
 	glc.bind_buffer(storage_loc, storage_buffer.begin(), 32);
 
+	gl::buffer<gl::uvec3> cmdbuf(glc);
+	cmdbuf.storage(1, gl::buffer_usage::static_draw);
+	cmdbuf.assign_range((gl::uvec3[]){ {5, 1, 1} }, 0);
+
 	// Compute
 	glc.use_program(prog);
 
@@ -115,7 +119,8 @@ void main(void)
 		prog.set_uniform(operand1_uni, operand);
 		glc.bind_buffer(counter_loc, counter_buf_iter);
 		
-		glc.dispatch_compute({5, 1, 1});
+		//glc.dispatch_compute({5, 1, 1});
+		glc.dispatch_compute_indirect(cmdbuf.begin());
 
 		counter_buf_iter += 1;
 	}

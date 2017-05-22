@@ -6,7 +6,7 @@
 
 #include <list>
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 // TODO: rename this to drawbuffer ?

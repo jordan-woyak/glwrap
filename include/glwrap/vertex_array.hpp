@@ -7,7 +7,7 @@
 #include "util.hpp"
 #include "detail/attribute.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 class context;
@@ -87,7 +87,7 @@ public:
 /*
 	// TODO: kill
 	template <typename T, typename A>
-	void bind_vertex_attribute(const attribute_location<T>& _attrib, const buffer_iterator<T, A>& _iter)
+	void bind_vertex_pointer(const attribute_location<T>& _attrib, const buffer_iterator<T, A>& _iter)
 	{
 		// TODO: make temporary?
 		GLWRAP_EC_CALL(glBindBuffer)(GL_ARRAY_BUFFER, _iter.get_buffer());

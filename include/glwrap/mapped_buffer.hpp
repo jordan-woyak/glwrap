@@ -2,7 +2,7 @@
 
 #include "buffer.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 // TODO: differentt type for readable and writable mappings

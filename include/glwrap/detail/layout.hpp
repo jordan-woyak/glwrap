@@ -10,7 +10,7 @@
 
 // TODO: move this out of detail/ ?
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 namespace block_layout

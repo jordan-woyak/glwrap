@@ -4,7 +4,7 @@
 
 #include "variable.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail

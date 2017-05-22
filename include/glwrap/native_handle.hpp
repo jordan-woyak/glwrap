@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 struct adopt_handle_t {};

@@ -10,7 +10,7 @@
 #include "vector.hpp"
 #include "exception.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 // Zero error checking
@@ -476,6 +476,41 @@ typed_index_attribute<I, B, M> operator|(typed_index<I, B, T> const& _binding, M
 	
 	return typed_index_attribute<I, B, M>(_binding.get_index(), detail::get_member_offset(_member));
 }
+
+template <typename T, typename A>
+class buffer_iterator;
+
+template <typename T>
+class optional_buffer_ptr
+{
+public:
+	optional_buffer_ptr(const T* _ptr)
+		: m_buffer()
+		, m_ptr(_ptr)
+	{}
+
+	// TODO: ugly:
+	template <typename A>
+	//optional_buffer_ptr(const buffer_iterator<T, A>& _iter)
+	optional_buffer_ptr(const A& _iter)
+		: m_buffer(_iter.get_buffer())
+		, m_ptr(reinterpret_cast<const T*>(_iter.get_offset()))
+	{}
+
+	uint_t get_buffer() const
+	{
+		return m_buffer;
+	}
+
+	const T* get_ptr() const
+	{
+		return m_ptr;
+	}
+
+private:
+	uint_t m_buffer;
+	const T* m_ptr;
+};
 
 }
 

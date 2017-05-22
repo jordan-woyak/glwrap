@@ -14,7 +14,7 @@
 #include "../matrix.hpp"
 #include "../vector.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 namespace shader

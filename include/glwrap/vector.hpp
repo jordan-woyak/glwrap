@@ -5,7 +5,7 @@
 #include "util.hpp"
 #include "detail/traits.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 using glm::vec2;

@@ -2,7 +2,7 @@
 
 #include "detail/context.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail

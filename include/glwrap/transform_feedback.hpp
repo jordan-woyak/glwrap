@@ -5,7 +5,7 @@
 #include "native_handle.hpp"
 #include "buffer.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail

@@ -7,7 +7,7 @@
 
 #include "detail/variable.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 class context;

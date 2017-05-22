@@ -1,6 +1,6 @@
 #pragma once
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail

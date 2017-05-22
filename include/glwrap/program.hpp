@@ -11,7 +11,7 @@
 #include "transform_feedback.hpp"
 #include "uniform_block.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 class context;

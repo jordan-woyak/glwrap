@@ -5,7 +5,7 @@
 
 #include "detail/context.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 class vertex_array;
@@ -214,11 +214,7 @@ private:
 		typedef ubyte_t* index_type;
 		typedef int value_type;
 		
-		// Offsets are kept separately so I can match iterators
-		// from the same buffer area for transform feedback
-		//ubyte_t* m_buffer_offset;
-		uint_t m_member_offset;
-
+		//ubyte_t* m_offset;
 		alignment_type m_alignment;
 		uint_t m_buffer;
 

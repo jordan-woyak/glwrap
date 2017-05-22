@@ -2,7 +2,7 @@
 
 // this whole file is lame
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 // TODO: lame

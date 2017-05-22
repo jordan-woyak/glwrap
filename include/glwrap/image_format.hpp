@@ -2,7 +2,7 @@
 
 #include <map>
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 enum class base_format

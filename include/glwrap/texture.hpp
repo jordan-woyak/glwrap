@@ -11,7 +11,7 @@
 
 #include "sampler.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 enum class swizzle_component : GLenum

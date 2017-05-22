@@ -3,7 +3,7 @@
 #include "vector.hpp"
 #include "detail/traits.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 using glm::mat2;

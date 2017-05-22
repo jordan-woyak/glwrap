@@ -42,6 +42,7 @@ typedef GLintptr intptr_t;
 typedef GLsizeiptr sizeiptr_t;
 //typedef GLsync sync_t
 typedef GLbitfield bitfield_t;
+// TODO: use glm::half
 typedef GLhalf half_t;
 typedef GLfloat float_t;
 //typedef GLclampf clampf_t;
@@ -50,6 +51,7 @@ typedef GLdouble double_t;
 // TODO: kill this
 typedef double_t depth_t;
 
+// TODO: gl::array probably isn't needed
 template <typename T, sizei_t N>
 using array = std::array<T, N>;
 
@@ -176,7 +178,7 @@ struct draw_arrays_indirect_cmd
 	uint_t count;
 	uint_t primitive_count;
 	uint_t first;
-	uint_t reserved;
+	uint_t base_instance; // reserved on ES
 };
 
 struct draw_elements_indirect_cmd
@@ -185,7 +187,15 @@ struct draw_elements_indirect_cmd
 	uint_t instance_count;
 	uint_t first_index;
 	uint_t base_vertex;
-	uint_t reserved;
+	uint_t base_instance; // reserved on ES
 };
+
+// TODO: straight uvec3 or this, or a struct of 3 uint ?
+/*
+struct dispatch_indirect_cmd
+{
+	uvec3 num_groups;
+};
+*/
 
 }

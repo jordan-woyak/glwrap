@@ -12,7 +12,7 @@
 //#include "transform_feedback.hpp"
 
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 // TODO: variable_description should just hold the name

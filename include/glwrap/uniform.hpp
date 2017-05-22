@@ -2,7 +2,7 @@
 
 #include "detail/uniform.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 namespace detail

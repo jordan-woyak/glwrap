@@ -14,6 +14,8 @@ int main()
 	gl::display dsp(glc, window_size);
 	dsp.set_caption("glwrap-sample");
 
+	glc.enable_debugging();
+
 	// create a texture, load the data (this needs some work)
 	gl::texture_2d tex(glc);
 	std::vector<gl::ubyte_t> texdata =
@@ -125,7 +127,7 @@ int main()
 	};
 
 	gl::buffer<FooMat> matbuf(glc);
-	matbuf.storage(1, gl::buffer_usage::static_draw);
+	matbuf.storage(1, gl::buffer_usage::stream_draw);
 
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<FooVertex>();
@@ -179,6 +181,16 @@ int main()
 	glc.use_vertex_array(arr);
 	glc.use_read_framebuffer(fbuf);
 
+	gl::buffer<gl::draw_arrays_indirect_cmd> cmdbuf(glc);
+	cmdbuf.storage(1, gl::buffer_usage::static_draw);
+
+	gl::draw_arrays_indirect_cmd draw_cmd = {};
+	draw_cmd.count = 4;
+	draw_cmd.primitive_count = 1;
+	draw_cmd.first = 0;
+
+	cmdbuf.assign_range((gl::draw_arrays_indirect_cmd[]){ {draw_cmd} }, 0);
+
 	dsp.set_display_func([&]
 	{
 		auto const ratio = (float)window_size.y / window_size.x;
@@ -195,7 +207,10 @@ int main()
 
 		glc.use_draw_framebuffer(fbuf);
 		glc.clear_color({1, 1, 1, 1});
-		glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
+
+		//glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
+		glc.draw_arrays_indirect(gl::primitive::triangle_fan, cmdbuf.begin());
+		//glc.draw_arrays_indirect(gl::primitive::triangle_fan, &draw_cmd);
 
 		glc.use_draw_framebuffer(nullptr);
 		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);

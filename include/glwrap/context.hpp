@@ -21,7 +21,7 @@
 
 #include "detail/context.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 class display;
@@ -334,12 +334,14 @@ public:
 			_count);
 	}
 
-	// TODO: allow buffer offset
-	void draw_arrays_indirect(primitive _mode, const draw_arrays_indirect_cmd* _cmd)
+	// TODO: this fails with non-buffer pointers, shouldn't that be valid?
+	void draw_arrays_indirect(primitive _mode, const detail::optional_buffer_ptr<draw_arrays_indirect_cmd>& _cmd)
 	{
+		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
+		
 		GLWRAP_EC_CALL(glDrawArraysIndirect)(
 			static_cast<enum_t>(_mode),
-			_cmd);
+			_cmd.get_ptr());
 	}
 
 	void draw_arrays_instanced(primitive _mode, int_t _offset, sizei_t _count, sizei_t _instances)
@@ -362,13 +364,15 @@ public:
 			(ubyte_t*)0 + _start * m_element_type_size);
 	}
 
-	// TODO: allow buffer offset
-	void draw_elements_indirect(primitive _mode, const draw_elements_indirect_cmd* _cmd)
+	// TODO: this fails with non-buffer pointers, shouldn't that be valid?
+	void draw_elements_indirect(primitive _mode, const detail::optional_buffer_ptr<draw_elements_indirect_cmd>& _cmd)
 	{
+		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
+		
 		GLWRAP_EC_CALL(glDrawElementsIndirect)(
 			static_cast<enum_t>(_mode),
 			get_element_type(),
-			_cmd);
+			_cmd.get_ptr());
 	}
 
 	// TODO: should these just take the element array and bind it?
@@ -394,10 +398,17 @@ public:
 			(ubyte_t*)0 + _start * m_element_type_size);
 	}
 
-	// TODO: dispatch compute indirect
 	void dispatch_compute(const uvec3& _num_groups)
 	{
 		GLWRAP_EC_CALL(glDispatchCompute)(_num_groups.x, _num_groups.y, _num_groups.z);
+	}
+
+	// TODO: uvec3 is fine or have an actual cmd struct?
+	void dispatch_compute_indirect(const detail::optional_buffer_ptr<uvec3>& _cmd)
+	{
+		detail::scoped_value<detail::parameter::dispatch_indirect_buffer> binding(_cmd.get_buffer());
+		
+		GLWRAP_EC_CALL(glDispatchComputeIndirect)(_cmd.get_ptr() - (uvec3*)0);
 	}
 
 	void use_program(program& _prog)

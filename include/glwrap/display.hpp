@@ -13,7 +13,7 @@
 #include "context.hpp"
 #include "vector.hpp"
 
-namespace gl
+namespace GLWRAP_NAMESPACE
 {
 
 class display
