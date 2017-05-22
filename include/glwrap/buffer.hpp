@@ -177,7 +177,7 @@ class buffer : public detail::globject<detail::buffer_obj>
 
 public:
 
-	// TODO: require T is a POD-type
+	static_assert(std::is_trivially_copyable<T>::value, "buffer must be of trivially copyable type.");
 
 	typedef T value_type;
 	typedef A alignment_type;

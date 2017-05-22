@@ -43,9 +43,7 @@ public:
 		std::swap(m_alignment, _other.m_alignment);
 	}
 
-// TODO: movable
-
-	mapped_buffer(buffer<T, A>& _buffer)
+	explicit mapped_buffer(buffer<T, A>& _buffer)
 		: m_ptr()
 		, m_size(_buffer.size())
 		, m_buffer(_buffer.native_handle())
@@ -53,6 +51,7 @@ public:
 	{
 		// TODO: allow range
 		// TODO: don't hardcode access mode
+		// TODO: allow for all the other flags: persistent and such.
 
 		bitfield_t const access_mode = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;
 		

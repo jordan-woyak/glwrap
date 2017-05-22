@@ -201,8 +201,6 @@ constexpr inline GLenum data_type_enum<int_t>()
 {
 	return GL_INT;
 }
-
-// TODO: half_t
 /*
 template <>
 constexpr inline GLenum data_type_enum<half_t>()

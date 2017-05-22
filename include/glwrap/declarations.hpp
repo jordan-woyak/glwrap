@@ -42,7 +42,6 @@ typedef GLintptr intptr_t;
 typedef GLsizeiptr sizeiptr_t;
 //typedef GLsync sync_t
 typedef GLbitfield bitfield_t;
-// TODO: use glm::half
 typedef GLhalf half_t;
 typedef GLfloat float_t;
 //typedef GLclampf clampf_t;
@@ -190,8 +189,9 @@ struct draw_elements_indirect_cmd
 	uint_t base_instance; // reserved on ES
 };
 
-// TODO: straight uvec3 or this, or a struct of 3 uint ?
 /*
+// TODO: straight uvec3 or this, or a struct of 3 uint ?
+// Should this just be a typedef of uvec3?
 struct dispatch_indirect_cmd
 {
 	uvec3 num_groups;
