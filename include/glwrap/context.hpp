@@ -54,6 +54,15 @@ public:
 
 		//glutDestroyWindow(w);
 #endif
+
+		detail::g_current_context = this;
+	}
+
+	~context()
+	{
+		detail::g_current_context = nullptr;
+
+		// TODO: de-init
 	}
 
 	context(context const&) = delete;
@@ -339,6 +348,7 @@ public:
 	void draw_arrays_indirect(primitive _mode, buffer_iterator<draw_arrays_indirect_cmd, A> _cmd,
 		sizei_t _drawcount = 1)
 	{
+		// TODO: even bother unbinding this?
 		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
 
 		if (GL_ARB_multi_draw_indirect)
@@ -387,6 +397,7 @@ public:
 	void draw_elements_indirect(primitive _mode, buffer_iterator<draw_elements_indirect_cmd, A> _cmd,
 		sizei_t _drawcount = 1)
 	{
+		// TODO: even bother unbinding this?
 		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
 
 		if (GL_ARB_multi_draw_indirect)
@@ -569,6 +580,10 @@ public:
 			GLWRAP_EC_CALL(glEnable)(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 			GLWRAP_EC_CALL(glEnable)(GL_DEBUG_OUTPUT);
 		}
+		else
+		{
+			detail::g_check_every_gl_call = true;
+		}
 	}
 
 	void disable_debugging()
@@ -576,6 +591,10 @@ public:
 		if (GL_KHR_debug)
 		{
 			GLWRAP_EC_CALL(glDisable)(GL_DEBUG_OUTPUT);
+		}
+		else
+		{
+			detail::g_check_every_gl_call = false;
 		}
 	}
 

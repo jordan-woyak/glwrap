@@ -184,7 +184,6 @@ public:
 	set(value_type _val)
 	{
 		GLWRAP_EC_CALL(glBlendColor)(_val.r, _val.g, _val.b, _val.a);
-		check_unlikely_error();
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL
@@ -206,7 +205,6 @@ public:
 	set(const value_type& _val)
 	{
 		GLWRAP_EC_CALL(glClearColor)(_val.r, _val.g, _val.b, _val.a);
-		check_unlikely_error();
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL
@@ -228,7 +226,6 @@ public:
 	set(value_type _val)
 	{
 		GLWRAP_EC_CALL(glClearDepthf)(_val);
-		check_unlikely_error();
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL
@@ -250,7 +247,6 @@ public:
 	set(value_type _val)
 	{
 		GLWRAP_EC_CALL(glClearStencil)(_val);
-		check_unlikely_error();
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL

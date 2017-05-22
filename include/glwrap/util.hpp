@@ -85,15 +85,6 @@ void check_error(const char* func_name)
 	}
 }
 
-// TODO: use/kill this?
-// TODO: have varying levels of unlikeliness
-GLWRAP_FUNC_DECL
-void
-check_unlikely_error()
-{
-	//check_error();
-}
-
 template <typename R, typename... Args>
 class gl_function_caller
 {
@@ -113,7 +104,8 @@ public:
 			
 			~dtor_checker()
 			{
-				check_error(name);
+				if (g_check_every_gl_call)
+					check_error(name);
 			}
 		};
 

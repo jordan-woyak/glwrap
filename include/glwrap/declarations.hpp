@@ -54,8 +54,14 @@ typedef double_t depth_t;
 template <typename T, sizei_t N>
 using array = std::array<T, N>;
 
+class context;
+
 namespace detail
 {
+
+// TODO: These globals are ugly!!
+thread_local context* g_current_context = {};
+thread_local bool g_check_every_gl_call = {};
 	
 static const bool_t IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED = GL_FALSE;
 

@@ -40,6 +40,11 @@ public:
 	}
 #endif
 
+	~display()
+	{
+		// TODO: de-init
+	}
+
 	display(display const&) = delete;
 	display& operator=(display const&) = delete;
 

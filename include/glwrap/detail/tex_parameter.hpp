@@ -65,7 +65,6 @@ get_tex_parameter(GLenum _target, GLenum _pname)
 	T ret;
 
 	gl_get_tex_parameter<I>(_target, _pname, &ret);
-	check_unlikely_error();
 
 	return ret;
 }
@@ -146,7 +145,6 @@ typename std::enable_if<std::is_scalar<T>::value>::type
 set_tex_parameter(GLenum _target, GLenum _pname, T _param)
 {
 	gl_tex_parameter<I>(_target, _pname, _param);
-	check_unlikely_error();
 }
 
 template <bool I, typename T>

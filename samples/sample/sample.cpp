@@ -16,6 +16,11 @@ int main()
 
 	glc.enable_debugging();
 
+	std::cout << "Vendor: " << glc.get_vendor_name() << std::endl;
+	std::cout << "Renderer: " << glc.get_renderer_name() << std::endl;
+	std::cout << "Version: " << glc.get_version() << std::endl;
+	std::cout << "GLSL Version: " << glc.get_shading_language_version() << std::endl;
+
 	// create a texture, load the data (this needs some work)
 	gl::texture_2d tex(glc);
 	std::vector<gl::ubyte_t> texdata =
