@@ -50,6 +50,32 @@ typedef GLdouble double_t;
 // TODO: kill this
 typedef double_t depth_t;
 
+template <typename T>
+struct normalized
+{
+	static_assert(std::is_integral<T>::value, "normalized is only sane for integral types.");
+
+	// TODO: allow normalized ivec/uivec as well
+	
+	normalized& operator=(float_t _val)
+	{
+		// This is valid for both signed and unsigned types.
+		// OpenGL defines the range as [MIN + 1, MAX]
+		val = T(_val * std::numeric_limits<T>::max());
+		
+		return *this;
+	}
+	
+	T val;
+};
+
+typedef normalized<byte_t> norm_byte_t;
+typedef normalized<ubyte_t> norm_ubyte_t;
+typedef normalized<short_t> norm_short_t;
+typedef normalized<ushort_t> norm_ushort_t;
+typedef normalized<int_t> norm_int_t;
+typedef normalized<uint_t> norm_uint_t;
+
 // TODO: gl::array probably isn't needed
 template <typename T, sizei_t N>
 using array = std::array<T, N>;

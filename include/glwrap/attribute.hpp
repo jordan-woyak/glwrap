@@ -54,7 +54,9 @@ public:
 	location_type<T> get()
 	{
 		location_type<T> ind(m_current_index);
-		m_current_index += detail::attrib_index_count<T>::value;
+		m_current_index += detail::variable_traits<T>::attrib_index_count;
+
+		// TODO: keep track of the attrib_resource_count also.
 
 		if (m_current_index > m_max_vertex_attribs)
 			throw exception(0);

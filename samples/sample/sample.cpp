@@ -178,6 +178,7 @@ int main()
 	samp.set_min_filter(gl::texture_filter::linear);
 	samp.set_mag_filter(gl::texture_filter::nearest);
 
+	// TODO: is this needed?
 	//glc.enable(gl::capability::multisample);
 
 	gl::float_t rotate = 0;

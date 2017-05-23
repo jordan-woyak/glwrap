@@ -420,6 +420,7 @@ struct is_valid_shader_variable_type<T, typename std::enable_if<
 	>::type> : is_valid_shader_variable_type<typename std::remove_extent<T>::type>
 {};
 
+// TODO: kill this, I have it in attrib_traits
 // Breaks down a T vec,mat,array or T itself down to T
 template <typename T, typename Enable = void>
 struct underlying_type
