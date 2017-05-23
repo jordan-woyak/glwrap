@@ -105,25 +105,11 @@ public:
 	static const bool is_integral = variable_traits<value_type>::is_integral;
 };
 
+// Matrices are just an array of vecs
 template <typename T>
 struct variable_traits<T, typename std::enable_if<is_mat<T>::value>::type>
-{
-	// TODO: just impl in terms of a vec array
-private:
-	typedef detail::mat_traits<T> traits;
-	typedef typename traits::value_type value_type;
-
-public:
-	typedef value_type underlying_type;
-
-	static const int component_count = traits::cols * traits::rows;
-	static const int attrib_index_count = traits::cols;
-	static const int attrib_resource_count =
-		variable_traits<value_type>::attrib_resource_count * attrib_index_count;
-	
-	static const enum_t type_enum = variable_traits<value_type>::type_enum;
-	static const bool is_integral = variable_traits<value_type>::is_integral;
-};
+	: variable_traits<typename T::col_type[mat_traits<T>::cols]>
+{};
 
 template <typename ShaderT, typename InputT, bool Normalize>
 typename std::enable_if<variable_traits<ShaderT>::attrib_index_count == 1 && !variable_traits<ShaderT>::is_integral>::type
