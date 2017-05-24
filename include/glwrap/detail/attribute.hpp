@@ -70,12 +70,12 @@ struct variable_traits<T, typename std::enable_if<std::is_scalar<T>::value>::typ
 
 template <typename T>
 struct variable_traits<T, typename std::enable_if<is_vec<T>::value>::type>
-{
+{	
 private:
 	typedef detail::vec_traits<T> traits;
-	typedef typename traits::value_type value_type;
 
 public:
+	typedef typename traits::value_type value_type;
 	typedef value_type underlying_type;
 
 	static const int component_count = traits::dimensions;
@@ -84,16 +84,19 @@ public:
 	
 	static const enum_t type_enum = variable_traits<value_type>::type_enum;
 	static const bool is_integral = variable_traits<value_type>::is_integral;
+
+	static_assert(sizeof(T) == sizeof(value_type) * component_count,
+		"Sanity check. Code assumes containers are exactly the size of their contents.");
 };
 
 template <typename T>
 struct variable_traits<T, typename std::enable_if<std::is_array<T>::value>::type>
 {
 private:
-	typedef typename std::remove_extent<T>::type value_type;
 	static const int length = std::extent<T>::value;
 
 public:
+	typedef typename std::remove_extent<T>::type value_type;
 	typedef typename variable_traits<value_type>::underlying_type underlying_type;
 
 	static const int component_count = variable_traits<value_type>::component_count * length;
@@ -103,6 +106,9 @@ public:
 	
 	static const enum_t type_enum = variable_traits<value_type>::type_enum;
 	static const bool is_integral = variable_traits<value_type>::is_integral;
+
+	static_assert(sizeof(T) == sizeof(value_type) * length,
+		"Sanity check. Code assumes containers are exactly the size of their contents.");
 };
 
 // Matrices are just an array of vecs
@@ -112,53 +118,31 @@ struct variable_traits<T, typename std::enable_if<is_mat<T>::value>::type>
 {};
 
 template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<variable_traits<ShaderT>::attrib_index_count == 1 && !variable_traits<ShaderT>::is_integral>::type
+typename std::enable_if<!variable_traits<ShaderT>::is_integral>::type
+inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
+{
+	typedef variable_traits<InputT> traits;
+
+	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
+	{
+		GLWRAP_EC_CALL(glVertexAttribFormat)(
+			_index + i, traits::component_count / traits::attrib_index_count,
+			traits::type_enum, Normalize, _offset + i * sizeof(InputT) / traits::attrib_index_count);
+	}
+}
+
+template <typename ShaderT, typename InputT, bool Normalize>
+typename std::enable_if<variable_traits<ShaderT>::is_integral>::type
 inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 {
 	typedef variable_traits<InputT> traits;
 	
-	GLWRAP_EC_CALL(glVertexAttribFormat)(_index, traits::component_count, traits::type_enum, Normalize, _offset);
-}
-
-template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<variable_traits<ShaderT>::attrib_index_count == 1 && variable_traits<ShaderT>::is_integral>::type
-inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
-{
-	typedef variable_traits<InputT> traits;
-	
-	GLWRAP_EC_CALL(glVertexAttribIFormat)(_index, traits::component_count, traits::type_enum, _offset);
-}
-
-template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<std::is_array<ShaderT>::value>::type
-inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
-{
-	// The array element types:
-	typedef typename std::remove_extent<ShaderT>::type shader_type;
-	typedef typename std::remove_extent<InputT>::type input_type;
-	
-	const uint_t length = std::extent<ShaderT>::value;
-	// Index count per element
-	const uint_t index_count = detail::variable_traits<shader_type>::attrib_index_count;
-
-	for (uint_t i = 0; i != length; ++i)
-		gl_vertex_attrib_format<shader_type, input_type, Normalize>
-			(_index + index_count * i, _offset + sizeof(input_type) * i);
-}
-
-template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<is_mat<ShaderT>::value>::type
-inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
-{
-	// Matrices are treated as a Cols-length array of vecs
-	
-	typedef typename ShaderT::col_type shader_col_type;
-	typedef typename InputT::col_type input_col_type;
-	
-	constexpr uint_t length = mat_traits<ShaderT>::cols;
-	
-	gl_vertex_attrib_format<shader_col_type[length], input_col_type[length], Normalize>
-		(_index, _offset);
+	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
+	{
+		GLWRAP_EC_CALL(glVertexAttribIFormat)(
+			_index + i, traits::component_count / traits::attrib_index_count,
+			traits::type_enum, _offset + i * sizeof(InputT) / traits::attrib_index_count);
+	}
 }
 
 template <typename ShaderT>
@@ -189,53 +173,31 @@ inline void gl_disable_vertex_attrib_array(uint_t _index)
 }
 
 template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<variable_traits<ShaderT>::attrib_index_count == 1 && !variable_traits<ShaderT>::is_integral>::type
+typename std::enable_if<!variable_traits<ShaderT>::is_integral>::type
 inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 {
 	typedef variable_traits<InputT> traits;
 	
-	GLWRAP_EC_CALL(glVertexArrayAttribFormat)(_vao, _index, traits::component_count, traits::type_enum, Normalize, _offset);
+	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
+	{
+		GLWRAP_EC_CALL(glVertexArrayAttribFormat)(_vao,
+			_index + i, traits::component_count / traits::attrib_index_count,
+			traits::type_enum, Normalize, _offset + i * sizeof(InputT) / traits::attrib_index_count);
+	}
 }
 
 template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<variable_traits<ShaderT>::attrib_index_count == 1 && variable_traits<ShaderT>::is_integral>::type
+typename std::enable_if<variable_traits<ShaderT>::is_integral>::type
 inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 {
 	typedef variable_traits<InputT> traits;
 	
-	GLWRAP_EC_CALL(glVertexArrayAttribIFormat)(_vao, _index, traits::component_count, traits::type_enum, _offset);
-}
-
-template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<std::is_array<ShaderT>::value>::type
-inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
-{
-	// The array element types:
-	typedef typename std::remove_extent<ShaderT>::type shader_type;
-	typedef typename std::remove_extent<InputT>::type input_type;
-	
-	const uint_t length = std::extent<ShaderT>::value;
-	// Index count per element
-	const uint_t index_count = detail::variable_traits<shader_type>::attrib_index_count;
-
-	for (uint_t i = 0; i != length; ++i)
-		gl_vertex_array_attrib_format<shader_type, input_type, Normalize>
-			(_vao, _index + index_count * i, _offset + sizeof(input_type) * i);
-}
-
-template <typename ShaderT, typename InputT, bool Normalize>
-typename std::enable_if<is_mat<ShaderT>::value>::type
-inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
-{
-	// Matrices are treated as a Cols-length array of vecs
-	
-	typedef typename ShaderT::col_type shader_col_type;
-	typedef typename InputT::col_type input_col_type;
-	
-	constexpr uint_t length = mat_traits<ShaderT>::cols;
-	
-	gl_vertex_array_attrib_format<shader_col_type[length], input_col_type[length], Normalize>
-		(_vao, _index, _offset);
+	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
+	{
+		GLWRAP_EC_CALL(glVertexArrayAttribIFormat)(_vao,
+			_index + i, traits::component_count / traits::attrib_index_count,
+			traits::type_enum, _offset + i * sizeof(InputT) / traits::attrib_index_count);
+	}
 }
 
 template <typename ShaderT>
