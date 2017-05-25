@@ -114,6 +114,13 @@ public:
 	{
 		// TODO: assert that Shader and Input type conversion is sensible
 		//static_assert(std::is_same<ShaderType, InputType>::value, "Currently, attrib types must match exactly..");
+
+		typedef detail::variable_traits<ShaderType> s_traits;
+		typedef detail::variable_traits<InputType> i_traits;
+
+		static_assert(s_traits::component_count == i_traits::component_count
+			&& s_traits::attrib_index_count == i_traits::attrib_index_count,
+			"Component and/or attribute index counts of input/attrib types does not match. Input is not sensible.");
 		
 		if (GL_ARB_direct_state_access)
 		{
