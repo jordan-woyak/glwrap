@@ -114,9 +114,6 @@ public:
 	template <typename ShaderType, typename InputType>
 	void set_attribute_format(const attribute_location<ShaderType>& _attrib, const vertex_buffer_binding_attribute<InputType>& _binding)
 	{
-		// TODO: assert that Shader and Input type conversion is sensible
-		//static_assert(std::is_same<ShaderType, InputType>::value, "Currently, attrib types must match exactly..");
-
 		typedef detail::variable_traits<ShaderType> s_traits;
 		typedef detail::variable_traits<InputType> i_traits;
 
