@@ -22,8 +22,9 @@ struct vertex_buffer_index
 
 // TODO: name? just vertex_binding?
 template <typename T>
-using vertex_buffer_binding = detail::buffer_index<detail::vertex_buffer_index, T>;
+using vertex_buffer_binding = detail::buffer_index_attribute<detail::vertex_buffer_index, T>;
 
+// TODO: ugly, kill one of these
 template <typename T>
 using vertex_buffer_binding_attribute = detail::buffer_index_attribute<detail::vertex_buffer_index, T>;
 
@@ -109,6 +110,7 @@ public:
 */
 
 	// TODO: separate Bind and Format / rename this
+	// TODO: templates are getting ugly
 	template <typename ShaderType, typename InputType>
 	void set_attribute_format(const attribute_location<ShaderType>& _attrib, const vertex_buffer_binding_attribute<InputType>& _binding)
 	{

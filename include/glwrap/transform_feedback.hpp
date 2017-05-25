@@ -18,9 +18,9 @@ struct transform_feedback_index
 
 // TODO: name? transform_feedback_buffer_binding ?
 template <typename T>
-using transform_feedback_binding = detail::buffer_index<detail::transform_feedback_index, T>;
+using transform_feedback_binding = detail::buffer_index_attribute<detail::transform_feedback_index, T>;
 
-// TODO: ugly
+// TODO: ugly, kill one of these
 template <typename T>
 using transform_feedback_binding_attribute = detail::buffer_index_attribute<detail::transform_feedback_index, T>;
 

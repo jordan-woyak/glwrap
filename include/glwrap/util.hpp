@@ -412,11 +412,6 @@ private:
 	index_type m_index;
 };
 
-template <typename B, typename T>
-using buffer_index = typed_index<uint_t, B, T>;
-
-// This is used for atomic counter, transform feedback, and vertex array
-// TODO: rename
 template <typename I, typename B, typename T>
 class typed_index_attribute
 {
@@ -445,9 +440,6 @@ private:
 	uint_t m_offset;
 };
 
-template <typename B, typename T>
-using buffer_index_attribute = typed_index_attribute<uint_t, B, T>;
-
 template <typename I, typename B, typename T, typename M>
 typed_index_attribute<I, B, M> operator|(typed_index_attribute<I, B, T> const& _attr, M T::*_member)
 {
@@ -457,20 +449,17 @@ typed_index_attribute<I, B, M> operator|(typed_index_attribute<I, B, T> const& _
 	return typed_index_attribute<I, B, M>(_attr.get_index(), _attr.get_offset() + detail::get_member_offset(_member));
 }
 
-// TODO: make this not needed
-template <typename I, typename B, typename T, typename M>
-typed_index_attribute<I, B, M> operator|(typed_index<I, B, T> const& _binding, M T::*_member)
-{
-	// TODO: only do this for types that need aligning:
-	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
-	
-	return typed_index_attribute<I, B, M>(_binding.get_index(), detail::get_member_offset(_member));
-}
+template <typename B, typename T>
+using buffer_index = typed_index<uint_t, B, T>;
 
+// TODO: kill this?
+template <typename B, typename T>
+using buffer_index_attribute = typed_index_attribute<uint_t, B, T>;
+
+/*
 template <typename T, typename A>
 class buffer_iterator;
 
-/*
 template <typename T>
 class optional_buffer_ptr
 {

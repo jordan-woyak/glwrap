@@ -13,9 +13,9 @@ struct atomic_counter_index
 
 // TODO: name
 template <typename T>
-using atomic_counter_binding = detail::buffer_index<detail::atomic_counter_index, T>;
+using atomic_counter_binding = detail::buffer_index_attribute<detail::atomic_counter_index, T>;
 
-// TODO: ugly
+// TODO: ugly, kill one of these
 template <typename T>
 using atomic_counter_binding_attribute = detail::buffer_index_attribute<detail::atomic_counter_index, T>;
 
