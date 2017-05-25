@@ -56,7 +56,8 @@ struct normalized
 	static_assert(std::is_integral<T>::value, "normalized is only sane for integral types.");
 
 	// TODO: allow normalized ivec/uivec as well
-	
+
+	// TODO: explicit?
 	normalized& operator=(float_t _val)
 	{
 		// This is valid for both signed and unsigned types.
@@ -64,6 +65,11 @@ struct normalized
 		val = T(_val * std::numeric_limits<T>::max());
 		
 		return *this;
+	}
+
+	explicit operator float_t() const
+	{
+		return float_t(val) / std::numeric_limits<T>::max();
 	}
 	
 	T val;

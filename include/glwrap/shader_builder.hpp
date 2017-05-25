@@ -155,6 +155,13 @@ private:
 		src += "#extension GL_ARB_explicit_uniform_location : require\n";
 		src += "#extension GL_ARB_explicit_attrib_location : require\n";
 		//src += "#extension ARB_shader_atomic_counters : require\n";
+
+		src += R"(
+#ifdef GL_ES
+precision mediump float;
+#endif
+)";
+		
 		for (auto& line : m_header_lines)
 			src += line;
 		src += m_source;
