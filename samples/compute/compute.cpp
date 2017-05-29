@@ -4,23 +4,25 @@
 
 #include "glwrap/gl.hpp"
 
-struct MyFoo
+struct MyUniformBlockData
 {
-	float m;
-	float p;
+	int val1;
+	int val2;
 };
 
-void get_struct_layout(gl::detail::struct_layout<MyFoo>& sl)
+void get_struct_layout(gl::detail::struct_layout<MyUniformBlockData>& sl)
 {
-	sl.add_member(&MyFoo::m, "m");
-	sl.add_member(&MyFoo::p, "p");
+	//sl.set_name("MyUniformBlockData");
 	
-	//sl.validate_layout(glc, &MyFoo::m, &MyFoo::p);
+	sl.add_member(&MyUniformBlockData::val1, "val1");
+	sl.add_member(&MyUniformBlockData::val2, "val2");
+	
+	//sl.validate_layout(glc);
 };
 
 int main()
 {
-	glewExperimental = true;
+	//glewExperimental = true;
 
 	gl::context glc;
 	gl::display dsp(glc, {120, 120});
@@ -74,7 +76,7 @@ int main()
 
 	gl::uniform_block_location_enumerator uniform_blocks(glc);
 
-	auto uniblock_loc = cshad.create_uniform_block(gl::variable<MyFoo>("my_uni", uniform_blocks));
+	auto uniblock_loc = cshad.create_uniform_block(gl::variable<MyUniformBlockData>("", uniform_blocks));
 
 	cshad.set_source(
 R"(
@@ -88,9 +90,12 @@ void main(void)
 	if (0 == gl_LocalInvocationIndex)
 	{
 		//uint i = data1.length();
-		atomicExchange(data1[1], 5);
+		atomicExchange(data1[0], 5);
 
-		data1[3] = data1.length();
+		data1[1] = data1.length();
+
+		data1[2] = val1;
+		data1[3] = val2;
 	}
 
 	if (gl_LocalInvocationIndex < operand1)
@@ -126,10 +131,15 @@ void main(void)
 	gl::buffer<MyCounterType> counter_buffer(glc);
 	counter_buffer.assign(std::vector<MyCounterType>(operands.size()), gl::buffer_usage::static_read);
 
+	// Create shader storage
 	gl::buffer<gl::int_t> storage_buffer(glc);
 	storage_buffer.assign(std::vector<gl::int_t>(32), gl::buffer_usage::static_read);
-
 	glc.bind_buffer(storage_loc, storage_buffer.begin(), 32);
+
+	// Create uniform block storage
+	gl::buffer<MyUniformBlockData, gl::detail::uniform_buffer_alignment> uniform_buffer(glc);
+	uniform_buffer.assign(std::vector<MyUniformBlockData>{{72,31}}, gl::buffer_usage::static_draw);
+	glc.bind_buffer(uniblock_loc, uniform_buffer.begin());
 
 	gl::buffer<gl::uvec3> cmdbuf(glc);
 	cmdbuf.storage(1, gl::buffer_usage::static_draw);

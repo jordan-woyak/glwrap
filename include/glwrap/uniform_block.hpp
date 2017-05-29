@@ -64,7 +64,7 @@ public:
 		if (m_current_index == m_max_uniform_buffer_bindings)
 			throw exception(0);
 
-		return {m_current_index++};
+		return uniform_block_location<T>(m_current_index++);
 	}
 
 private:

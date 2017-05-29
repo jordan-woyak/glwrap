@@ -497,6 +497,13 @@ public:
 		GLWRAP_EC_CALL(glBindBufferRange)(GL_SHADER_STORAGE_BUFFER, _binding.get_index(),
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _size);
 	}
+
+	template <typename T>
+	void bind_buffer(uniform_block_location<T> const& _binding, const uniform_buffer_iterator<T>& _iter)
+	{
+		GLWRAP_EC_CALL(glBindBufferRange)(GL_UNIFORM_BUFFER, _binding.get_index(),
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * 1);
+	}
 	
 	template <typename T>
 	void use_element_array(buffer<T>& _buff)
