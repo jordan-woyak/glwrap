@@ -481,10 +481,11 @@ public:
 		GLWRAP_EC_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
 	}
 
-	// TODO: iterator needs to be atomic counter aligned
 	template <typename T, sizei_t S>
 	void bind_buffer(atomic_counter_binding<T> const& _binding, const static_buffer_iterator<T, S>& _iter)
 	{
+		static_assert(S % 4 == 0, "Atomic counter buffer must be aligned to 4 bytes.");
+		
 		GLWRAP_EC_CALL(glBindBufferRange)(GL_ATOMIC_COUNTER_BUFFER, _binding.get_index(),
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
 	}

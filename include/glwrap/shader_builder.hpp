@@ -96,10 +96,10 @@ public:
 		get_struct_layout(sl);
 		
 		std::string def =
-			"layout(" + _desc.get_layout().get_string() + ")	 uniform "
+			"layout(" + _desc.get_layout().get_string() + ") uniform "
 			+ _desc.get_name() + "_block { "
 			+ sl.get_definitions_string()
-			+ " };\n";
+			+ " } " + _desc.get_name() + ";\n";
 		
 		m_header_lines.emplace_back(def);
 

@@ -76,7 +76,7 @@ int main()
 
 	gl::uniform_block_location_enumerator uniform_blocks(glc);
 
-	auto uniblock_loc = cshad.create_uniform_block(gl::variable<MyUniformBlockData>("", uniform_blocks));
+	auto uniblock_loc = cshad.create_uniform_block(gl::variable<MyUniformBlockData>("ublock", uniform_blocks));
 
 	cshad.set_source(
 R"(
@@ -94,8 +94,8 @@ void main(void)
 
 		data1[1] = data1.length();
 
-		data1[2] = val1;
-		data1[3] = val2;
+		data1[2] = ublock.val1;
+		data1[3] = ublock.val2;
 	}
 
 	if (gl_LocalInvocationIndex < operand1)

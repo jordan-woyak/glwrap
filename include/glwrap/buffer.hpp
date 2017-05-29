@@ -14,15 +14,16 @@ namespace detail
 {
 
 // TODO: move these elsewhere?
-struct uniform_buffer_alignment
+template <enum_t Param>
+struct parameter_alignment
 {
-	uniform_buffer_alignment(sizei_t _size)
+	parameter_alignment(sizei_t _size)
 	{
 		// TODO: would be nice to not call this for every buffer.
 		auto const element_size = _size;
-		auto const ubo_alignment = detail::get_parameter<int_t>(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT);
+		auto const req_alignment = detail::get_parameter<int_t>(Param);
 
-		m_stride = ((element_size + ubo_alignment - 1) / ubo_alignment) * ubo_alignment;
+		m_stride = ((element_size + req_alignment - 1) / req_alignment) * req_alignment;
 	}
 
 	sizei_t get_stride() const
@@ -33,6 +34,9 @@ struct uniform_buffer_alignment
 private:
 	sizei_t m_stride;
 };
+
+typedef parameter_alignment<GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT> uniform_buffer_alignment;
+typedef parameter_alignment<GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT> shader_storage_buffer_alignment;
 
 template <sizei_t Stride>
 struct static_buffer_alignment
@@ -74,6 +78,9 @@ class buffer_iterator;
 
 template <typename T>
 using uniform_buffer_iterator = buffer_iterator<T, detail::uniform_buffer_alignment>;
+
+template <typename T>
+using shader_storage_buffer_iterator = buffer_iterator<T, detail::shader_storage_buffer_alignment>;
 
 template <typename T, sizei_t N>
 using static_buffer_iterator = buffer_iterator<T, detail::static_buffer_alignment<N>>;

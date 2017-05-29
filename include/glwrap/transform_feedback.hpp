@@ -86,7 +86,8 @@ public:
 	template <typename T, sizei_t S>
 	void bind_buffer(transform_feedback_binding<T> const& _binding, const static_buffer_iterator<T, S>& _iter, sizei_t _size)
 	{
-		// TODO: check strides for alignment ?
+		// TODO: needs to be 8 for doubles:
+		static_assert(S % 4 == 0, "Transform Feedback buffer must be aligned to 4 bytes.");
 
 		// TODO: make not needed
 		detail::scoped_value<detail::parameter::transform_feedback> binding(native_handle());
