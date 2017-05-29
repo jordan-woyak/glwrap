@@ -26,7 +26,8 @@ public:
 		return m_index;
 	}
 
-private:
+// TODO: make more explicit perhaps..
+//private:
 	attribute_location(int_t _index)
 		: m_index(_index)
 	{}

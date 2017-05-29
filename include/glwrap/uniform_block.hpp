@@ -72,31 +72,32 @@ private:
 	int_t m_max_uniform_buffer_bindings;
 };
 
-/*
-template <typename T>
-class uniform_block_definition
-{
-	friend class program;
+// TODO: can shader storage and uniform block share the layout type?
 
+// TODO: detail namespace
+// TODO: name
+template <typename T>
+class uniform_block_layout
+{
 public:
-	template <typename A>
-	uniform_block_definition& operator()(A T::*_member, const std::string& _name)
+	typedef uniform_block_location<T> location_type;
+
+	uniform_block_layout(const location_type& _loc)
+		: m_location(_loc)
+	{}
+
+	location_type get_location() const
 	{
-		register_member(_member, _name);
-		return *this;
+		return m_location;
 	}
 
-	template <typename A>
-	void register_member(A T::*_member, const std::string& _name)
+	std::string get_string() const
 	{
-		m_members[detail::get_member_offset(_member)] =
-			std::unique_ptr<detail::variable_base>(new detail::variable<A>(_name));
+		return "binding = " + std::to_string(m_location.get_index());
 	}
 
 private:
-	// TODO: shared_ptr can be killed
-	std::map<std::size_t, std::shared_ptr<detail::variable_base>> m_members;
+	location_type m_location;
 };
-*/
 
 }

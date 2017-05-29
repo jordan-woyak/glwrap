@@ -87,6 +87,16 @@ auto variable(std::string _name, shader_storage_location_enumerator& _enum)
 	return {std::move(_name), _enum.template get<T>()};
 }
 
+// Uniform Block
+template <typename T>
+auto variable(std::string _name, uniform_block_location_enumerator& _enum)
+	-> variable_description<T, uniform_block_layout<T>>
+{
+	// TODO: require T is struct
+	
+	return {std::move(_name), _enum.template get<T>()};
+}
+
 /*
 // TODO: templatify all the location types so this can assume the variable type from the location
 template <typename T, typename L>

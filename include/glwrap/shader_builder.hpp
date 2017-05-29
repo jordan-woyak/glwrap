@@ -89,6 +89,24 @@ public:
 	}
 
 	template <typename P, typename L>
+	auto create_uniform_block(const variable_description<P, L>& _desc)
+		-> typename variable_description<P, L>::layout_type::location_type
+	{
+		gl::detail::struct_layout<P> sl;
+		get_struct_layout(sl);
+		
+		std::string def =
+			"layout(" + _desc.get_layout().get_string() + ")	 uniform "
+			+ _desc.get_name() + "_block { "
+			+ sl.get_definitions_string()
+			+ " };\n";
+		
+		m_header_lines.emplace_back(def);
+
+		return _desc.get_layout().get_location();
+	}
+
+	template <typename P, typename L>
 	auto create_storage(const variable_description<P, L>& _desc)
 		-> typename variable_description<P, L>::layout_type::location_type
 	{
@@ -105,24 +123,6 @@ public:
 		return _desc.get_layout().get_location();
 	}
 
-/*
-	template <typename P>
-	typename detail::shader_io_type<T, P>::input_type
-	assume_input(std::string const& _name)
-	{
-		m_assumed_vars.emplace_back(new detail::variable<P>(_name));
-		return std::prev(m_assumed_vars.end());
-	}
-
-	template <typename P>
-	typename detail::shader_io_type<T, P>::output_type
-	assume_output(std::string const& _name)
-	{
-		m_assumed_vars.emplace_back(new detail::variable<P>(_name));
-		return std::prev(m_assumed_vars.end());
-	}
-*/
-
 	// TODO: should this just take and modify a shader?
 	basic_shader<T> create_shader(context& _glc) const
 	{
@@ -137,7 +137,7 @@ public:
 	{
 		std::string const src = generate_full_source();
 		std::array<const char*, 1> srcs = {src.c_str()};
-		return program(GLWRAP_EC_CALL(glCreateShaderProgramv)(shader_type, srcs.size(), srcs.data()));
+		return program(GLWRAP_EC_CALL(glCreateShaderProgramv)(shader_type, srcs.size(), srcs.data()), adopt_handle);
 	}
 
 private:

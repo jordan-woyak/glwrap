@@ -4,6 +4,20 @@
 
 #include "glwrap/gl.hpp"
 
+struct MyFoo
+{
+	float m;
+	float p;
+};
+
+void get_struct_layout(gl::detail::struct_layout<MyFoo>& sl)
+{
+	sl.add_member(&MyFoo::m, "m");
+	sl.add_member(&MyFoo::p, "p");
+	
+	//sl.validate_layout(glc, &MyFoo::m, &MyFoo::p);
+};
+
 int main()
 {
 	glewExperimental = true;
@@ -12,10 +26,18 @@ int main()
 	gl::display dsp(glc, {120, 120});
 	dsp.set_caption("glwrap-compute");
 
+	glc.enable_debugging();
+
 	std::cout << "Vendor: " << glc.get_vendor_name() << std::endl;
 	std::cout << "Renderer: " << glc.get_renderer_name() << std::endl;
 	std::cout << "Version: " << glc.get_version() << std::endl;
 	std::cout << "GLSL Version: " << glc.get_shading_language_version() << std::endl;
+
+	/*template <typename T>
+	struct struct_layout<MyFoo>
+	{
+		static const int i = 0;
+	};*/
 
 	struct MyCounterType
 	{
@@ -49,6 +71,10 @@ int main()
 	//auto storage_loc = storages.get<gl::int_t>();
 
 	auto storage_loc = cshad.create_storage(gl::variable<gl::int_t[]>("data1", storages));
+
+	gl::uniform_block_location_enumerator uniform_blocks(glc);
+
+	auto uniblock_loc = cshad.create_uniform_block(gl::variable<MyFoo>("my_uni", uniform_blocks));
 
 	cshad.set_source(
 R"(

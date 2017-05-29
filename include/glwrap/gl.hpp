@@ -9,7 +9,6 @@
 #include "uniform.hpp"
 #include "shader.hpp"
 #include "program.hpp"
-#include "shader_builder.hpp"
 
 #ifndef GLWRAP_NO_SFML
 #include "display.hpp"
@@ -27,6 +26,9 @@
 
 #include "framebuffer.hpp"
 #include "renderbuffer.hpp"
+
+#include "interface_block.hpp"
+#include "shader_builder.hpp"
 
 #include "vertex_array.hpp"
 
