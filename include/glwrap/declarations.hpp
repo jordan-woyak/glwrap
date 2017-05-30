@@ -18,6 +18,7 @@
 #include <glm/gtx/type_trait.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/integer.hpp>
 
 #include <type_traits>
 #include <array>

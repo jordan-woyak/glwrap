@@ -113,6 +113,14 @@ void main(void)
 	if (!prog.is_good())
 		return 1;
 
+	gl::buffer_pool bpool(glc);
+
+	bpool.get<gl::int_t>(45);
+	bpool.get<gl::int_t>(45);
+	bpool.get<gl::int_t>(45);
+	bpool.get<gl::int_t>(1024*1024);
+	bpool.get<gl::int_t>(1024);
+
 	std::vector<gl::float_t> operands =
 	{
 		0, 250, 112, 723, 300, 100
