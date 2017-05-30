@@ -490,13 +490,11 @@ public:
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
 	}
 
-	// TODO: iterator needs to be shader storage aligned
-	// TODO: end iterator might be more sensible
-	template <typename T, sizei_t S>
-	void bind_buffer(shader_storage_location<T[]> const& _binding, const static_buffer_iterator<T, S>& _iter, sizei_t _size)
+	template <typename T>
+	void bind_buffer(shader_storage_location<T> const& _binding, const shader_storage_buffer_iterator<T>& _iter)
 	{
 		GLWRAP_EC_CALL(glBindBufferRange)(GL_SHADER_STORAGE_BUFFER, _binding.get_index(),
-			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _size);
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * 1);
 	}
 
 	template <typename T>

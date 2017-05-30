@@ -92,38 +92,23 @@ public:
 	auto create_uniform_block(const variable_description<P, L>& _desc)
 		-> typename variable_description<P, L>::layout_type::location_type
 	{
-		gl::detail::struct_layout<P> sl;
-		get_struct_layout(sl);
-		
-		std::string def =
-			"layout(" + _desc.get_layout().get_string() + ") uniform "
-			+ _desc.get_name() + "_block { "
-			+ sl.get_definitions_string()
-			+ " } " + _desc.get_name() + ";\n";
-		
-		m_header_lines.emplace_back(def);
+		m_header_lines.emplace_back(get_glsl_block_definition<P>("uniform", _desc));
 
 		return _desc.get_layout().get_location();
 	}
 
+	// TODO: rename ?
 	template <typename P, typename L>
-	auto create_storage(const variable_description<P, L>& _desc)
+	auto create_storage_block(const variable_description<P, L>& _desc)
 		-> typename variable_description<P, L>::layout_type::location_type
 	{
-		std::string def =
-			"layout(" + _desc.get_layout().get_string() + ") buffer "
-			+ _desc.get_name() + "_block { "
-			+ detail::get_type_name<P>()
-			+ " " + _desc.get_name()
-			+ detail::glsl_var_suffix<P>::suffix()
-			+ "; };\n";
-		
-		m_header_lines.emplace_back(def);
+		m_header_lines.emplace_back(get_glsl_block_definition<P>("buffer", _desc));
 
 		return _desc.get_layout().get_location();
 	}
 
 	// TODO: should this just take and modify a shader?
+	// TODO: rename to generate_ or build_ ?
 	basic_shader<T> create_shader(context& _glc) const
 	{
 		basic_shader<T> result(_glc);
@@ -133,6 +118,7 @@ public:
 	}
 
 	// TODO: rename? create a single stage program for program pipelines
+	// TODO: rename to generate_ or build_ ?
 	program create_shader_program(context& _glc) const
 	{
 		std::string const src = generate_full_source();
@@ -171,19 +157,52 @@ precision mediump float;
 
 	// TODO: move this elsewhere:
 	template <typename P, typename L>
-	std::string get_glsl_definition(const std::string& _prefix, const variable_description<P, L>& _desc) const
+	std::string get_glsl_definition(const std::string& _storage_qualifier, const variable_description<P, L>& _desc) const
 	{
 		// TODO: support unspecified location
 		// TODO: support dualsource: layout(location = 0, index = 1)
 		// TODO: support fragdata: layout(xfb_buffer = 2, xfb_offset = 0)
+
+		std::string result;
+
+		std::string layout = _desc.get_layout().get_string();
+		if (!layout.empty())
+			result += "layout(" + layout + ") ";
 		
-		return
-			"layout(" + _desc.get_layout().get_string() + ") "
-			+ _prefix + " "
+		result += _storage_qualifier + " "
 			+ detail::get_type_name<P>()
 			+ " " + _desc.get_name()
 			+ detail::glsl_var_suffix<P>::suffix()
 			+ ";\n";
+
+			return result;
+	}
+
+	// TODO: this is a lot of duplicate code..
+	template <typename P, typename L>
+	std::string get_glsl_block_definition(const std::string& _storage_qualifier, const variable_description<P, L>& _desc) const
+	{
+		// TODO: need to allow for unique block names..
+		
+		std::string result;
+
+		detail::struct_layout<P> sl;
+		get_struct_layout(sl);
+
+		std::string layout = _desc.get_layout().get_string();
+		if (!layout.empty())
+			result += "layout(" + layout + ") ";
+		
+		result += _storage_qualifier + " " + sl.get_name() + " \n{\n";
+
+		for (auto& m : sl.members)
+			result += "\t" + m.definition + ";\n";
+
+		result += "} " + _desc.get_name()
+			+ detail::glsl_var_suffix<P>::suffix()
+			+ ";\n";
+
+			return result;
 	}
 
 	std::string m_source;

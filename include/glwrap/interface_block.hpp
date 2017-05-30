@@ -12,6 +12,16 @@ namespace detail
 template <typename T>
 struct struct_layout
 {
+	const std::string& get_name() const
+	{
+		return m_name;
+	}
+	
+	void set_name(std::string _name)
+	{
+		m_name = std::move(_name);
+	}
+	
 	template <typename M>
 	void add_member(M T::*_member, const std::string& _name)
 	{		
@@ -87,6 +97,8 @@ void main() {}
 		return std::move(ret);
 	}
 
+// TODO: private
+
 	struct member
 	{
 		std::string name;
@@ -95,6 +107,7 @@ void main() {}
 		int_t offset;
 	};
 
+	std::string m_name;
 	std::vector<member> members;
 };
 

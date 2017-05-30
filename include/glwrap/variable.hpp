@@ -81,8 +81,8 @@ template <typename T>
 auto variable(std::string _name, shader_storage_location_enumerator& _enum)
 	-> variable_description<T, shader_storage_layout<T>>
 {
-	static_assert(std::is_array<T>::value && 0 == std::extent<T>::value,
-		"Shader storage currently only supports arrays of indeterminate length.");
+	//static_assert(std::is_array<T>::value && 0 == std::extent<T>::value,
+		//"Shader storage currently only supports arrays of indeterminate length.");
 	
 	return {std::move(_name), _enum.template get<T>()};
 }

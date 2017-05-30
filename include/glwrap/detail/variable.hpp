@@ -17,6 +17,7 @@
 namespace GLWRAP_NAMESPACE
 {
 
+// TODO: rename opaque ?
 namespace shader
 {
 
@@ -116,6 +117,9 @@ struct atomic
 namespace detail
 {
 
+template <typename T>
+struct struct_layout;
+
 typedef std::string type_name_t;
 
 // glsl variable name suffix
@@ -129,6 +133,7 @@ struct glsl_var_suffix<T, typename std::enable_if<std::is_array<T>::value>::type
 	{
 		std::string ext;
 
+		// TODO: is a zero-sized array mapping to an unbounded array sensible?
 		if (std::extent<T>::value)
 			ext = std::to_string(std::extent<T>::value);
 		

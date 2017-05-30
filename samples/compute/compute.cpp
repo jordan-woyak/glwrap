@@ -10,9 +10,14 @@ struct MyUniformBlockData
 	int val2;
 };
 
+struct MyShaderStorageData
+{
+	int data1[32];
+};
+
 void get_struct_layout(gl::detail::struct_layout<MyUniformBlockData>& sl)
 {
-	//sl.set_name("MyUniformBlockData");
+	sl.set_name("MyUniformBlockData");
 	
 	sl.add_member(&MyUniformBlockData::val1, "val1");
 	sl.add_member(&MyUniformBlockData::val2, "val2");
@@ -20,10 +25,17 @@ void get_struct_layout(gl::detail::struct_layout<MyUniformBlockData>& sl)
 	//sl.validate_layout(glc);
 };
 
+void get_struct_layout(gl::detail::struct_layout<MyShaderStorageData>& sl)
+{
+	sl.set_name("MyShaderStorageData");
+	
+	sl.add_member(&MyShaderStorageData::data1, "data1");
+	
+	//sl.validate_layout(glc);
+};
+
 int main()
 {
-	//glewExperimental = true;
-
 	gl::context glc;
 	gl::display dsp(glc, {120, 120});
 	dsp.set_caption("glwrap-compute");
@@ -35,28 +47,11 @@ int main()
 	std::cout << "Version: " << glc.get_version() << std::endl;
 	std::cout << "GLSL Version: " << glc.get_shading_language_version() << std::endl;
 
-	/*template <typename T>
-	struct struct_layout<MyFoo>
-	{
-		static const int i = 0;
-	};*/
-
 	struct MyCounterType
 	{
 		gl::uint_t counter1;
 		gl::uint_t counter2;
 	};
-
-#if 0
-	struct MyInput
-	{
-		gl::layout::std140<gl::float_t> input1;
-		gl::layout::std140<gl::vec2> input2;
-		gl::layout::std140<gl::vec3> input3;
-
-		//gl::layout::std140<gl::mat4> input4;
-	};
-#endif
 
 	gl::compute_shader_builder cshad(glc);
 
@@ -70,18 +65,13 @@ int main()
 	cshad.create_uniform(gl::variable("counter2", counter_loc | &MyCounterType::counter2));
 
 	gl::shader_storage_location_enumerator storages(glc);
-	//auto storage_loc = storages.get<gl::int_t>();
-
-	auto storage_loc = cshad.create_storage(gl::variable<gl::int_t[]>("data1", storages));
+	auto storage_loc = cshad.create_storage_block(gl::variable<MyShaderStorageData>("", storages));
 
 	gl::uniform_block_location_enumerator uniform_blocks(glc);
-
 	auto uniblock_loc = cshad.create_uniform_block(gl::variable<MyUniformBlockData>("ublock", uniform_blocks));
 
 	cshad.set_source(
 R"(
-
-//buffer int foo[2];
 
 layout(local_size_x = 100, local_size_y = 10) in;
 
@@ -132,9 +122,9 @@ void main(void)
 	counter_buffer.assign(std::vector<MyCounterType>(operands.size()), gl::buffer_usage::static_read);
 
 	// Create shader storage
-	gl::buffer<gl::int_t> storage_buffer(glc);
-	storage_buffer.assign(std::vector<gl::int_t>(32), gl::buffer_usage::static_read);
-	glc.bind_buffer(storage_loc, storage_buffer.begin(), 32);
+	gl::buffer<MyShaderStorageData, gl::detail::shader_storage_buffer_alignment> storage_buffer(glc);
+	storage_buffer.assign(std::vector<MyShaderStorageData>{{}}, gl::buffer_usage::static_read);
+	glc.bind_buffer(storage_loc, storage_buffer.begin());
 
 	// Create uniform block storage
 	gl::buffer<MyUniformBlockData, gl::detail::uniform_buffer_alignment> uniform_buffer(glc);
@@ -171,7 +161,7 @@ void main(void)
 
 	glc.memory_barrier(gl::memory_barrier::buffer_update);
 
-	for (auto& datum : gl::map_buffer(storage_buffer))
+	for (auto& datum : gl::map_buffer(storage_buffer).begin()->data1)
 		std::cout << datum << ' ';
 
 	std::cout << std::endl;
