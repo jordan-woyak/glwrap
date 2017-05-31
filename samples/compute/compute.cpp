@@ -115,11 +115,13 @@ void main(void)
 
 	gl::buffer_pool bpool(glc);
 
-	bpool.get<gl::int_t>(45);
-	bpool.get<gl::int_t>(45);
-	bpool.get<gl::int_t>(45);
-	bpool.get<gl::int_t>(1024*1024);
-	bpool.get<gl::int_t>(1024);
+	//bpool.get<gl::int_t>(45);
+	//bpool.get<gl::int_t>(45);
+	//bpool.get<gl::int_t>(45);
+	//bpool.get<gl::int_t>(1024*1024);
+	//bpool.get<gl::int_t>(1024);
+
+	bpool.debug_stats();
 
 	std::vector<gl::float_t> operands =
 	{
@@ -128,6 +130,7 @@ void main(void)
 
 	gl::buffer<MyCounterType> counter_buffer(glc);
 	counter_buffer.assign(std::vector<MyCounterType>(operands.size()), gl::buffer_usage::static_read);
+	//auto counter_buffer = bpool.get<MyCounterType>(operands.size());
 
 	// Create shader storage
 	gl::buffer<MyShaderStorageData, gl::detail::shader_storage_buffer_alignment> storage_buffer(glc);
@@ -135,13 +138,12 @@ void main(void)
 	glc.bind_buffer(storage_loc, storage_buffer.begin());
 
 	// Create uniform block storage
-	gl::buffer<MyUniformBlockData, gl::detail::uniform_buffer_alignment> uniform_buffer(glc);
-	uniform_buffer.assign(std::vector<MyUniformBlockData>{{72,31}}, gl::buffer_usage::static_draw);
+	auto uniform_buffer = bpool.get<MyUniformBlockData, gl::detail::uniform_buffer_alignment>(1);
+	uniform_buffer.assign_range((MyUniformBlockData[]){{72, 31}}, 0);
 	glc.bind_buffer(uniblock_loc, uniform_buffer.begin());
 
-	gl::buffer<gl::uvec3> cmdbuf(glc);
-	cmdbuf.storage(1, gl::buffer_usage::static_draw);
-	cmdbuf.assign_range((gl::uvec3[]){ {5, 1, 1} }, 0);
+	auto cmdbuf = bpool.get<gl::uvec3>(1);
+	cmdbuf.assign_range((gl::uvec3[]){{5, 1, 1}}, 0);
 
 	// Compute
 	glc.use_program(prog);
