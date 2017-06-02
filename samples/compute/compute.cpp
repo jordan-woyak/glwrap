@@ -12,7 +12,7 @@ struct MyUniformBlockData
 
 struct MyShaderStorageData
 {
-	int data1[32];
+	int data1[12];
 };
 
 void get_struct_layout(gl::detail::struct_layout<MyUniformBlockData>& sl)
@@ -84,6 +84,9 @@ void main(void)
 
 		data1[1] = data1.length();
 
+		//data1[0] = ublock.val1;
+		//data1[1] = ublock.val2;
+
 		data1[2] = ublock.val1;
 		data1[3] = ublock.val2;
 	}
@@ -121,21 +124,19 @@ void main(void)
 	//bpool.get<gl::int_t>(1024*1024);
 	//bpool.get<gl::int_t>(1024);
 
-	bpool.debug_stats();
-
 	std::vector<gl::float_t> operands =
 	{
 		0, 250, 112, 723, 300, 100
 	};
 
-	gl::buffer<MyCounterType> counter_buffer(glc);
-	counter_buffer.assign(std::vector<MyCounterType>(operands.size()), gl::buffer_usage::static_read);
-	//auto counter_buffer = bpool.get<MyCounterType>(operands.size());
-
 	// Create shader storage
-	gl::buffer<MyShaderStorageData, gl::detail::shader_storage_buffer_alignment> storage_buffer(glc);
-	storage_buffer.assign(std::vector<MyShaderStorageData>{{}}, gl::buffer_usage::static_read);
+	auto storage_buffer = bpool.get<MyShaderStorageData, gl::detail::shader_storage_buffer_alignment>(1);
+	storage_buffer.assign_range(std::vector<MyShaderStorageData>(1), 0);
 	glc.bind_buffer(storage_loc, storage_buffer.begin());
+
+	// Create counter buffer
+	auto counter_buffer = bpool.get<MyCounterType>(operands.size());
+	counter_buffer.assign_range(std::vector<MyCounterType>(operands.size()), 0);
 
 	// Create uniform block storage
 	auto uniform_buffer = bpool.get<MyUniformBlockData, gl::detail::uniform_buffer_alignment>(1);
@@ -144,6 +145,8 @@ void main(void)
 
 	auto cmdbuf = bpool.get<gl::uvec3>(1);
 	cmdbuf.assign_range((gl::uvec3[]){{5, 1, 1}}, 0);
+
+	bpool.debug_stats();
 
 	// Compute
 	glc.use_program(prog);
@@ -164,14 +167,16 @@ void main(void)
 	std::cout << "DONE" << std::endl << std::endl;
 
 	// print results
-	for (auto& counters : gl::map_buffer(counter_buffer))
+	for (auto& counters : counter_buffer.get_range(0, operands.size()))
 		std::cout << counters.counter1 << "\t" << counters.counter2 << std::endl;
 
 	std::cout << std::endl;
 
 	glc.memory_barrier(gl::memory_barrier::buffer_update);
 
-	for (auto& datum : gl::map_buffer(storage_buffer).begin()->data1)
+	// TODO: eliminating rng variable breaks everything. is this a clang bug?
+	auto rng = storage_buffer.get_range(0, 1);
+	for (auto& datum : rng.front().data1)
 		std::cout << datum << ' ';
 
 	std::cout << std::endl;

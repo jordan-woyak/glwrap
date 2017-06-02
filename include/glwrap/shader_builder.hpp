@@ -152,7 +152,7 @@ precision mediump float;
 			src += line;
 		src += m_source;
 
-		return std::move(src);
+		return src;
 	}
 
 	// TODO: move this elsewhere:

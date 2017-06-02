@@ -254,7 +254,7 @@ public:
 		result.bind_draw_buffers(m_draw_buffers);
 		result.bind_read_buffer(m_read_buffer);
 		
-		return std::move(result);
+		return result;
 	}
 
 private:

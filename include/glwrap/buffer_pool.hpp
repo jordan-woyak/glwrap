@@ -26,7 +26,7 @@ public:
 
 	iterator end()
 	{
-		return {m_buffer, (ubyte_t*)0 + m_offset + m_size * m_alignment.get_stride(), m_alignment};
+		return {m_buffer, (ubyte_t*)0 + m_offset + m_size, m_alignment};
 	}
 
 	uint_t size() const
@@ -37,6 +37,33 @@ public:
 	uint_t capacity() const
 	{
 		return m_capacity / m_alignment.get_stride();
+	}
+
+	// TODO: do I want this?
+	std::vector<T> get_range(uint_t _start, uint_t _count) const
+	{
+		std::vector<T> result(_count);
+
+		auto const stride = m_alignment.get_stride();
+
+		// TODO: need to use glMapBufferRange, GetBufferSubData is not in GLES
+
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, m_buffer);
+
+		if (stride != sizeof(T))
+		{
+			std::vector<char> bytes(stride * _count);
+			GLWRAP_EC_CALL(glGetBufferSubData)(GL_COPY_READ_BUFFER, m_offset + _start * stride, _count * stride, bytes.data());
+
+			for (uint_t i = 0; i != _count; ++i)
+				result[i] = *reinterpret_cast<T*>(bytes.data() + i * stride);
+		}
+		else
+		{
+			GLWRAP_EC_CALL(glGetBufferSubData)(GL_COPY_READ_BUFFER, m_offset + _start * stride, _count * stride, result.data());
+		}
+
+		return result;
 	}
 
 	// TODO: duplicate code in buffer class
@@ -65,6 +92,7 @@ public:
 	}
 
 private:
+	// TODO: get alignment from buffer_pool
 	sub_buffer(uint_t _buffer, uint_t _offset, uint_t _size, uint_t _capacity)
 		: m_buffer(_buffer)
 		, m_offset(_offset)
@@ -93,9 +121,7 @@ class buffer_pool
 		min_sub_buffer_size = 64,
 	};
 
-	// TODO: change this to uint_t maybe:
-	typedef ubyte_t buffer_value_type;
-	typedef buffer<buffer_value_type> buffer_type;
+	typedef buffer<ubyte_t> buffer_type;
 
 	typedef typename buffer_type::native_handle_type buffer_handle_type;
 	
@@ -110,11 +136,12 @@ public:
 		// TODO: allow for probability of a sub buffer growing, sort blocks by this hint
 		// TODO: allow for pre-allocated space to be larger than initial requested size
 		
-		// TODO: don't ignore alignment
-		uint_t const req_size = sizeof(T) * _length / sizeof(buffer_value_type);
+		A alignment(sizeof(T));
+		uint_t const req_size = alignment.get_stride() * _length;
 
 		auto it = m_blocks.begin();
 
+		// TODO: make sure block is aligned!
 		if (m_blocks.end() != it && req_size <= it->length /* && block is aligned */)
 		{
 			auto blk = *it;
@@ -131,7 +158,7 @@ public:
 
 			std::cout << "got block: " << blk.start << " " << blk.length << " #" << blk.buffer << std::endl;
 
-			return sub_buffer<T, A>(blk.buffer, blk.start / sizeof(buffer_value_type), req_size, blk.length);
+			return sub_buffer<T, A>(blk.buffer, blk.start, req_size, blk.length);
 		}
 		else
 		{
@@ -139,6 +166,7 @@ public:
 
 			// TODO: look for a block with different alignment?
 
+			// TODO: does this round up?
 			uint_t const next_pow2 = 1 << glm::log2(req_size);
 
 			uint_t const new_buf_size = std::max(next_pow2, (uint_t)min_buffer_size);
@@ -162,8 +190,10 @@ public:
 		std::cout << "buffer count: " << m_buffers.size() << std::endl;
 
 		std::cout << "block count: " << m_blocks.size() << std::endl;
-		//for (auto& b : m_blocks)
-			//std::cout << "\t#" << b.buffer << " size: " << b.length << std::endl;
+		for (auto& b : m_blocks)
+			std::cout << "#" << b.buffer << " size: " << b.length << " ";
+
+		std::cout << std::endl;
 	}
 
 private:

@@ -143,7 +143,7 @@ private:
 			}
 		}
 
-		return std::move(result);
+		return result;
 	}
 
 	std::map<int_t, std::map<uint_t, std::string>> m_bindings;

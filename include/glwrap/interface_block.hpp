@@ -94,7 +94,7 @@ void main() {}
 		for (auto& m : members)
 			ret += "\t" + m.definition + ";\n";
 
-		return std::move(ret);
+		return ret;
 	}
 
 // TODO: private
