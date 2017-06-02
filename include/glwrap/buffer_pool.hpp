@@ -42,28 +42,10 @@ public:
 	// TODO: do I want this?
 	std::vector<T> get_range(uint_t _start, uint_t _count) const
 	{
-		std::vector<T> result(_count);
-
-		auto const stride = m_alignment.get_stride();
-
-		// TODO: need to use glMapBufferRange, GetBufferSubData is not in GLES
-
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, m_buffer);
-
-		if (stride != sizeof(T))
-		{
-			std::vector<char> bytes(stride * _count);
-			GLWRAP_EC_CALL(glGetBufferSubData)(GL_COPY_READ_BUFFER, m_offset + _start * stride, _count * stride, bytes.data());
-
-			for (uint_t i = 0; i != _count; ++i)
-				result[i] = *reinterpret_cast<T*>(bytes.data() + i * stride);
-		}
-		else
-		{
-			GLWRAP_EC_CALL(glGetBufferSubData)(GL_COPY_READ_BUFFER, m_offset + _start * stride, _count * stride, result.data());
-		}
-
-		return result;
+		gl::mapped_buffer<T, A> mbuf(m_buffer, m_offset, size(), m_alignment);
+		
+		// TODO: should I just return the mapped buffer?
+		return std::vector<T>(mbuf.begin(), mbuf.end());
 	}
 
 	// TODO: duplicate code in buffer class

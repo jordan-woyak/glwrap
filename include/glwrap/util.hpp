@@ -351,10 +351,20 @@ public:
 		return *this += 1;
 	}
 
+	indexing_iterator& operator--()
+	{
+		return *this -= 1;
+	}
+
 	indexing_iterator& operator+=(int _val)
 	{
 		m_index += _val;
 		return *this;
+	}
+
+	indexing_iterator& operator-=(int _val)
+	{
+		return *this += -_val;
 	}
 
 	value_type& operator*() const
@@ -375,6 +385,11 @@ public:
 	bool operator!=(indexing_iterator const& _rhs) const
 	{
 		return !(*this == _rhs);
+	}
+
+	int operator-(indexing_iterator const& _rhs) const
+	{
+		return m_index - _rhs.m_index;
 	}
 
 	// TODO: member or free func?

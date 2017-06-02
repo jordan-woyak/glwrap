@@ -44,10 +44,14 @@ public:
 	}
 
 	explicit mapped_buffer(buffer<T, A>& _buffer)
+		: mapped_buffer(_buffer.native_handle(), 0, _buffer.size(), _buffer.m_alignment)
+	{}
+
+	explicit mapped_buffer(uint_t _buffer, uint_t _offset, uint_t _size, A _alignment)
 		: m_ptr()
-		, m_size(_buffer.size())
-		, m_buffer(_buffer.native_handle())
-		, m_alignment(_buffer.m_alignment)
+		, m_size(_size)
+		, m_buffer(_buffer)
+		, m_alignment(_alignment)
 	{
 		// TODO: allow range
 		// TODO: don't hardcode access mode
@@ -58,14 +62,14 @@ public:
 		if (GL_ARB_direct_state_access)
 		{
 			m_ptr = static_cast<ubyte_t*>(GLWRAP_EC_CALL(glMapNamedBufferRange)(
-				m_buffer, 0, m_size * get_stride(), access_mode));
+				m_buffer, _offset, m_size * get_stride(), access_mode));
 		}
 		else
 		{
 			GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_buffer);
 
 			m_ptr = static_cast<ubyte_t*>(GLWRAP_EC_CALL(glMapBufferRange)(
-				GL_COPY_WRITE_BUFFER, 0, m_size * get_stride(), access_mode));
+				GL_COPY_WRITE_BUFFER, _offset, m_size * get_stride(), access_mode));
 		}		
 	}
 
