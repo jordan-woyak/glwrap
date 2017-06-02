@@ -7,8 +7,22 @@
 namespace GLWRAP_NAMESPACE
 {
 
+namespace detail
+{
+
+struct buffer_block
+{
+	uint_t start;
+	uint_t length;
+	uint_t buffer;
+};
+
+}
+
 class buffer_pool;
 
+// TODO: rename
+// TODO: pass the pool to the sub buffer ctor to create it
 template <typename T, typename A = detail::tight_buffer_alignment<T>>
 class sub_buffer
 {
@@ -21,12 +35,12 @@ public:
 
 	iterator begin()
 	{
-		return {m_buffer, (ubyte_t*)0 + m_offset, m_alignment};
+		return {m_block.buffer, (ubyte_t*)0 + m_block.start, m_alignment};
 	}
 
 	iterator end()
 	{
-		return {m_buffer, (ubyte_t*)0 + m_offset + m_size, m_alignment};
+		return {m_block.buffer, (ubyte_t*)0 + m_block.start + m_size, m_alignment};
 	}
 
 	uint_t size() const
@@ -36,13 +50,13 @@ public:
 
 	uint_t capacity() const
 	{
-		return m_capacity / m_alignment.get_stride();
+		return m_block.length / m_alignment.get_stride();
 	}
 
 	// TODO: do I want this?
 	std::vector<T> get_range(uint_t _start, uint_t _count) const
 	{
-		gl::mapped_buffer<T, A> mbuf(m_buffer, m_offset, size(), m_alignment);
+		gl::mapped_buffer<T, A> mbuf(m_block.buffer, m_block.start, size(), m_alignment);
 		
 		// TODO: should I just return the mapped buffer?
 		return std::vector<T>(mbuf.begin(), mbuf.end());
@@ -69,26 +83,22 @@ public:
 
 		auto const stride = m_alignment.get_stride();
 
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_buffer);
-		GLWRAP_EC_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, m_offset + _offset * stride, size * stride, &*begin);
+		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_block.buffer);
+		GLWRAP_EC_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, m_block.start + _offset * stride, size * stride, &*begin);
 	}
 
 private:
 	// TODO: get alignment from buffer_pool
-	sub_buffer(uint_t _buffer, uint_t _offset, uint_t _size, uint_t _capacity)
-		: m_buffer(_buffer)
-		, m_offset(_offset)
+	sub_buffer(const detail::buffer_block& _block, uint_t _size)
+		: m_block(_block)
 		, m_size(_size)
-		, m_capacity(_capacity)
 		, m_alignment(sizeof(value_type))
 	{}
 
-	uint_t m_buffer;
+	detail::buffer_block m_block;
 
-	uint_t m_offset;
-
+	// TODO: this is in byte.. kinda messy
 	uint_t m_size;
-	uint_t m_capacity;
 
 	alignment_type m_alignment;
 };
@@ -124,9 +134,9 @@ public:
 		auto it = m_blocks.begin();
 
 		// TODO: make sure block is aligned!
-		if (m_blocks.end() != it && req_size <= it->length /* && block is aligned */)
+		if (m_blocks.end() != it && req_size <= it->data.length /* && block is aligned */)
 		{
-			auto blk = *it;
+			auto blk = it->data;
 			m_blocks.erase(it);
 
 			for (uint_t half_len = blk.length / 2; half_len >= min_sub_buffer_size && req_size <= half_len; half_len /= 2)
@@ -140,7 +150,7 @@ public:
 
 			std::cout << "got block: " << blk.start << " " << blk.length << " #" << blk.buffer << std::endl;
 
-			return sub_buffer<T, A>(blk.buffer, blk.start, req_size, blk.length);
+			return sub_buffer<T, A>(blk, req_size);
 		}
 		else
 		{
@@ -173,7 +183,7 @@ public:
 
 		std::cout << "block count: " << m_blocks.size() << std::endl;
 		for (auto& b : m_blocks)
-			std::cout << "#" << b.buffer << " size: " << b.length << " ";
+			std::cout << "#" << b.data.buffer << " size: " << b.data.length << " ";
 
 		std::cout << std::endl;
 	}
@@ -181,24 +191,19 @@ public:
 private:
 	struct block
 	{
-		// TODO: ctor
-		
-		uint_t start;
-		uint_t length;
-
-		buffer_handle_type buffer;
+		detail::buffer_block data;
 
 		bool operator<(const block& _rhs) const
 		{
-			return length > _rhs.length;
+			return data.length > _rhs.data.length;
 		}
 	};
 
-	void release_block(const block& blk)
+	void release_block(const detail::buffer_block& blk)
 	{
 		// TODO: merge blocks, but keep strict alignment?
 
-		m_blocks.insert(blk);
+		m_blocks.insert({blk});
 	}
 
 	// TODO: kill this:
