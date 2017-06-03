@@ -2,18 +2,21 @@
 
 #include "constants.hpp"
 #include "uniform_block.hpp"
+#include "buffer_view.hpp"
 
 #include "detail/context.hpp"
 
 namespace GLWRAP_NAMESPACE
 {
 
-class vertex_array;
+template <typename T, typename A>
+class mapped_buffer;
 
 namespace detail
 {
 
-// TODO: move these elsewhere?
+// TODO: move these elsewhere, they don't make sense in detail namespace
+
 template <enum_t Param>
 struct parameter_alignment
 {
@@ -51,7 +54,6 @@ struct static_buffer_alignment
 	}
 };
 
-
 template <typename T>
 using tight_buffer_alignment = static_buffer_alignment<sizeof(T)>;
 
@@ -73,9 +75,6 @@ private:
 
 }
 
-template <typename T, typename A>
-class buffer_iterator;
-
 template <typename T>
 using uniform_buffer_iterator = buffer_iterator<T, detail::uniform_buffer_alignment>;
 
@@ -90,72 +89,6 @@ using tight_buffer_iterator = buffer_iterator<T, detail::tight_buffer_alignment<
 
 template <typename T>
 using dynamic_buffer_iterator = buffer_iterator<T, detail::dynamic_buffer_alignment>;
-
-template <typename T, typename A>
-class buffer;
-
-// TODO: move this into the buffer class?
-template <typename T, typename A>
-class buffer_iterator
-{
-	template <typename, typename>
-	friend class buffer;
-
-public:
-	typedef T value_type;
-	typedef A alignment_type;
-
-	buffer_iterator& operator++()
-	{
-		return *this +=1;
-	}
-
-	buffer_iterator& operator+=(std::size_t _val)
-	{
-		m_offset += _val * get_stride();
-		return *this;
-	}
-
-	friend buffer_iterator operator+(buffer_iterator _lhs, std::size_t _offset)
-	{
-		return _lhs += _offset;
-	}
-
-	// TODO: this should be private
-	buffer_iterator(uint_t _buffer, ubyte_t* _offset, const alignment_type& _alignment)
-		: m_offset(_offset)
-		, m_alignment(_alignment)
-		, m_buffer(_buffer)
-	{}
-
-	uint_t get_buffer() const
-	{
-		return m_buffer;
-	}
-	
-	ubyte_t* get_offset() const
-	{
-		return m_offset;
-	}
-
-	sizei_t get_stride() const
-	{
-		return m_alignment.get_stride();
-	}
-
-	const alignment_type& get_alignment() const
-	{
-		return m_alignment;
-	}
-
-private:
-	ubyte_t* m_offset;
-	alignment_type m_alignment;
-	uint_t m_buffer;
-};
-
-template <typename T, typename A>
-class mapped_buffer;
 
 namespace detail
 {
@@ -182,21 +115,17 @@ struct buffer_obj
 
 }
 
-// TODO: used gl*NamedBuffer* functions when available:
-
 template <typename T, typename A = detail::tight_buffer_alignment<T>>
-class buffer : public detail::globject<detail::buffer_obj>
+class buffer : public detail::globject<detail::buffer_obj>, public buffer_view<buffer, T, A>
 {
-	friend class context;
-
 public:
-
 	static_assert(std::is_trivially_copyable<T>::value, "buffer must be of trivially copyable type.");
 
 	typedef T value_type;
 	typedef A alignment_type;
+	typedef buffer_view<::GLWRAP_NAMESPACE::buffer, T, A> view_type;
 
-	friend class mapped_buffer<T, A>;
+	friend view_type;
 
 	// TODO: allow creation of a buffer directly from a vector/array
 
@@ -204,7 +133,6 @@ public:
 		: m_alignment(sizeof(value_type))
 	{}
 
-	// TODO: rename, use glStorage?
 	void storage(std::size_t _size, buffer_usage _usage)
 	{
 		// TODO: proper use of flags
@@ -238,111 +166,15 @@ public:
 		}
 	}
 
-	// TODO: cache this?
-	std::size_t size() const
-	{
-		sizei_t sz = 0;
-		
-		if (GL_ARB_direct_state_access)
-		{
-			GLWRAP_GL_CALL(glGetNamedBufferParameteriv)(native_handle(), GL_BUFFER_SIZE, &sz);
-		}
-		else
-		{
-			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-			GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
-		}
-		
-		return sz / get_stride();
-	}
-
-private:
-	// TODO: use indexing_iterator
-/*
-	struct iter_state
-	{
-		typedef ubyte_t* index_type;
-		typedef int value_type;
-		
-		//ubyte_t* m_offset;
-		alignment_type m_alignment;
-		uint_t m_buffer;
-
-		value_type& deref(index_type _index) const
-		{
-			// TODO: implement
-
-			throw exception();
-		}
-	};
-*/
-
-public:
-	//typedef indexing_iterator<iter_state> iterator;
-	typedef buffer_iterator<T, A> iterator;
-
-	iterator begin()
-	{
-		//return {nullptr, iter_state{0, m_alignment, native_handle()}};
-		return {native_handle(), 0, m_alignment};
-	}
-
-	// TODO: this is broken for untight-alignments
-	// TODO: rename
-	// TODO: parameter order?
-	template <typename R>
-	void assign_range(R&& _range, sizei_t _offset)
-	{
-		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
-		auto& contig_range = _range;
-
-		auto const begin = std::begin(contig_range);
-		auto const size = std::distance(begin, std::end(contig_range));
-
-		static_assert(detail::is_contiguous<R>::value,
-			"range must be contiguous");
-
-		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
-			"range must contain value_type");
-
-		if (GL_ARB_direct_state_access)
-		{
-			GLWRAP_GL_CALL(glNamedBufferSubData)(native_handle(), _offset * get_stride(), size * get_stride(), &*begin);
-		}
-		else
-		{
-			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-			GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, _offset * get_stride(), size * get_stride(), &*begin);
-		}
-	}
-
 	// TODO: discourage use of mutable buffers
-	// TODO: this is broken for untight-alignments
 	// TODO: rename
 	template <typename R>
 	void assign(R&& _range, buffer_usage _usage)
 	{
-		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
-		auto& contig_range = _range;
+		auto const size = std::distance(std::begin(_range), std::end(_range));
 
-		auto const begin = std::begin(contig_range);
-		auto const size = std::distance(begin, std::end(contig_range));
-
-		static_assert(detail::is_contiguous<R>::value,
-			"range must be contiguous");
-
-		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
-			"range must contain value_type");
-
-		if (GL_ARB_direct_state_access)
-		{
-			GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), size * get_stride(), &*begin, static_cast<enum_t>(_usage));
-		}
-		else
-		{
-			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-			GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, static_cast<enum_t>(_usage));
-		}
+		storage(size, _usage);
+		view_type::assign_range(std::forward<R>(_range), 0);
 	}
 
 	// TODO: discourage use of mutable buffers
@@ -370,6 +202,39 @@ public:
 	}
 
 private:
+	uint_t get_buffer() const
+	{
+		return native_handle();
+	}
+
+	uint_t get_byte_offset() const
+	{
+		return 0;
+	}
+
+	uint_t get_byte_length() const
+	{
+		// TODO: cache this?
+		sizei_t sz = 0;
+		
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_GL_CALL(glGetNamedBufferParameteriv)(native_handle(), GL_BUFFER_SIZE, &sz);
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+			GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
+		}
+		
+		return sz / get_stride();
+	}
+
+	const alignment_type& get_alignment() const
+	{
+		return m_alignment;
+	}
+	
 	sizei_t get_stride() const
 	{
 		return m_alignment.get_stride();

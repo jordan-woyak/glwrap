@@ -122,7 +122,7 @@ public:
 	program create_shader_program(context& _glc) const
 	{
 		std::string const src = generate_full_source();
-		std::array<const char*, 1> srcs = {src.c_str()};
+		std::array<const char*, 1> srcs = {{src.c_str()}};
 		return program(GLWRAP_GL_CALL(glCreateShaderProgramv)(shader_type, srcs.size(), srcs.data()), adopt_handle);
 	}
 

@@ -3,6 +3,7 @@
 #include <set>
 
 #include "buffer.hpp"
+#include "buffer_view.hpp"
 
 namespace GLWRAP_NAMESPACE
 {
@@ -24,21 +25,16 @@ class buffer_pool;
 // TODO: rename
 // TODO: pass the pool to the sub buffer ctor to create it
 template <typename T, typename A = detail::tight_buffer_alignment<T>>
-class sub_buffer
+class sub_buffer : public buffer_view<sub_buffer, T, A>
 {
-	friend buffer_pool;
-
-	sub_buffer()
-		: m_block()
-		, m_size()
-		, m_alignment(sizeof(T))
-		, m_pool()
-	{}
-	
 public:
 	typedef buffer_iterator<T, A> iterator;
 	typedef T value_type;
 	typedef A alignment_type;
+	typedef buffer_view<::GLWRAP_NAMESPACE::sub_buffer, T, A> view_type;
+
+	friend view_type;
+	friend buffer_pool;
 
 	sub_buffer(const sub_buffer&) = delete;
 	sub_buffer& operator=(const sub_buffer&) = delete;
@@ -63,73 +59,21 @@ public:
 		std::swap(m_pool, _other.m_pool);
 	}
 
-	~sub_buffer()
-	{
-		m_pool->release_block(m_block);
-	}
-
-	iterator begin()
-	{
-		return {m_block.buffer, (ubyte_t*)0 + m_block.start, m_alignment};
-	}
-
-	iterator end()
-	{
-		return {m_block.buffer, (ubyte_t*)0 + m_block.start + m_size, m_alignment};
-	}
-
-	uint_t size() const
-	{
-		return m_size / m_alignment.get_stride();
-	}
+	~sub_buffer();
 
 	uint_t capacity() const
 	{
 		return m_block.length / m_alignment.get_stride();
 	}
 
-	// TODO: do I want this?
-	std::vector<T> get_range(uint_t _start, uint_t _count) const
-	{
-		gl::mapped_buffer<T, A> mbuf(m_block.buffer, m_block.start, size(), m_alignment);
-		
-		// TODO: should I just return the mapped buffer?
-		return std::vector<T>(mbuf.begin(), mbuf.end());
-	}
-
-	// TODO: duplicate code in buffer class
-	// TODO: broken for non-tight alignment
-	template <typename R>
-	void assign_range(R&& _range, sizei_t _offset)
-	{
-		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
-		auto& contig_range = _range;
-
-		auto const begin = std::begin(contig_range);
-		auto const size = std::distance(begin, std::end(contig_range));
-
-		static_assert(detail::is_contiguous<R>::value,
-			"range must be contiguous");
-
-		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
-			"range must contain value_type");
-
-		// TODO: clamp size so data isn't written into other sub-buffers?
-
-		auto const stride = m_alignment.get_stride();
-
-		if (GL_ARB_direct_state_access)
-		{
-			GLWRAP_GL_CALL(glNamedBufferSubData)(m_block.buffer, m_block.start + _offset * stride, size * stride, &*begin);
-		}
-		else
-		{
-			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_block.buffer);
-			GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, m_block.start + _offset * stride, size * stride, &*begin);
-		}
-	}
-
 private:
+	sub_buffer()
+		: m_block()
+		, m_size()
+		, m_alignment(sizeof(T))
+		, m_pool()
+	{}
+
 	// TODO: get alignment from buffer_pool
 	sub_buffer(const detail::buffer_block& _block, uint_t _size, buffer_pool* _pool)
 		: m_block(_block)
@@ -138,9 +82,29 @@ private:
 		, m_pool(_pool)
 	{}
 
+	uint_t get_buffer() const
+	{
+		return m_block.buffer;
+	}
+
+	uint_t get_byte_offset() const
+	{
+		return m_block.start;
+	}
+
+	uint_t get_byte_length() const
+	{
+		return m_block.length;
+	}
+
+	const alignment_type& get_alignment() const
+	{
+		return m_alignment;
+	}
+
 	detail::buffer_block m_block;
 
-	// TODO: this is in byte.. kinda messy
+	// TODO: this is in bytes.. kinda messy
 	uint_t m_size;
 
 	alignment_type m_alignment;
@@ -217,7 +181,7 @@ public:
 
 			std::cout << "#" << buf.native_handle() << " size: " << new_buf_size << std::endl;
 			
-			m_blocks.insert({0, new_buf_size, buf.native_handle()});
+			m_blocks.insert({{{0, new_buf_size, buf.native_handle()}}});
 			
 			m_buffers.emplace_back(std::move(buf));
 
@@ -265,5 +229,12 @@ private:
 	// TODO: use vector and std::make_heap ?
 	std::multiset<block> m_blocks;
 };
+
+// TODO: move this back into the class def:
+template <typename T, typename A>
+sub_buffer<T, A>::~sub_buffer()
+{
+	m_pool->release_block(m_block);
+}
 
 }

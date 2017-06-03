@@ -267,7 +267,7 @@ class framebuffer_reference
 {
 public:
 	// TODO: nullptr is kinda ugly
-	framebuffer_reference(nullptr_t)
+	framebuffer_reference(std::nullptr_t)
 		: m_fb{}
 	{}
 

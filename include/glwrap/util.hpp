@@ -115,12 +115,11 @@ public:
 	// .. not that it needs to be for glFunctions
 	R operator()(Args... _args) const
 	{
+		typedef std::chrono::high_resolution_clock clock;
+		
 		struct dtor_checker
 		{
 			const char* name;
-
-			typedef std::chrono::high_resolution_clock clock;
-
 			clock::time_point start_time;
 
 			dtor_checker(const char* _name)

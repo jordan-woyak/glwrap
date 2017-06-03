@@ -41,7 +41,7 @@ int main()
 	dsp.set_caption("glwrap-compute");
 
 	glc.enable_profiling();
-	//glc.enable_debugging();
+	glc.enable_debugging();
 
 	std::cout << "Vendor: " << glc.get_vendor_name() << std::endl;
 	std::cout << "Renderer: " << glc.get_renderer_name() << std::endl;

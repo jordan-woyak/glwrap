@@ -43,17 +43,13 @@ public:
 		std::swap(m_alignment, _other.m_alignment);
 	}
 
-	explicit mapped_buffer(buffer<T, A>& _buffer)
-		: mapped_buffer(_buffer.native_handle(), 0, _buffer.size(), _buffer.m_alignment)
-	{}
-
-	explicit mapped_buffer(uint_t _buffer, uint_t _offset, uint_t _size, A _alignment)
+	template <template <typename, typename> class B>
+	explicit mapped_buffer(buffer_view<B, T, A>& _view)
 		: m_ptr()
-		, m_size(_size)
-		, m_buffer(_buffer)
-		, m_alignment(_alignment)
+		, m_size(_view.size())
+		, m_buffer(_view.buffer())
+		, m_alignment(_view.alignment())
 	{
-		// TODO: allow range
 		// TODO: don't hardcode access mode
 		// TODO: allow for all the other flags: persistent and such.
 
@@ -61,15 +57,15 @@ public:
 		
 		if (GL_ARB_direct_state_access)
 		{
-			m_ptr = static_cast<ubyte_t*>(GLWRAP_GL_CALL(glMapNamedBufferRange)(
-				m_buffer, _offset, m_size * get_stride(), access_mode));
+			m_ptr = static_cast<ubyte_t*>(GLWRAP_GL_CALL(glMapNamedBufferRange)(m_buffer,
+				_view.byte_offset(), _view.byte_length(), access_mode));
 		}
 		else
 		{
 			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_buffer);
 
-			m_ptr = static_cast<ubyte_t*>(GLWRAP_GL_CALL(glMapBufferRange)(
-				GL_COPY_WRITE_BUFFER, _offset, m_size * get_stride(), access_mode));
+			m_ptr = static_cast<ubyte_t*>(GLWRAP_GL_CALL(glMapBufferRange)(GL_COPY_WRITE_BUFFER,
+				_view.byte_offset(), _view.byte_length(), access_mode));
 		}		
 	}
 
@@ -153,10 +149,10 @@ private:
 	alignment_type m_alignment;
 };
 
-template <typename T, typename A>
-mapped_buffer<T, A> map_buffer(buffer<T, A>& _buffer)
+template <template <typename, typename> class B, typename T, typename A>
+mapped_buffer<T, A> map_buffer(buffer_view<B, T, A>& _view)
 {
-	return mapped_buffer<T, A>(_buffer);
+	return mapped_buffer<T, A>(_view);
 }
 
 }

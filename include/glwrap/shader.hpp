@@ -45,7 +45,7 @@ public:
 
 	void set_source(const std::string& _src)
 	{
-		std::array<const char*, 1> shad_full = {_src.c_str()};
+		std::array<const char*, 1> shad_full = {{_src.c_str()}};
 		GLWRAP_GL_CALL(glShaderSource)(native_handle(), shad_full.size(), shad_full.data(), 0);
 	}
 

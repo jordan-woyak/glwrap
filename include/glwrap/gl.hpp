@@ -17,6 +17,7 @@
 #include "matrix.hpp"
 #include "query.hpp"
 
+#include "buffer_view.hpp"
 #include "buffer.hpp"
 #include "buffer_pool.hpp"
 #include "mapped_buffer.hpp"

@@ -176,15 +176,17 @@ enum class memory_barrier : GLenum
 	texture_update = GL_TEXTURE_UPDATE_BARRIER_BIT,
 	buffer_update = GL_BUFFER_UPDATE_BARRIER_BIT,
 	framebuffer = GL_FRAMEBUFFER_BARRIER_BIT,
-	transoform_feedback = GL_TRANSFORM_FEEDBACK_BARRIER_BIT,
+	transform_feedback = GL_TRANSFORM_FEEDBACK_BARRIER_BIT,
 	atomic_counter = GL_ATOMIC_COUNTER_BARRIER_BIT,
 	shader_storage = GL_SHADER_STORAGE_BARRIER_BIT,
+	//query_buffer = GL_QUERY_BUFFER_BARRIER_BIT,
 
 	all = GL_ALL_BARRIER_BITS,
 };
 
 // TODO: allow creation of these from the two separate parts?
-enum class buffer_usage
+// TODO: kill and replace with storage flags
+enum class buffer_usage : enum_t
 {
 	stream_draw = GL_STREAM_DRAW,
 	stream_read = GL_STREAM_READ,
@@ -199,12 +201,17 @@ enum class buffer_usage
 	dynamic_copy = GL_DYNAMIC_COPY,
 };
 
-// TODO: allow combing this
-enum class buffer_mask
+enum class buffer_mask : enum_t
 {
 	color = GL_COLOR_BUFFER_BIT,
 	depth = GL_DEPTH_BUFFER_BIT,
 	stencil = GL_STENCIL_BUFFER_BIT,
 };
+
+inline buffer_mask operator|(buffer_mask _lhs, buffer_mask _rhs)
+{
+	return static_cast<buffer_mask>
+	(static_cast<enum_t>(_lhs) | static_cast<enum_t>(_rhs));
+}
 
 }
