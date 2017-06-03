@@ -94,7 +94,10 @@ namespace detail
 
 // TODO: These globals are ugly!!
 thread_local context* g_current_context = {};
+
+// TODO: Move these into the context class
 thread_local bool g_check_every_gl_call = {};
+thread_local bool g_profile_every_gl_call = {};
 	
 static const bool_t IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED = GL_FALSE;
 

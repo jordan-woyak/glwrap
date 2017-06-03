@@ -6,7 +6,7 @@ namespace GLWRAP_NAMESPACE
 {
 
 struct adopt_handle_t {};
-constexpr adopt_handle_t adopt_handle {}; 
+constexpr adopt_handle_t adopt_handle {};
 
 namespace detail
 {

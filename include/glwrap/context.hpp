@@ -37,6 +37,8 @@ public:
 #ifndef GLWRAP_NO_SFML
 		, m_sf_window(new sf::RenderWindow)
 #endif
+		, m_draw_indirect_buffer_binding(detail::adopt_value)
+		, m_dispatch_indirect_buffer_binding(detail::adopt_value)
 	{
 #if !defined(GLWRAP_FAKE_CONTEXT) && defined(GLWRAP_NO_SFML)
 		int dummy = 0;
@@ -348,8 +350,7 @@ public:
 	void draw_arrays_indirect(primitive _mode, buffer_iterator<draw_arrays_indirect_cmd, A> _cmd,
 		sizei_t _drawcount = 1)
 	{
-		// TODO: even bother unbinding this?
-		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
+		m_draw_indirect_buffer_binding.set(_cmd.get_buffer());
 
 		if (GL_ARB_multi_draw_indirect)
 		{
@@ -397,8 +398,7 @@ public:
 	void draw_elements_indirect(primitive _mode, buffer_iterator<draw_elements_indirect_cmd, A> _cmd,
 		sizei_t _drawcount = 1)
 	{
-		// TODO: even bother unbinding this?
-		detail::scoped_value<detail::parameter::draw_indirect_buffer> binding(_cmd.get_buffer());
+		m_draw_indirect_buffer_binding.set(_cmd.get_buffer());
 
 		if (GL_ARB_multi_draw_indirect)
 		{
@@ -455,7 +455,7 @@ public:
 	template <typename A>
 	void dispatch_compute_indirect(const buffer_iterator<uvec3, A>& _cmd)
 	{
-		detail::scoped_value<detail::parameter::dispatch_indirect_buffer> binding(_cmd.get_buffer());
+		m_dispatch_indirect_buffer_binding.set(_cmd.get_buffer());
 		
 		GLWRAP_GL_CALL(glDispatchComputeIndirect)(_cmd.get_offset() - (ubyte_t*)0);
 	}
@@ -604,6 +604,16 @@ public:
 		}
 	}
 
+	void enable_profiling()
+	{
+		detail::g_profile_every_gl_call = true;
+	}
+
+	void disable_profiling()
+	{
+		detail::g_profile_every_gl_call = true;
+	}
+
 private:
 	void debug_message_handler(
 		GLenum _source,
@@ -724,6 +734,10 @@ private:
 #ifndef GLWRAP_NO_SFML
 	std::unique_ptr<sf::RenderWindow> m_sf_window;
 #endif
+
+	// TODO: these will bind 0 on context destruction, that isn't really needed..
+	detail::scoped_value<detail::parameter::draw_indirect_buffer> m_draw_indirect_buffer_binding;
+	detail::scoped_value<detail::parameter::dispatch_indirect_buffer> m_dispatch_indirect_buffer_binding;
 };
 
 }

@@ -5,6 +5,8 @@
 #include <vector>
 #include <list>
 
+#include <chrono>
+
 #include <GL/glew.h>
 
 #include "vector.hpp"
@@ -22,6 +24,10 @@ namespace GLWRAP_NAMESPACE
 namespace detail
 {
 
+// TODO: naming?
+struct adopt_value_t {};
+constexpr adopt_value_t adopt_value {};
+
 // TODO: poorly named
 // TODO: I'd like to kill this.
 template <typename T>
@@ -31,27 +37,38 @@ public:
 	scoped_value(const scoped_value&) = delete;
 	scoped_value& operator=(const scoped_value&) = delete;
 
+	explicit scoped_value(adopt_value_t, const typename T::value_type& _val = {})
+		: m_prev_value(_val)
+		, m_current_value(_val)
+	{}
+
 	explicit scoped_value(const typename T::value_type& _val)
 		: m_prev_value(T::get())
-		, m_desired_value(_val)
+		, m_current_value(m_prev_value)
 	{
-		if (m_prev_value != m_desired_value)
-		{
-			T::set(m_desired_value);
-		}
+		set(_val);
 	}
 
 	scoped_value(scoped_value&& _other)
 		: m_prev_value(_other.m_prev_value)
-		, m_desired_value(_other.m_desired_value)
+		, m_current_value(_other.m_current_value)
 	{
 		// _other will no longer unbind on destruction
-		_other.m_desired_value = m_prev_value;
+		_other.m_current_value = m_prev_value;
+	}
+
+	void set(const typename T::value_type& _val)
+	{
+		if (_val != m_current_value)
+		{
+			m_current_value = _val;
+			T::set(m_current_value);
+		}
 	}
 
 	~scoped_value()
 	{
-		if (m_prev_value != m_desired_value)
+		if (m_prev_value != m_current_value)
 		{
 			T::set(m_prev_value);
 		}
@@ -59,7 +76,7 @@ public:
 
 private:
 	typename T::value_type const m_prev_value;
-	typename T::value_type m_desired_value;
+	typename T::value_type m_current_value;
 };
 
 template <typename T>
@@ -101,15 +118,39 @@ public:
 		struct dtor_checker
 		{
 			const char* name;
+
+			typedef std::chrono::high_resolution_clock clock;
+
+			clock::time_point start_time;
+
+			dtor_checker(const char* _name)
+				: name(_name)
+			{
+				if (g_profile_every_gl_call)
+				{
+					start_time = clock::now();
+				}
+			}
 			
 			~dtor_checker()
 			{
+				if (g_profile_every_gl_call)
+				{
+					auto end_time = clock::now();
+					auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+
+					// TODO: do more than just print the timings, keep a log
+					std::cerr << "Time: " << name << " : " << duration.count() << " ns." << std::endl;
+				}
+				
 				if (g_check_every_gl_call)
+				{
 					check_error(name);
+				}
 			}
 		};
 
-		dtor_checker checker{m_name};
+		dtor_checker checker(m_name);
 
 		return m_func(std::forward<Args>(_args)...);;
 	}
