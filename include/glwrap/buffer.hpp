@@ -207,17 +207,52 @@ public:
 	// TODO: rename, use glStorage?
 	void storage(std::size_t _size, buffer_usage _usage)
 	{
-		// TODO: call glBufferStorage directly if available
-		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
+		// TODO: proper use of flags
+		bitfield_t const flags =
+			GL_DYNAMIC_STORAGE_BIT | GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+		
+		if (GL_ARB_buffer_storage)
+		{
+			if (GL_ARB_direct_state_access)
+			{
+				GLWRAP_GL_CALL(glNamedBufferStorage)(native_handle(), _size * get_stride(), nullptr, flags);
+			}
+			else
+			{
+				GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());				
+				GLWRAP_GL_CALL(glBufferStorage)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, flags);
+			}
+		}
+		// Emulate buffer storage support:
+		else
+		{
+			if (GL_ARB_direct_state_access)
+			{
+				GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
+			}
+			else
+			{
+				GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+				GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
+			}
+		}
 	}
 
+	// TODO: cache this?
 	std::size_t size() const
 	{
 		sizei_t sz = 0;
-		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
-
+		
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_GL_CALL(glGetNamedBufferParameteriv)(native_handle(), GL_BUFFER_SIZE, &sz);
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+			GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
+		}
+		
 		return sz / get_stride();
 	}
 
@@ -270,11 +305,18 @@ public:
 		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
 			"range must contain value_type");
 
-		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, _offset * get_stride(), size * get_stride(), &*begin);
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_GL_CALL(glNamedBufferSubData)(native_handle(), _offset * get_stride(), size * get_stride(), &*begin);
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+			GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, _offset * get_stride(), size * get_stride(), &*begin);
+		}
 	}
 
-	// TODO: discourage use of mutable buffers//
+	// TODO: discourage use of mutable buffers
 	// TODO: this is broken for untight-alignments
 	// TODO: rename
 	template <typename R>
@@ -292,21 +334,39 @@ public:
 		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
 			"range must contain value_type");
 
-		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, static_cast<enum_t>(_usage));
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), size * get_stride(), &*begin, static_cast<enum_t>(_usage));
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+			GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, static_cast<enum_t>(_usage));
+		}
 	}
 
-	// TODO: discourage use of mutable buffers//
+	// TODO: discourage use of mutable buffers
 	void assign(buffer const& _other, buffer_usage _usage)
 	{
-		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());
-		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		if (GL_ARB_direct_state_access)
+		{
+			sizei_t sz = 0;
+			GLWRAP_GL_CALL(glGetNamedBufferParameteriv)(_other.native_handle(), GL_BUFFER_SIZE, &sz);
+			
+			GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), sz, nullptr, static_cast<enum_t>(_usage));
+			GLWRAP_GL_CALL(glCopyNamedBufferSubData)(_other.native_handle(), native_handle(), 0, 0, sz);
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
 
-		sizei_t sz = 0;
-		GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
-
-		GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size, nullptr, static_cast<enum_t>(_usage));
-		GLWRAP_GL_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
+			sizei_t sz = 0;
+			GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
+		
+			GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, sz, nullptr, static_cast<enum_t>(_usage));
+			GLWRAP_GL_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
+		}
 	}
 
 private:

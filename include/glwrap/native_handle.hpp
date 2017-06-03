@@ -37,9 +37,10 @@ protected:
 
 	~native_handle_base()
 	{
-		// TODO: test for zero value?
-		
-		obj_generator::delete_objs(1, &m_native_handle);
+		if (m_native_handle)
+		{
+			obj_generator::delete_objs(1, &m_native_handle);
+		}
 	}
 
 	native_handle_base(const native_handle_base&) = delete;

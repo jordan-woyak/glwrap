@@ -146,27 +146,23 @@ struct transform_feedback : regular_parameter_getter<int_t, GL_TRANSFORM_FEEDBAC
 	}
 };
 
-struct draw_indirect_buffer : regular_parameter_getter<int_t, GL_DRAW_INDIRECT_BUFFER_BINDING>
+template <enum_t BufferTarget, enum_t BufferBinding>
+struct buffer : regular_parameter_getter<int_t, BufferBinding>
 {
 	typedef uint_t value_type;
 	
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_GL_CALL(glBindBuffer)(GL_DRAW_INDIRECT_BUFFER, _value);
+		GLWRAP_GL_CALL(glBindBuffer)(BufferTarget, _value);
 	}
 };
 
-struct dispatch_indirect_buffer : regular_parameter_getter<int_t, GL_DISPATCH_INDIRECT_BUFFER_BINDING>
-{
-	typedef uint_t value_type;
-	
-	static GLWRAP_MEMBER_FUNC_DECL
-	void set(value_type _value)
-	{
-		GLWRAP_GL_CALL(glBindBuffer)(GL_DISPATCH_INDIRECT_BUFFER, _value);
-	}
-};
+struct draw_indirect_buffer : buffer<GL_DRAW_INDIRECT_BUFFER, GL_DRAW_INDIRECT_BUFFER_BINDING>
+{};
+
+struct dispatch_indirect_buffer : buffer<GL_DISPATCH_INDIRECT_BUFFER, GL_DISPATCH_INDIRECT_BUFFER_BINDING>
+{};
 
 }
 

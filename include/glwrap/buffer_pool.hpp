@@ -118,8 +118,15 @@ public:
 
 		auto const stride = m_alignment.get_stride();
 
-		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_block.buffer);
-		GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, m_block.start + _offset * stride, size * stride, &*begin);
+		if (GL_ARB_direct_state_access)
+		{
+			GLWRAP_GL_CALL(glNamedBufferSubData)(m_block.buffer, m_block.start + _offset * stride, size * stride, &*begin);
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_block.buffer);
+			GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, m_block.start + _offset * stride, size * stride, &*begin);
+		}
 	}
 
 private:
