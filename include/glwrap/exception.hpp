@@ -19,6 +19,7 @@ public:
 	}
 
 private:
+	// TODO: use gluErrorString ?
 	static std::string get_string(GLenum _err)
 	{
 		switch (_err)

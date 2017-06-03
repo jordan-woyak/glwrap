@@ -231,14 +231,14 @@ public:
 		set_parameter_raw(GL_TEXTURE_MAX_LEVEL, _level);
 	}
 
-	void set_min_filter(texture_filter _mode)
+	void set_min_filter(texture_filter _tex, mipmap_filter _mip)
 	{
-		set_parameter_raw(GL_TEXTURE_MIN_FILTER, static_cast<int_t>(_mode));
+		set_parameter_raw(GL_TEXTURE_MIN_FILTER, detail::get_texture_filter_enum(_tex, _mip));
 	}
 
-	void set_mag_filter(texture_filter _mode)
+	void set_mag_filter(texture_filter _tex)
 	{
-		set_parameter_raw(GL_TEXTURE_MAG_FILTER, static_cast<int_t>(_mode));
+		set_parameter_raw(GL_TEXTURE_MAG_FILTER, detail::get_texture_filter_enum(_tex));
 	}
 
 	void set_wrap_s(wrap_mode _mode)

@@ -172,7 +172,7 @@ int main()
 	gl::sampler samp(glc);
 	glc.bind_sampler(texunit, samp);
 
-	samp.set_min_filter(gl::texture_filter::linear);
+	samp.set_min_filter(gl::texture_filter::linear, gl::mipmap_filter::linear);
 	samp.set_mag_filter(gl::texture_filter::nearest);
 
 	// TODO: is this needed?

@@ -23,6 +23,14 @@ public:
 		return m_native_handle;
 	}
 
+	native_handle_type release_handle()
+	{
+		auto const nh = m_native_handle;
+		m_native_handle = native_handle_type();
+		
+		return nh;
+	}
+
 protected:
 	template <typename... T>
 	explicit native_handle_base(T&&... _args)
