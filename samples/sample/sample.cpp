@@ -12,6 +12,7 @@ int main()
 	gl::display dsp(glc, window_size);
 	dsp.set_caption("glwrap-sample");
 
+	glc.enable_profiling();
 	glc.enable_debugging();
 
 	std::cout << "Vendor: " << glc.get_vendor_name() << std::endl;
@@ -123,8 +124,12 @@ int main()
 	verbuf.assign(verts, gl::buffer_usage::static_draw);
 	}
 
+	// Testing if a rotating buffer helps performance
+	gl::uint_t rotating_buffer_count = 3;
+	gl::uint_t rotating_buffer_iter = 0;
+
 	gl::buffer<gl::mat4> matbuf(glc);
-	matbuf.storage(1, gl::buffer_usage::stream_draw);
+	matbuf.storage(rotating_buffer_count, gl::buffer_usage::stream_draw);
 
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<FooVertex>();
@@ -138,7 +143,7 @@ int main()
 	arr.set_buffer(input_loc, verbuf.begin());
 
 	arr.set_attribute_format(model_attrib, mat_loc);
-	arr.set_buffer(mat_loc, matbuf.begin());
+	//arr.set_buffer(mat_loc, matbuf.begin());
 	arr.set_divisor(mat_loc, 1);
 
 	gl::color_attachment_enumerator col_attachments(glc);
@@ -189,6 +194,8 @@ int main()
 
 	cmdbuf.assign_range((gl::draw_arrays_indirect_cmd[]){ {draw_cmd} }, 0);
 
+	glc.set_clear_color({1, 1, 1, 1});
+
 	dsp.set_display_func([&]
 	{
 		auto const ratio = (float)window_size.y / window_size.x;
@@ -198,13 +205,16 @@ int main()
 			gl::scale(0.1f * gl::clamp(ratio, ratio, 1), 0.1f / gl::clamp(ratio, 1, ratio), 1.f);
 
 		//prog.set_uniform(model_uni, model);
-		matbuf.assign_range((gl::mat4[]){ model }, 0);
+		matbuf.assign_range((gl::mat4[]){ model }, rotating_buffer_iter);
+		arr.set_buffer(mat_loc, matbuf.begin() + rotating_buffer_iter);
+
+		rotating_buffer_iter = ((rotating_buffer_iter + 1) % rotating_buffer_count);
 
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
 		glc.use_draw_framebuffer(fbuf);
-		glc.clear_color({1, 1, 1, 1});
+		glc.clear(gl::buffer_mask::color);
 
 		//glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
 		glc.draw_arrays_indirect(gl::primitive::triangle_fan, cmdbuf.begin());

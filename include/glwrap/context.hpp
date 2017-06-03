@@ -70,24 +70,25 @@ public:
 	context(context const&) = delete;
 	context& operator=(context const&) = delete;
 
-	// TODO: kill these 3, provide clear functionality like ogl
-	void clear_color(vec4 const& _color = vec4{})
+	void set_clear_color(vec4 const& _color = vec4{})
 	{
 		GLWRAP_GL_CALL(glClearColor)(_color.x, _color.y, _color.z, _color.w);
-		GLWRAP_GL_CALL(glClear)(GL_COLOR_BUFFER_BIT);
 	}
 
-	void clear_stencil(int_t _index = 0)
+	void set_clear_stencil(int_t _index = 0)
 	{
 		GLWRAP_GL_CALL(glClearStencil)(_index);
-		GLWRAP_GL_CALL(glClear)(GL_STENCIL_BUFFER_BIT);
 	}
 
-	void clear_depth(depth_t _depth = 1.0)
+	void set_clear_depth(depth_t _depth = 1.0)
 	{
 		GLWRAP_GL_CALL(glClearDepth)(_depth);
-		GLWRAP_GL_CALL(glClear)(GL_DEPTH_BUFFER_BIT);
 	}
+
+	void clear(buffer_mask _mask)
+	{
+		GLWRAP_GL_CALL(glClear)(static_cast<bitfield_t>(_mask));
+	};
 
 	void line_width(float_t _width)
 	{

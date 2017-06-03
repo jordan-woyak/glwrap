@@ -116,7 +116,7 @@ public:
 		return *this;
 	}
 
-	friend buffer_iterator operator+(const buffer_iterator& _lhs, std::size_t _offset)
+	friend buffer_iterator operator+(buffer_iterator _lhs, std::size_t _offset)
 	{
 		return _lhs += _offset;
 	}

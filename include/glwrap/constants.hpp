@@ -199,4 +199,12 @@ enum class buffer_usage
 	dynamic_copy = GL_DYNAMIC_COPY,
 };
 
+// TODO: allow combing this
+enum class buffer_mask
+{
+	color = GL_COLOR_BUFFER_BIT,
+	depth = GL_DEPTH_BUFFER_BIT,
+	stencil = GL_STENCIL_BUFFER_BIT,
+};
+
 }
