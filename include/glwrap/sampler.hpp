@@ -97,6 +97,15 @@ public:
 		set_parameter_raw(GL_TEXTURE_LOD_BIAS, _bias);
 	}
 
+	// TODO: name with *_ext ?
+	void set_max_anisotropy(float_t _anisotropy)
+	{
+		// TODO: query GL_EXT_texture_filter_anisotropic for availability
+		// TODO: query GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT for maximum value
+		
+		set_parameter_raw(GL_TEXTURE_MAX_ANISOTROPY_EXT, _anisotropy);
+	}
+
 	// TODO: GL_TEXTURE_BORDER_COLOR
 	// TODO: GL_TEXTURE_COMPARE_MODE
 	// TODO: GL_TEXTURE_COMPARE_FUNC

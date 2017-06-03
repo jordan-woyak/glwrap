@@ -182,6 +182,8 @@ struct buffer_obj
 
 }
 
+// TODO: used gl*NamedBuffer* functions when available:
+
 template <typename T, typename A = detail::tight_buffer_alignment<T>>
 class buffer : public detail::globject<detail::buffer_obj>
 {
@@ -201,7 +203,8 @@ public:
 	explicit buffer(context&)
 		: m_alignment(sizeof(value_type))
 	{}
-	
+
+	// TODO: rename, use glStorage?
 	void storage(std::size_t _size, buffer_usage _usage)
 	{
 		// TODO: call glBufferStorage directly if available
@@ -271,6 +274,7 @@ public:
 		GLWRAP_EC_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, _offset * get_stride(), size * get_stride(), &*begin);
 	}
 
+	// TODO: discourage use of mutable buffers//
 	// TODO: this is broken for untight-alignments
 	// TODO: rename
 	template <typename R>
@@ -291,7 +295,8 @@ public:
 		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
 		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, static_cast<enum_t>(_usage));
 	}
-	
+
+	// TODO: discourage use of mutable buffers//
 	void assign(buffer const& _other, buffer_usage _usage)
 	{
 		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());

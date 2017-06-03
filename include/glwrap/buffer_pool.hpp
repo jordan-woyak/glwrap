@@ -27,11 +27,46 @@ template <typename T, typename A = detail::tight_buffer_alignment<T>>
 class sub_buffer
 {
 	friend buffer_pool;
+
+	sub_buffer()
+		: m_block()
+		, m_size()
+		, m_alignment(sizeof(T))
+		, m_pool()
+	{}
 	
 public:
 	typedef buffer_iterator<T, A> iterator;
 	typedef T value_type;
 	typedef A alignment_type;
+
+	sub_buffer(const sub_buffer&) = delete;
+	sub_buffer& operator=(const sub_buffer&) = delete;
+
+	sub_buffer(sub_buffer&& _other)
+		: sub_buffer()
+	{
+		swap(_other);
+	}
+
+	sub_buffer& operator=(sub_buffer&& _other)
+	{
+		sub_buffer().swap(*this);
+		swap(_other);
+	}
+
+	void swap(sub_buffer& _other)
+	{
+		std::swap(m_block, _other.m_block);
+		std::swap(m_size, _other.m_size);
+		std::swap(m_alignment, _other.m_alignment);
+		std::swap(m_pool, _other.m_pool);
+	}
+
+	~sub_buffer()
+	{
+		m_pool->release_block(m_block);
+	}
 
 	iterator begin()
 	{
@@ -89,10 +124,11 @@ public:
 
 private:
 	// TODO: get alignment from buffer_pool
-	sub_buffer(const detail::buffer_block& _block, uint_t _size)
+	sub_buffer(const detail::buffer_block& _block, uint_t _size, buffer_pool* _pool)
 		: m_block(_block)
 		, m_size(_size)
 		, m_alignment(sizeof(value_type))
+		, m_pool(_pool)
 	{}
 
 	detail::buffer_block m_block;
@@ -101,11 +137,16 @@ private:
 	uint_t m_size;
 
 	alignment_type m_alignment;
+
+	buffer_pool* m_pool;
 };
 
 // TODO: when to delete buffers and when to downsize blocks
 class buffer_pool
 {
+	template <typename T, typename A>
+	friend class sub_buffer;
+	
 	// TODO: make this configurable:
 	enum : uint_t
 	{
@@ -150,7 +191,7 @@ public:
 
 			std::cout << "got block: " << blk.start << " " << blk.length << " #" << blk.buffer << std::endl;
 
-			return sub_buffer<T, A>(blk, req_size);
+			return sub_buffer<T, A>(blk, req_size, this);
 		}
 		else
 		{
@@ -202,6 +243,8 @@ private:
 	void release_block(const detail::buffer_block& blk)
 	{
 		// TODO: merge blocks, but keep strict alignment?
+
+		//std::cout << "block released." << std::endl;
 
 		m_blocks.insert({blk});
 	}
