@@ -309,15 +309,12 @@ public:
 	}
 
 	void blit_pixels(ivec2 const& _src_begin, ivec2 const& _src_end,
-		ivec2 const& _dst_begin, ivec2 const& _dst_end, filter _filter)
+		ivec2 const& _dst_begin, ivec2 const& _dst_end, buffer_mask _mask, filter _filter)
 	{
-		// TODO: mask
-		auto _mask = GL_COLOR_BUFFER_BIT;
-
 		GLWRAP_GL_CALL(glBlitFramebuffer)(
 			_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
 			_dst_begin.x, _dst_begin.y, _dst_end.x, _dst_end.y,
-			_mask, static_cast<GLenum>(_filter));
+			static_cast<bitfield_t>(_mask), static_cast<enum_t>(_filter));
 	}
 
 	void flush()

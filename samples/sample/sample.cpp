@@ -221,7 +221,7 @@ int main()
 		//glc.draw_arrays_indirect(gl::primitive::triangle_fan, &draw_cmd);
 
 		glc.use_draw_framebuffer(nullptr);
-		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::filter::nearest);
+		glc.blit_pixels({0, 0}, window_size, {0, 0}, window_size, gl::buffer_mask::color, gl::filter::nearest);
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
