@@ -15,27 +15,27 @@ namespace detail
 
 void gl_get(GLenum _pname, GLboolean* _params)
 {
-	GLWRAP_EC_CALL(glGetBooleanv)(_pname, _params);
+	GLWRAP_GL_CALL(glGetBooleanv)(_pname, _params);
 }
 
 void gl_get(GLenum _pname, GLdouble* _params)
 {
-	GLWRAP_EC_CALL(glGetDoublev)(_pname, _params);
+	GLWRAP_GL_CALL(glGetDoublev)(_pname, _params);
 }
 
 void gl_get(GLenum _pname, GLfloat* _params)
 {
-	GLWRAP_EC_CALL(glGetFloatv)(_pname, _params);
+	GLWRAP_GL_CALL(glGetFloatv)(_pname, _params);
 }
 
 void gl_get(GLenum _pname, GLint* _params)
 {
-	GLWRAP_EC_CALL(glGetIntegerv)(_pname, _params);
+	GLWRAP_GL_CALL(glGetIntegerv)(_pname, _params);
 }
 
 void gl_get(GLenum _pname, GLint64* _params)
 {
-	GLWRAP_EC_CALL(glGetInteger64v)(_pname, _params);
+	GLWRAP_GL_CALL(glGetInteger64v)(_pname, _params);
 }
 
 //
@@ -58,7 +58,7 @@ T get_parameter(enum_t _pname)
 GLWRAP_FUNC_DECL
 const char* get_string(enum_t _pname)
 {
-	return reinterpret_cast<const char*>(GLWRAP_EC_CALL(glGetString)(_pname));
+	return reinterpret_cast<const char*>(GLWRAP_GL_CALL(glGetString)(_pname));
 }
 
 template <typename T, enum_t P>
@@ -87,7 +87,7 @@ struct draw_framebuffer : regular_parameter_getter<int_t, GL_DRAW_FRAMEBUFFER_BI
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindFramebuffer)(GL_DRAW_FRAMEBUFFER, _value);
+		GLWRAP_GL_CALL(glBindFramebuffer)(GL_DRAW_FRAMEBUFFER, _value);
 	}
 };
 
@@ -98,7 +98,7 @@ struct read_framebuffer : regular_parameter_getter<int_t, GL_READ_FRAMEBUFFER_BI
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindFramebuffer)(GL_READ_FRAMEBUFFER, _value);
+		GLWRAP_GL_CALL(glBindFramebuffer)(GL_READ_FRAMEBUFFER, _value);
 	}
 };
 
@@ -109,7 +109,7 @@ struct vertex_array : regular_parameter_getter<int_t, GL_VERTEX_ARRAY_BINDING>
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindVertexArray)(_value);
+		GLWRAP_GL_CALL(glBindVertexArray)(_value);
 	}
 };
 
@@ -120,7 +120,7 @@ struct program : regular_parameter_getter<int_t, GL_CURRENT_PROGRAM>
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glUseProgram)(_value);
+		GLWRAP_GL_CALL(glUseProgram)(_value);
 	}
 };
 
@@ -131,7 +131,7 @@ struct renderbuffer : regular_parameter_getter<int_t, GL_RENDERBUFFER_BINDING>
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindRenderbuffer)(GL_RENDERBUFFER, _value);
+		GLWRAP_GL_CALL(glBindRenderbuffer)(GL_RENDERBUFFER, _value);
 	}
 };
 
@@ -142,7 +142,7 @@ struct transform_feedback : regular_parameter_getter<int_t, GL_TRANSFORM_FEEDBAC
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _value);
+		GLWRAP_GL_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _value);
 	}
 };
 
@@ -153,7 +153,7 @@ struct draw_indirect_buffer : regular_parameter_getter<int_t, GL_DRAW_INDIRECT_B
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindBuffer)(GL_DRAW_INDIRECT_BUFFER, _value);
+		GLWRAP_GL_CALL(glBindBuffer)(GL_DRAW_INDIRECT_BUFFER, _value);
 	}
 };
 
@@ -164,7 +164,7 @@ struct dispatch_indirect_buffer : regular_parameter_getter<int_t, GL_DISPATCH_IN
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindBuffer)(GL_DISPATCH_INDIRECT_BUFFER, _value);
+		GLWRAP_GL_CALL(glBindBuffer)(GL_DISPATCH_INDIRECT_BUFFER, _value);
 	}
 };
 
@@ -183,7 +183,7 @@ public:
 	void
 	set(value_type _val)
 	{
-		GLWRAP_EC_CALL(glBlendColor)(_val.r, _val.g, _val.b, _val.a);
+		GLWRAP_GL_CALL(glBlendColor)(_val.r, _val.g, _val.b, _val.a);
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL
@@ -204,7 +204,7 @@ public:
 	void
 	set(const value_type& _val)
 	{
-		GLWRAP_EC_CALL(glClearColor)(_val.r, _val.g, _val.b, _val.a);
+		GLWRAP_GL_CALL(glClearColor)(_val.r, _val.g, _val.b, _val.a);
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL
@@ -225,7 +225,7 @@ public:
 	void
 	set(value_type _val)
 	{
-		GLWRAP_EC_CALL(glClearDepthf)(_val);
+		GLWRAP_GL_CALL(glClearDepthf)(_val);
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL
@@ -246,7 +246,7 @@ public:
 	void
 	set(value_type _val)
 	{
-		GLWRAP_EC_CALL(glClearStencil)(_val);
+		GLWRAP_GL_CALL(glClearStencil)(_val);
 	}
 
 	GLWRAP_MEMBER_FUNC_DECL

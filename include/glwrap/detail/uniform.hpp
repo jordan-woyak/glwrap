@@ -73,14 +73,14 @@ GLWRAP_FUNC_DECL \
 void \
 gl_uniform_v(int_t _loc, sizei_t _count, const v_type* _value) \
 { \
-	GLWRAP_EC_CALL(glUniform##u_name##v)(_loc, _count, value_ptr(*_value)); \
+	GLWRAP_GL_CALL(glUniform##u_name##v)(_loc, _count, value_ptr(*_value)); \
 } \
 \
 GLWRAP_FUNC_DECL \
 void \
 gl_program_uniform_v(uint_t _program, int_t _loc, sizei_t _count, const v_type* _value) \
 { \
-	GLWRAP_EC_CALL(glProgramUniform##u_name##v)(_program, _loc, _count, value_ptr(*_value)); \
+	GLWRAP_GL_CALL(glProgramUniform##u_name##v)(_program, _loc, _count, value_ptr(*_value)); \
 }
 
 GLWRAP_UNIFORM_V_DEF(1f, float_t)
@@ -105,14 +105,14 @@ GLWRAP_FUNC_DECL \
 void \
 gl_uniform_v(int_t _loc, sizei_t _count, const v_type* _value) \
 { \
-	GLWRAP_EC_CALL(glUniformMatrix##u_name##v)(_loc, _count, IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED, value_ptr(*_value)); \
+	GLWRAP_GL_CALL(glUniformMatrix##u_name##v)(_loc, _count, IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED, value_ptr(*_value)); \
 } \
 \
 GLWRAP_FUNC_DECL \
 void \
 gl_program_uniform_v(uint_t _program, int_t _loc, sizei_t _count, const v_type* _value) \
 { \
-	GLWRAP_EC_CALL(glProgramUniformMatrix##u_name##v)(_program, _loc, _count, IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED, value_ptr(*_value)); \
+	GLWRAP_GL_CALL(glProgramUniformMatrix##u_name##v)(_program, _loc, _count, IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED, value_ptr(*_value)); \
 }
 
 GLWRAP_UNIFORM_MAT_V_DEF(2f, mat2)

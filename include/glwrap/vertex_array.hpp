@@ -63,17 +63,17 @@ struct vertex_array_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateVertexArrays)(_n, _objs);
+			GLWRAP_GL_CALL(glCreateVertexArrays)(_n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenVertexArrays)(_n, _objs);
+			GLWRAP_GL_CALL(glGenVertexArrays)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteVertexArrays)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteVertexArrays)(_n, _objs);
 	}
 };
 
@@ -91,7 +91,7 @@ public:
 	void bind_vertex_pointer(const attribute_location<T>& _attrib, const buffer_iterator<T, A>& _iter)
 	{
 		// TODO: make temporary?
-		GLWRAP_EC_CALL(glBindBuffer)(GL_ARRAY_BUFFER, _iter.get_buffer());
+		GLWRAP_GL_CALL(glBindBuffer)(GL_ARRAY_BUFFER, _iter.get_buffer());
 
 		// TODO: make not needed
 		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
@@ -105,7 +105,7 @@ public:
 	{
 		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 	
-		GLWRAP_EC_CALL(glVertexAttribDivisor)(_attrib.get_index(), _divisor);
+		GLWRAP_GL_CALL(glVertexAttribDivisor)(_attrib.get_index(), _divisor);
 	}
 */
 
@@ -145,14 +145,14 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glVertexArrayVertexBuffer)(native_handle(), _binding.get_index(),
+			GLWRAP_GL_CALL(glVertexArrayVertexBuffer)(native_handle(), _binding.get_index(),
 				_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glBindVertexBuffer)(_binding.get_index(),
+			GLWRAP_GL_CALL(glBindVertexBuffer)(_binding.get_index(),
 				_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
 		}
 	}
@@ -195,13 +195,13 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glVertexArrayBindingDivisor)(native_handle(), _binding.get_index(), _divisor);
+			GLWRAP_GL_CALL(glVertexArrayBindingDivisor)(native_handle(), _binding.get_index(), _divisor);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
 		
-			GLWRAP_EC_CALL(glVertexBindingDivisor)(_binding.get_index(), _divisor);
+			GLWRAP_GL_CALL(glVertexBindingDivisor)(_binding.get_index(), _divisor);
 		}
 	}
 };

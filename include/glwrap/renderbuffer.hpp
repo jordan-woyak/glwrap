@@ -14,17 +14,17 @@ struct renderbuffer_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateRenderbuffers)(_n, _objs);
+			GLWRAP_GL_CALL(glCreateRenderbuffers)(_n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenRenderbuffers)(_n, _objs);
+			GLWRAP_GL_CALL(glGenRenderbuffers)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteRenderbuffers)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteRenderbuffers)(_n, _objs);
 	}
 };
 
@@ -43,13 +43,13 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glNamedRenderbufferStorageMultisample)(native_handle(), _samples, GL_RGBA, _dims.x, _dims.y);
+			GLWRAP_GL_CALL(glNamedRenderbufferStorageMultisample)(native_handle(), _samples, GL_RGBA, _dims.x, _dims.y);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::renderbuffer> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, _samples, GL_RGBA, _dims.x, _dims.y);
+			GLWRAP_GL_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, _samples, GL_RGBA, _dims.x, _dims.y);
 		}
 	}
 
@@ -60,19 +60,19 @@ public:
 		
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glGetNamedRenderbufferParameteriv)(native_handle(), GL_RENDERBUFFER_SAMPLES, &samples);
-			GLWRAP_EC_CALL(glGetNamedRenderbufferParameteriv)(native_handle(), GL_RENDERBUFFER_INTERNAL_FORMAT, &format);
+			GLWRAP_GL_CALL(glGetNamedRenderbufferParameteriv)(native_handle(), GL_RENDERBUFFER_SAMPLES, &samples);
+			GLWRAP_GL_CALL(glGetNamedRenderbufferParameteriv)(native_handle(), GL_RENDERBUFFER_INTERNAL_FORMAT, &format);
 
-			GLWRAP_EC_CALL(glNamedRenderbufferStorageMultisample)(native_handle(), samples, format, _dims.x, _dims.y);
+			GLWRAP_GL_CALL(glNamedRenderbufferStorageMultisample)(native_handle(), samples, format, _dims.x, _dims.y);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::renderbuffer> binding(native_handle());
 
-			GLWRAP_EC_CALL(glGetRenderbufferParameteriv)(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &samples);
-			GLWRAP_EC_CALL(glGetRenderbufferParameteriv)(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &format);
+			GLWRAP_GL_CALL(glGetRenderbufferParameteriv)(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &samples);
+			GLWRAP_GL_CALL(glGetRenderbufferParameteriv)(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &format);
 
-			GLWRAP_EC_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, samples, format, _dims.x, _dims.y);
+			GLWRAP_GL_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, samples, format, _dims.x, _dims.y);
 		}
 	}
 };

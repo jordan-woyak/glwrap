@@ -76,17 +76,17 @@ struct framebuffer_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateFramebuffers)(_n, _objs);
+			GLWRAP_GL_CALL(glCreateFramebuffers)(_n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenFramebuffers)(_n, _objs);
+			GLWRAP_GL_CALL(glGenFramebuffers)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteFramebuffers)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteFramebuffers)(_n, _objs);
 	}
 };
 
@@ -106,13 +106,13 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
+			GLWRAP_GL_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
+			GLWRAP_GL_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
 		}
 	}
 
@@ -124,13 +124,13 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glNamedFramebufferTexture)(native_handle(), _point.get_index(), _attachment.native_handle(), _level);
+			GLWRAP_GL_CALL(glNamedFramebufferTexture)(native_handle(), _point.get_index(), _attachment.native_handle(), _level);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glFramebufferTexture2D)(GL_READ_FRAMEBUFFER, _point.get_index(), _attachment.target, _attachment.native_handle(), _level);
+			GLWRAP_GL_CALL(glFramebufferTexture2D)(GL_READ_FRAMEBUFFER, _point.get_index(), _attachment.target, _attachment.native_handle(), _level);
 		}
 	}
 
@@ -139,13 +139,13 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, 0);
+			GLWRAP_GL_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, 0);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_index(), GL_RENDERBUFFER, 0);
+			GLWRAP_GL_CALL(glFramebufferRenderbuffer)(GL_READ_FRAMEBUFFER, _point.get_index(), GL_RENDERBUFFER, 0);
 		}
 	}
 
@@ -158,13 +158,13 @@ public:
 		
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glNamedFramebufferDrawBuffers)(native_handle(), bufs.size(), bufs.data());
+			GLWRAP_GL_CALL(glNamedFramebufferDrawBuffers)(native_handle(), bufs.size(), bufs.data());
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glDrawBuffers)(bufs.size(), bufs.data());
+			GLWRAP_GL_CALL(glDrawBuffers)(bufs.size(), bufs.data());
 		}
 	}
 
@@ -173,13 +173,13 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glNamedFramebufferReadBuffer)(native_handle(), _attachment.get_index());
+			GLWRAP_GL_CALL(glNamedFramebufferReadBuffer)(native_handle(), _attachment.get_index());
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glReadBuffer)(_attachment.get_index());
+			GLWRAP_GL_CALL(glReadBuffer)(_attachment.get_index());
 		}
 	}
 
@@ -190,13 +190,13 @@ public:
 		
 		if (GL_ARB_direct_state_access)
 		{
-			status = GLWRAP_EC_CALL(glCheckNamedFramebufferStatus)(native_handle(), GL_DRAW_FRAMEBUFFER);
+			status = GLWRAP_GL_CALL(glCheckNamedFramebufferStatus)(native_handle(), GL_DRAW_FRAMEBUFFER);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
 
-			status = GLWRAP_EC_CALL(glCheckFramebufferStatus)(GL_DRAW_FRAMEBUFFER);
+			status = GLWRAP_GL_CALL(glCheckFramebufferStatus)(GL_DRAW_FRAMEBUFFER);
 		}
 
 		return (GL_FRAMEBUFFER_COMPLETE == status);

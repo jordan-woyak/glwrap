@@ -10,22 +10,22 @@ namespace detail
 
 void gl_tex_parameter(enum_t _target, enum_t _pname, float_t _value)
 {
-	GLWRAP_EC_CALL(glTexParameterf)(_target, _pname, _value);
+	GLWRAP_GL_CALL(glTexParameterf)(_target, _pname, _value);
 }
 
 void gl_tex_parameter(enum_t _target, enum_t _pname, int_t _value)
 {
-	GLWRAP_EC_CALL(glTexParameteri)(_target, _pname, _value);
+	GLWRAP_GL_CALL(glTexParameteri)(_target, _pname, _value);
 }
 
 void gl_texture_parameter(uint_t _texture, enum_t _pname, float_t _value)
 {
-	GLWRAP_EC_CALL(glTextureParameterf)(_texture, _pname, _value);
+	GLWRAP_GL_CALL(glTextureParameterf)(_texture, _pname, _value);
 }
 
 void gl_texture_parameter(uint_t _texture, enum_t _pname, int_t _value)
 {
-	GLWRAP_EC_CALL(glTextureParameteri)(_texture, _pname, _value);
+	GLWRAP_GL_CALL(glTextureParameteri)(_texture, _pname, _value);
 }
 
 
@@ -110,7 +110,7 @@ struct texture : regular_parameter_getter<int_t, texture_traits<Type>::binding>
 	static GLWRAP_MEMBER_FUNC_DECL
 	void set(value_type _value)
 	{
-		GLWRAP_EC_CALL(glBindTexture)(texture_traits<Type>::target, _value);
+		GLWRAP_GL_CALL(glBindTexture)(texture_traits<Type>::target, _value);
 	}
 };
 
@@ -138,7 +138,7 @@ template <texture_type TexType>
 typename std::enable_if<2 == texture_dims<TexType>::value>::type
 gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
-	GLWRAP_EC_CALL(glTexStorage2D)(texture_traits<TexType>::target, _levels, _internal_format,
+	GLWRAP_GL_CALL(glTexStorage2D)(texture_traits<TexType>::target, _levels, _internal_format,
 		_dims.x, _dims.y);
 }
 
@@ -146,7 +146,7 @@ template <texture_type TexType>
 typename std::enable_if<3 == texture_dims<TexType>::value>::type
 gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
-	GLWRAP_EC_CALL(glTexStorage3D)(texture_traits<TexType>::target, _levels, _internal_format,
+	GLWRAP_GL_CALL(glTexStorage3D)(texture_traits<TexType>::target, _levels, _internal_format,
 		_dims.x, _dims.y, _dims.z);
 }
 
@@ -156,7 +156,7 @@ template <texture_type TexType>
 typename std::enable_if<2 == texture_dims<TexType>::value>::type
 gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
-	GLWRAP_EC_CALL(glTextureStorage2D)(_texture, _levels, _internal_format,
+	GLWRAP_GL_CALL(glTextureStorage2D)(_texture, _levels, _internal_format,
 		_dims.x, _dims.y);
 }
 
@@ -164,7 +164,7 @@ template <texture_type TexType>
 typename std::enable_if<3 == texture_dims<TexType>::value>::type
 gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
-	GLWRAP_EC_CALL(glTextureStorage3D)(_texture, _levels, _internal_format,
+	GLWRAP_GL_CALL(glTextureStorage3D)(_texture, _levels, _internal_format,
 		_dims.x, _dims.y, _dims.z);
 }
 
@@ -175,7 +175,7 @@ typename std::enable_if<2 == texture_dims<TexType>::value>::type
 gl_tex_image(int_t _level, int_t _internal_format,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_EC_CALL(glTexImage2D)(texture_traits<TexType>::target, _level, _internal_format,
+	GLWRAP_GL_CALL(glTexImage2D)(texture_traits<TexType>::target, _level, _internal_format,
 		_dims.x, _dims.y,
 		0, _format, detail::data_type_enum<DataType>(), _data);
 }
@@ -185,7 +185,7 @@ typename std::enable_if<3 == texture_dims<TexType>::value>::type
 gl_tex_image(int_t _level, int_t _internal_format,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_EC_CALL(glTexImage3D)(texture_traits<TexType>::target, _level, _internal_format,
+	GLWRAP_GL_CALL(glTexImage3D)(texture_traits<TexType>::target, _level, _internal_format,
 		_dims.x, _dims.y, _dims.z,
 		0, _format, detail::data_type_enum<DataType>(), _data);
 }
@@ -197,7 +197,7 @@ typename std::enable_if<2 == texture_dims<TexType>::value>::type
 gl_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_EC_CALL(glTexSubImage2D)(texture_traits<TexType>::target, _level,
+	GLWRAP_GL_CALL(glTexSubImage2D)(texture_traits<TexType>::target, _level,
 		_offset.x, _offset.y,
 		_dims.x, _dims.y,
 		_format, detail::data_type_enum<DataType>(), _data);
@@ -208,7 +208,7 @@ typename std::enable_if<3 == texture_dims<TexType>::value>::type
 gl_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_EC_CALL(glTexSubImage3D)(texture_traits<TexType>::target, _level,
+	GLWRAP_GL_CALL(glTexSubImage3D)(texture_traits<TexType>::target, _level,
 		_offset.x, _offset.y, _offset.z,
 		_dims.x, _dims.y, _dims.z,
 		_format, detail::data_type_enum<DataType>(), _data);
@@ -222,7 +222,7 @@ typename std::enable_if<2 == texture_dims<TexType>::value>::type
 gl_texture_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_EC_CALL(glTextureSubImage2D)(_target, _level,
+	GLWRAP_GL_CALL(glTextureSubImage2D)(_target, _level,
 		_offset.x, _offset.y,
 		_dims.x, _dims.y,
 		_format, detail::data_type_enum<DataType>(), _data);
@@ -233,7 +233,7 @@ typename std::enable_if<3 == texture_dims<TexType>::value>::type
 gl_texture_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_EC_CALL(glTextureSubImage3D)(_target, _level,
+	GLWRAP_GL_CALL(glTextureSubImage3D)(_target, _level,
 		_offset.x, _offset.y, _offset.z,
 		_dims.x, _dims.y, _dims.z,
 		_format, detail::data_type_enum<DataType>(), _data);

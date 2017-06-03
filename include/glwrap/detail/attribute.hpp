@@ -125,7 +125,7 @@ inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 
 	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
 	{
-		GLWRAP_EC_CALL(glVertexAttribFormat)(
+		GLWRAP_GL_CALL(glVertexAttribFormat)(
 			_index + i, traits::component_count / traits::attrib_index_count,
 			traits::type_enum, Normalize, _offset + i * sizeof(InputT) / traits::attrib_index_count);
 	}
@@ -139,7 +139,7 @@ inline gl_vertex_attrib_format(uint_t _index, uint_t _offset)
 	
 	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
 	{
-		GLWRAP_EC_CALL(glVertexAttribIFormat)(
+		GLWRAP_GL_CALL(glVertexAttribIFormat)(
 			_index + i, traits::component_count / traits::attrib_index_count,
 			traits::type_enum, _offset + i * sizeof(InputT) / traits::attrib_index_count);
 	}
@@ -151,7 +151,7 @@ inline void gl_vertex_attrib_binding(uint_t _index, uint_t _binding)
 	const uint_t index_count = detail::variable_traits<ShaderT>::attrib_index_count;
 
 	for (uint_t i = 0; i != index_count; ++i)
-		GLWRAP_EC_CALL(glVertexAttribBinding)(_index + i, _binding);
+		GLWRAP_GL_CALL(glVertexAttribBinding)(_index + i, _binding);
 }
 
 template <typename ShaderT>
@@ -160,7 +160,7 @@ inline void gl_enable_vertex_attrib_array(uint_t _index)
 	const uint_t index_count = detail::variable_traits<ShaderT>::attrib_index_count;
 
 	for (uint_t i = 0; i != index_count; ++i)
-		GLWRAP_EC_CALL(glEnableVertexAttribArray)(_index + i);
+		GLWRAP_GL_CALL(glEnableVertexAttribArray)(_index + i);
 }
 
 template <typename ShaderT>
@@ -169,7 +169,7 @@ inline void gl_disable_vertex_attrib_array(uint_t _index)
 	const uint_t index_count = detail::variable_traits<ShaderT>::attrib_index_count;
 
 	for (uint_t i = 0; i != index_count; ++i)
-		GLWRAP_EC_CALL(glDisableVertexAttribArray)(_index + i);
+		GLWRAP_GL_CALL(glDisableVertexAttribArray)(_index + i);
 }
 
 template <typename ShaderT, typename InputT, bool Normalize>
@@ -180,7 +180,7 @@ inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 	
 	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
 	{
-		GLWRAP_EC_CALL(glVertexArrayAttribFormat)(_vao,
+		GLWRAP_GL_CALL(glVertexArrayAttribFormat)(_vao,
 			_index + i, traits::component_count / traits::attrib_index_count,
 			traits::type_enum, Normalize, _offset + i * sizeof(InputT) / traits::attrib_index_count);
 	}
@@ -194,7 +194,7 @@ inline gl_vertex_array_attrib_format(GLuint _vao, uint_t _index, uint_t _offset)
 	
 	for (uint_t i = 0; i != traits::attrib_index_count; ++i)
 	{
-		GLWRAP_EC_CALL(glVertexArrayAttribIFormat)(_vao,
+		GLWRAP_GL_CALL(glVertexArrayAttribIFormat)(_vao,
 			_index + i, traits::component_count / traits::attrib_index_count,
 			traits::type_enum, _offset + i * sizeof(InputT) / traits::attrib_index_count);
 	}
@@ -206,7 +206,7 @@ inline void gl_vertex_array_attrib_binding(GLuint _vao, uint_t _index, uint_t _b
 	const uint_t index_count = detail::variable_traits<ShaderT>::attrib_index_count;
 
 	for (uint_t i = 0; i != index_count; ++i)
-		GLWRAP_EC_CALL(glVertexArrayAttribBinding)(_vao, _index + i, _binding);
+		GLWRAP_GL_CALL(glVertexArrayAttribBinding)(_vao, _index + i, _binding);
 }
 
 template <typename ShaderT>
@@ -215,7 +215,7 @@ inline void gl_enable_vertex_array_attrib(GLuint _vao, uint_t _index)
 	const uint_t index_count = detail::variable_traits<ShaderT>::attrib_index_count;
 
 	for (uint_t i = 0; i != index_count; ++i)
-		GLWRAP_EC_CALL(glEnableVertexArrayAttrib)(_vao, _index + i);
+		GLWRAP_GL_CALL(glEnableVertexArrayAttrib)(_vao, _index + i);
 }
 
 template <typename ShaderT>
@@ -224,7 +224,7 @@ inline void gl_disable_vertex_array_attrib(GLuint _vao, uint_t _index)
 	const uint_t index_count = detail::variable_traits<ShaderT>::attrib_index_count;
 
 	for (uint_t i = 0; i != index_count; ++i)
-		GLWRAP_EC_CALL(glDisableVertexArrayAttrib)(_vao, _index + i);
+		GLWRAP_GL_CALL(glDisableVertexArrayAttrib)(_vao, _index + i);
 }
 
 /*
@@ -235,7 +235,7 @@ inline gl_vertex_attrib_pointer(uint_t _index, uint_t _stride, const void_t* _of
 {
 	typedef attrib_traits<InputT> traits;
 	
-	GLWRAP_EC_CALL(glVertexAttribPointer)(_index, traits::size, traits::type, Normalize, _stride, _offset);
+	GLWRAP_GL_CALL(glVertexAttribPointer)(_index, traits::size, traits::type, Normalize, _stride, _offset);
 }
 
 // TODO: kill this:
@@ -245,7 +245,7 @@ inline gl_vertex_attrib_pointer(uint_t _index, uint_t _stride, const void_t* _of
 {
 	typedef attrib_traits<InputT> traits;
 	
-	GLWRAP_EC_CALL(glVertexAttribIPointer)(_index, traits::size, traits::type, _stride, _offset);
+	GLWRAP_GL_CALL(glVertexAttribIPointer)(_index, traits::size, traits::type, _stride, _offset);
 }
 */
 

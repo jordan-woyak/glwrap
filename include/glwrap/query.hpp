@@ -22,17 +22,17 @@ struct query_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateQueries)(_type, _n, _objs);
+			GLWRAP_GL_CALL(glCreateQueries)(_type, _n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenQueries)(_n, _objs);
+			GLWRAP_GL_CALL(glGenQueries)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteQueries)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteQueries)(_n, _objs);
 	}
 };
 
@@ -48,19 +48,19 @@ public:
 
 	void start()
 	{
-		GLWRAP_EC_CALL(glBeginQuery)(static_cast<enum_t>(m_type), native_handle());
+		GLWRAP_GL_CALL(glBeginQuery)(static_cast<enum_t>(m_type), native_handle());
 	}
 
 	void stop()
 	{
 		// TODO: stupid stupid
-		GLWRAP_EC_CALL(glEndQuery)(static_cast<enum_t>(m_type));
+		GLWRAP_GL_CALL(glEndQuery)(static_cast<enum_t>(m_type));
 	}
 
 	uint64_t result() const
 	{
 		GLuint64 result = 0;
-		GLWRAP_EC_CALL(glGetQueryObjectui64v)(native_handle(), GL_QUERY_RESULT, &result);
+		GLWRAP_GL_CALL(glGetQueryObjectui64v)(native_handle(), GL_QUERY_RESULT, &result);
 		return result;
 	}
 

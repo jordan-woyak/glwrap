@@ -14,10 +14,10 @@ namespace GLWRAP_NAMESPACE
 {
 
 // Zero error checking
-//#define GLWRAP_EC_CALL(x) x
+//#define GLWRAP_GL_CALL(x) x
 
-//#define GLWRAP_EC_CALL(x) detail::make_gl_function_caller(x, __PRETTY_FUNCTION__)
-#define GLWRAP_EC_CALL(x) detail::make_gl_function_caller(x, #x) 
+//#define GLWRAP_GL_CALL(x) detail::make_gl_function_caller(x, __PRETTY_FUNCTION__)
+#define GLWRAP_GL_CALL(x) detail::make_gl_function_caller(x, #x) 
 
 namespace detail
 {

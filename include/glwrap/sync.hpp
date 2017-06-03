@@ -14,7 +14,7 @@ struct sync_obj
 	{
 		while (_n--)
 		{
-			*(_objs++) = GLWRAP_EC_CALL(glFenceSync)(_cond, _flags);
+			*(_objs++) = GLWRAP_GL_CALL(glFenceSync)(_cond, _flags);
 		}
 	}
 
@@ -22,7 +22,7 @@ struct sync_obj
 	{
 		while (_n--)
 		{
-			GLWRAP_EC_CALL(glDeleteSync)(*(_objs++));
+			GLWRAP_GL_CALL(glDeleteSync)(*(_objs++));
 		}
 	}
 };
@@ -40,20 +40,20 @@ public:
 	// allow timeout for in the future ?
 	void wait()
 	{
-		GLWRAP_EC_CALL(glWaitSync)(native_handle(), 0, GL_TIMEOUT_IGNORED);
+		GLWRAP_GL_CALL(glWaitSync)(native_handle(), 0, GL_TIMEOUT_IGNORED);
 	}
 
 	// use the flags parameter ?
 	void client_wait_for(std::chrono::nanoseconds _ns)
 	{
 		// TODO: return something
-		GLWRAP_EC_CALL(glClientWaitSync)(native_handle(), GL_SYNC_FLUSH_COMMANDS_BIT, _ns.count());
+		GLWRAP_GL_CALL(glClientWaitSync)(native_handle(), GL_SYNC_FLUSH_COMMANDS_BIT, _ns.count());
 	}
 
 	bool is_signaled() const
 	{
 		GLint result;
-		GLWRAP_EC_CALL(glGetSynciv)(native_handle(), GL_SYNC_STATUS, 1, nullptr, &result);
+		GLWRAP_GL_CALL(glGetSynciv)(native_handle(), GL_SYNC_STATUS, 1, nullptr, &result);
 		return GL_SIGNALED == result;
 	}
 

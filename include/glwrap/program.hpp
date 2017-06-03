@@ -28,7 +28,7 @@ struct program_obj
 	{
 		while (_n--)
 		{
-			*(_objs++) = GLWRAP_EC_CALL(glCreateProgram)();
+			*(_objs++) = GLWRAP_GL_CALL(glCreateProgram)();
 		}
 	}
 
@@ -36,7 +36,7 @@ struct program_obj
 	{
 		while (_n--)
 		{
-			GLWRAP_EC_CALL(glDeleteProgram)(*(_objs++));
+			GLWRAP_GL_CALL(glDeleteProgram)(*(_objs++));
 		}
 	}
 };
@@ -58,31 +58,31 @@ public:
 
 	void link()
 	{
-		GLWRAP_EC_CALL(glLinkProgram)(native_handle());
+		GLWRAP_GL_CALL(glLinkProgram)(native_handle());
 	}
 
 	std::string get_log() const
 	{
 		return detail::get_shader_string(native_handle(),
-			GLWRAP_EC_CALL(glGetProgramiv), GL_INFO_LOG_LENGTH,
-			GLWRAP_EC_CALL(glGetProgramInfoLog));
+			GLWRAP_GL_CALL(glGetProgramiv), GL_INFO_LOG_LENGTH,
+			GLWRAP_GL_CALL(glGetProgramInfoLog));
 	}
 
 	// TODO: rename
 	bool is_good() const
 	{
 		GLint status;
-		GLWRAP_EC_CALL(glGetProgramiv)(native_handle(), GL_LINK_STATUS, &status);
+		GLWRAP_GL_CALL(glGetProgramiv)(native_handle(), GL_LINK_STATUS, &status);
 		return (GL_TRUE == status);
 	}
 
 	// TODO: rename
 	bool is_valid() const
 	{
-		GLWRAP_EC_CALL(glValidateProgram)(native_handle());
+		GLWRAP_GL_CALL(glValidateProgram)(native_handle());
 		
 		GLint status;
-		GLWRAP_EC_CALL(glGetProgramiv)(native_handle(), GL_VALIDATE_STATUS, &status);
+		GLWRAP_GL_CALL(glGetProgramiv)(native_handle(), GL_VALIDATE_STATUS, &status);
 		return (GL_TRUE == status);
 	}
 /*
@@ -118,7 +118,7 @@ public:
 	template <typename T>
 	void set_uniform_block(uniform_block_location<T>& _block, uniform_block_binding<T> const& _binding)
 	{
-		GLWRAP_EC_CALL(glUniformBlockBinding)(native_handle(), _block.get_index(), _binding.get_index());
+		GLWRAP_GL_CALL(glUniformBlockBinding)(native_handle(), _block.get_index(), _binding.get_index());
 	}
 */
 	// TODO: just ban dynamic shader variable bindings in general?
@@ -127,13 +127,13 @@ public:
 	void bind_attribute(attribute<T>& _attrib, attribute_location<T> const& _location)
 	{
 		// Subsequent indices after begin_index are automatically handled by OpenGL
-		GLWRAP_EC_CALL(glBindAttribLocation)(native_handle(), _location.get_begin_index(), _attrib.get_name().c_str());
+		GLWRAP_GL_CALL(glBindAttribLocation)(native_handle(), _location.get_begin_index(), _attrib.get_name().c_str());
 	}
 
 	template <typename T>
 	void bind_fragdata(fragdata<T>& _fragdata, color_number const& _number)
 	{
-		GLWRAP_EC_CALL(glBindFragDataLocation)(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
+		GLWRAP_GL_CALL(glBindFragDataLocation)(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
 	}
 */
 
@@ -144,20 +144,20 @@ public:
 		// Is it worth it? any more performant?
 		
 		auto const varyings = _desc.build_varyings_array();
-		GLWRAP_EC_CALL(glTransformFeedbackVaryings)(native_handle(), varyings.size(), varyings.data(), GL_INTERLEAVED_ATTRIBS);
+		GLWRAP_GL_CALL(glTransformFeedbackVaryings)(native_handle(), varyings.size(), varyings.data(), GL_INTERLEAVED_ATTRIBS);
 	}
 
 	// TODO: accept a shader_builder as well?
 	template <shader_type T>
 	void attach(const basic_shader<T>& _shad)
 	{
-		GLWRAP_EC_CALL(glAttachShader)(native_handle(), _shad.native_handle());
+		GLWRAP_GL_CALL(glAttachShader)(native_handle(), _shad.native_handle());
 	}
 
 	template <shader_type T>
 	void detach(const basic_shader<T>& _shad)
 	{
-		GLWRAP_EC_CALL(glDetachShader)(native_handle(), _shad.native_handle());
+		GLWRAP_GL_CALL(glDetachShader)(native_handle(), _shad.native_handle());
 	}
 
 private:
@@ -172,17 +172,17 @@ struct program_pipeline_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateProgramPipelines)(_n, _objs);
+			GLWRAP_GL_CALL(glCreateProgramPipelines)(_n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenProgramPipelines)(_n, _objs);
+			GLWRAP_GL_CALL(glGenProgramPipelines)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteProgramPipelines)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteProgramPipelines)(_n, _objs);
 	}
 };
 
@@ -196,23 +196,23 @@ public:
 
 	void use_stages(shader_stage _stages, const program& _prog)
 	{
-		GLWRAP_EC_CALL(glUseProgramStages)(native_handle(), static_cast<enum_t>(_stages), _prog.native_handle());
+		GLWRAP_GL_CALL(glUseProgramStages)(native_handle(), static_cast<enum_t>(_stages), _prog.native_handle());
 	}
 
 	std::string get_log() const
 	{
 		return detail::get_shader_string(native_handle(),
-			GLWRAP_EC_CALL(glGetProgramPipelineiv), GL_INFO_LOG_LENGTH,
-			GLWRAP_EC_CALL(glGetProgramPipelineInfoLog));
+			GLWRAP_GL_CALL(glGetProgramPipelineiv), GL_INFO_LOG_LENGTH,
+			GLWRAP_GL_CALL(glGetProgramPipelineInfoLog));
 	}
 
 	// TODO: rename
 	bool is_valid() const
 	{
-		GLWRAP_EC_CALL(glValidateProgramPipeline)(native_handle());
+		GLWRAP_GL_CALL(glValidateProgramPipeline)(native_handle());
 		
 		GLint status;
-		GLWRAP_EC_CALL(glGetProgramPipelineiv)(native_handle(), GL_VALIDATE_STATUS, &status);
+		GLWRAP_GL_CALL(glGetProgramPipelineiv)(native_handle(), GL_VALIDATE_STATUS, &status);
 		return (GL_TRUE == status);
 	}
 private:

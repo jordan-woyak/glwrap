@@ -71,10 +71,10 @@ void main() {}
 
 		std::vector<uint_t> indices(names.size());
 
-		GLWRAP_EC_CALL(glGetUniformIndices)(prog.native_handle(), names.size(), names.data(), indices.data());
+		GLWRAP_GL_CALL(glGetUniformIndices)(prog.native_handle(), names.size(), names.data(), indices.data());
 
 		std::vector<int_t> offsets(indices.size());
-		GLWRAP_EC_CALL(glGetActiveUniformsiv)(prog.native_handle(), indices.size(), indices.data(), GL_UNIFORM_OFFSET, offsets.data());
+		GLWRAP_GL_CALL(glGetActiveUniformsiv)(prog.native_handle(), indices.size(), indices.data(), GL_UNIFORM_OFFSET, offsets.data());
 
 		for (size_t i = 0; i != members.size(); ++i)
 		{

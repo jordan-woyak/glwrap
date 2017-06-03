@@ -35,17 +35,17 @@ struct sampler_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateSamplers)(_n, _objs);
+			GLWRAP_GL_CALL(glCreateSamplers)(_n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenSamplers)(_n, _objs);
+			GLWRAP_GL_CALL(glGenSamplers)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteSamplers)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteSamplers)(_n, _objs);
 	}
 };
 
@@ -113,12 +113,12 @@ public:
 private:
 	void set_parameter_raw(GLenum _pname, int_t _val)
 	{
-		GLWRAP_EC_CALL(glSamplerParameteri)(native_handle(), _pname, _val);
+		GLWRAP_GL_CALL(glSamplerParameteri)(native_handle(), _pname, _val);
 	}
 
 	void set_parameter_raw(GLenum _pname, float_t _val)
 	{
-		GLWRAP_EC_CALL(glSamplerParameterf)(native_handle(), _pname, _val);
+		GLWRAP_GL_CALL(glSamplerParameterf)(native_handle(), _pname, _val);
 	}
 };
 

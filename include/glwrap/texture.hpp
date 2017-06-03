@@ -99,17 +99,17 @@ struct texture_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateTextures)(_target, _n, _objs);
+			GLWRAP_GL_CALL(glCreateTextures)(_target, _n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenTextures)(_n, _objs);
+			GLWRAP_GL_CALL(glGenTextures)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteTextures)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteTextures)(_n, _objs);
 	}
 };
 
@@ -200,14 +200,14 @@ public:
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glGenerateTextureMipmap)(native_handle());
+			GLWRAP_GL_CALL(glGenerateTextureMipmap)(native_handle());
 		}
 		else
 		{
 			// TODO: ugly
 			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 			
-			GLWRAP_EC_CALL(glGenerateMipmap)(target);
+			GLWRAP_GL_CALL(glGenerateMipmap)(target);
 		}
 	}
 

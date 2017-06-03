@@ -166,17 +166,17 @@ struct buffer_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateBuffers)(_n, _objs);
+			GLWRAP_GL_CALL(glCreateBuffers)(_n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenBuffers)(_n, _objs);
+			GLWRAP_GL_CALL(glGenBuffers)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteBuffers)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteBuffers)(_n, _objs);
 	}
 };
 
@@ -208,15 +208,15 @@ public:
 	void storage(std::size_t _size, buffer_usage _usage)
 	{
 		// TODO: call glBufferStorage directly if available
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
+		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
 	}
 
 	std::size_t size() const
 	{
 		sizei_t sz = 0;
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_EC_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
+		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
 
 		return sz / get_stride();
 	}
@@ -270,8 +270,8 @@ public:
 		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
 			"range must contain value_type");
 
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_EC_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, _offset * get_stride(), size * get_stride(), &*begin);
+		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, _offset * get_stride(), size * get_stride(), &*begin);
 	}
 
 	// TODO: discourage use of mutable buffers//
@@ -292,21 +292,21 @@ public:
 		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
 			"range must contain value_type");
 
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, static_cast<enum_t>(_usage));
+		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size * get_stride(), &*begin, static_cast<enum_t>(_usage));
 	}
 
 	// TODO: discourage use of mutable buffers//
 	void assign(buffer const& _other, buffer_usage _usage)
 	{
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());
-		GLWRAP_EC_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());
+		GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
 
 		sizei_t sz = 0;
-		GLWRAP_EC_CALL(glGetBufferParameteriv)(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
+		GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
 
-		GLWRAP_EC_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size, nullptr, static_cast<enum_t>(_usage));
-		GLWRAP_EC_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
+		GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, size, nullptr, static_cast<enum_t>(_usage));
+		GLWRAP_GL_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
 	}
 
 private:

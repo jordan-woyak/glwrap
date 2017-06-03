@@ -59,17 +59,17 @@ struct transform_feedback_obj
 	{
 		if (GL_ARB_direct_state_access)
 		{
-			GLWRAP_EC_CALL(glCreateTransformFeedbacks)(_n, _objs);
+			GLWRAP_GL_CALL(glCreateTransformFeedbacks)(_n, _objs);
 		}
 		else
 		{
-			GLWRAP_EC_CALL(glGenTransformFeedbacks)(_n, _objs);
+			GLWRAP_GL_CALL(glGenTransformFeedbacks)(_n, _objs);
 		}
 	}
 
 	static void delete_objs(sizei_t _n, uint_t* _objs)
 	{
-		GLWRAP_EC_CALL(glDeleteTransformFeedbacks)(_n, _objs);
+		GLWRAP_GL_CALL(glDeleteTransformFeedbacks)(_n, _objs);
 	}
 };
 
@@ -92,7 +92,7 @@ public:
 		// TODO: make not needed
 		detail::scoped_value<detail::parameter::transform_feedback> binding(native_handle());
 
-		GLWRAP_EC_CALL(glBindBufferRange)(GL_TRANSFORM_FEEDBACK_BUFFER, _binding.get_index(),
+		GLWRAP_GL_CALL(glBindBufferRange)(GL_TRANSFORM_FEEDBACK_BUFFER, _binding.get_index(),
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _size * _iter.get_stride());
 	}
 

@@ -123,7 +123,7 @@ public:
 	{
 		std::string const src = generate_full_source();
 		std::array<const char*, 1> srcs = {src.c_str()};
-		return program(GLWRAP_EC_CALL(glCreateShaderProgramv)(shader_type, srcs.size(), srcs.data()), adopt_handle);
+		return program(GLWRAP_GL_CALL(glCreateShaderProgramv)(shader_type, srcs.size(), srcs.data()), adopt_handle);
 	}
 
 private:

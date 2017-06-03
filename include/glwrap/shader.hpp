@@ -19,7 +19,7 @@ struct shader_obj
 	{
 		while (_n--)
 		{
-			*(_objs++) = GLWRAP_EC_CALL(glCreateShader)(_target);
+			*(_objs++) = GLWRAP_GL_CALL(glCreateShader)(_target);
 		}
 	}
 
@@ -27,7 +27,7 @@ struct shader_obj
 	{
 		while (_n--)
 		{
-			GLWRAP_EC_CALL(glDeleteShader)(*(_objs++));
+			GLWRAP_GL_CALL(glDeleteShader)(*(_objs++));
 		}
 	}
 };
@@ -46,33 +46,33 @@ public:
 	void set_source(const std::string& _src)
 	{
 		std::array<const char*, 1> shad_full = {_src.c_str()};
-		GLWRAP_EC_CALL(glShaderSource)(native_handle(), shad_full.size(), shad_full.data(), 0);
+		GLWRAP_GL_CALL(glShaderSource)(native_handle(), shad_full.size(), shad_full.data(), 0);
 	}
 
 	std::string get_source() const
 	{
 		return detail::get_shader_string(native_handle(),
-			GLWRAP_EC_CALL(glGetShaderiv), GL_SHADER_SOURCE_LENGTH,
-			GLWRAP_EC_CALL(glGetShaderSource));
+			GLWRAP_GL_CALL(glGetShaderiv), GL_SHADER_SOURCE_LENGTH,
+			GLWRAP_GL_CALL(glGetShaderSource));
 	}
 
 	void compile()
 	{
-		GLWRAP_EC_CALL(glCompileShader)(native_handle());
+		GLWRAP_GL_CALL(glCompileShader)(native_handle());
 	}
 
 	bool compile_status() const
 	{
 		int_t status = 0;
-		GLWRAP_EC_CALL(glGetShaderiv)(native_handle(), GL_COMPILE_STATUS, &status);
+		GLWRAP_GL_CALL(glGetShaderiv)(native_handle(), GL_COMPILE_STATUS, &status);
 		return (GL_TRUE == status);
 	}
 
 	std::string get_log() const
 	{
 		return detail::get_shader_string(native_handle(),
-			GLWRAP_EC_CALL(glGetShaderiv), GL_INFO_LOG_LENGTH,
-			GLWRAP_EC_CALL(glGetShaderInfoLog));
+			GLWRAP_GL_CALL(glGetShaderiv), GL_INFO_LOG_LENGTH,
+			GLWRAP_GL_CALL(glGetShaderInfoLog));
 	}
 
 private:
