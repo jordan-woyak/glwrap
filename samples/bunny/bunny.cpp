@@ -12,6 +12,8 @@ int main()
 	gl::display dsp(glc, window_size);
 	dsp.set_caption("glwrap-bunny");
 
+	glc.enable_debugging();
+
 	// custom vertex type
 	struct FooVertex
 	{
@@ -33,27 +35,20 @@ int main()
 
 	ply::load("bun.ply", vert_fmt, vertices, indices);
 
-	// allot generic vetex attrib locations
-	gl::attribute_location_alloter locs(glc);
-	auto pos_loc = locs.allot<gl::vec3>();
-	auto norm_loc = locs.allot<gl::vec3>();
+	gl::attribute_location_enumerator attribs(glc);
+	gl::uniform_location_enumerator uniforms(glc);
+	gl::fragdata_location_enumerator fragdatas(glc);
 
-	// create program
-	gl::program prog(glc);
+	gl::vertex_shader_builder vshad(glc);
 
-	auto model_uni = prog.create_uniform<gl::mat4>("model");
-	auto projection_uni = prog.create_uniform<gl::mat4>("projection");
+	auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
+	auto projection_uni = vshad.create_uniform(gl::variable<gl::mat4>("projection", uniforms));
 
-	auto light_dir_uni = prog.create_uniform<gl::vec3>("light_dir");
-	auto diff_color_uni = prog.create_uniform<gl::vec4>("diff_color");
-	auto spec_color_uni = prog.create_uniform<gl::vec4>("spec_color");
-	auto mat_color_uni = prog.create_uniform<gl::vec4>("mat_color");
-	auto ambient_uni = prog.create_uniform<gl::vec4>("ambient");
-	auto shininess_uni = prog.create_uniform<gl::float_t>("shininess");
+	auto light_dir_uni = vshad.create_uniform(gl::variable<gl::vec3>("light_dir", uniforms));
+	auto ambient_uni = vshad.create_uniform(gl::variable<gl::vec4>("ambient", uniforms));
 
-	gl::vertex_shader vshad(glc);
-	auto pos_attrib = vshad.create_input<gl::vec3>("pos");
-	auto norm_attrib = vshad.create_input<gl::vec3>("norm");
+	auto pos_attrib = vshad.create_input(gl::variable<gl::vec3>("pos", attribs));
+	auto norm_attrib = vshad.create_input(gl::variable<gl::vec3>("norm", attribs));
 
 	vshad.set_source(
 		"out vec3 vertex_normal, norm_light_dir, Ia, E;"
@@ -70,8 +65,15 @@ int main()
 		"}"
 	);
 
-	gl::fragment_shader fshad(glc);
-	auto fragdata = fshad.create_output<gl::vec4>("fragdata");
+	gl::fragment_shader_builder fshad(glc);
+
+	auto diff_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("diff_color", uniforms));
+	auto spec_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("spec_color", uniforms));
+	auto mat_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("mat_color", uniforms));
+	auto shininess_uni = fshad.create_uniform(gl::variable<gl::float_t>("shininess", uniforms));
+	
+	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
+	(void)fragdata;
 
 	fshad.set_source(
 		"in vec3 vertex_normal, norm_light_dir, Ia, E;"
@@ -94,18 +96,13 @@ int main()
 		"}"
 	);
 
-	prog.attach(vshad);
-	prog.attach(fshad);
-	prog.compile();
+	gl::program prog(glc);
 
-	std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
-	std::cout << "fshad log:\n" << fshad.get_log() << std::endl;
+	prog.attach(vshad.create_shader(glc));
+	prog.attach(fshad.create_shader(glc));
 
-	// bind attribute and fragdata location before linking
-	prog.bind_fragdata(fragdata, glc.draw_buffer(0));
-
-	prog.bind_attribute(pos_attrib, pos_loc);
-	prog.bind_attribute(norm_attrib, norm_loc);
+	//std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
+	//std::cout << "fshad log:\n" << fshad.get_log() << std::endl;
 
 	prog.link();
 
@@ -113,17 +110,21 @@ int main()
 	std::cout << "program good: " << prog.is_good() << std::endl;
 
 	// load vertex data
-	gl::buffer<FooVertex> verbuf(glc);
-	verbuf.assign(vertices);
+	auto verbuf = gl::make_buffer(glc, vertices, gl::buffer_access::none);
 
 	// load index data
-	gl::buffer<gl::uint_t> indbuf(glc);
-	indbuf.assign(indices);
+	auto indbuf = gl::make_buffer(glc, indices, gl::buffer_access::none);
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
-	arr.bind_vertex_attribute(pos_loc, verbuf.begin() | &FooVertex::pos);
-	arr.bind_vertex_attribute(norm_loc, verbuf.begin() | &FooVertex::norm);
+
+	gl::vertex_buffer_binding_enumerator vbufs(glc);
+	auto input_loc = vbufs.get<FooVertex>();
+
+	arr.set_attribute_format(pos_attrib, input_loc | &FooVertex::pos);
+	arr.set_attribute_format(norm_attrib, input_loc | &FooVertex::norm);
+
+	arr.set_buffer(input_loc, verbuf.begin());
 
 	gl::float_t rotate = 0;
 
@@ -142,7 +143,6 @@ int main()
 	glc.use_program(prog);
 	glc.use_vertex_array(arr);
 	glc.use_element_array(indbuf);
-	glc.use_primitive_mode(gl::primitive::triangles);
 
 	// point the rabbit down towards the camera
 	auto const pre_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f);
@@ -155,6 +155,9 @@ int main()
 		//gl::ortho(-1.f, 1.f, -1.f, 1.f);
 		
 	prog.set_uniform(projection_uni, proj);
+
+	glc.set_clear_depth(1.0f);
+	glc.set_clear_color({0.2f, 0.2f, 0.2f, 1});
 
 	dsp.set_display_func([&]
 	{
@@ -169,13 +172,8 @@ int main()
 		if ((rotate += 3.14f * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14f * 2;
 
-		glc.clear_depth(1.0f);
-		glc.clear_color({0.2f, 0.2f, 0.2f, 1});
-		glc.draw_elements(0, indices.size());
-
-		auto const err = glGetError();
-		if (GL_NO_ERROR != err)
-			std::cerr << "error: " << err << std::endl;
+		glc.clear(gl::buffer_mask::color | gl::buffer_mask::depth);
+		glc.draw_elements(gl::primitive::triangles, 0, indices.size());
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 const& _size)

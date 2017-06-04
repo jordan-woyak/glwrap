@@ -162,7 +162,8 @@ public:
 	}
 
 	template <typename R>
-	void storage(const typename std::enable_if<detail::is_range<R>::value>::type& _range, buffer_access _access)
+	typename std::enable_if<detail::is_range<R>::value>::type
+	storage(const R& _range, buffer_access _access)
 	{
 		// TODO: work around these limitations with compute shaders
 		static_assert(detail::is_contiguous<R>::value,
@@ -198,6 +199,12 @@ public:
 			GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, sz, nullptr, static_cast<enum_t>(_usage));
 			GLWRAP_GL_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
 		}
+	}
+
+	// naming ?
+	bool is_persistent_mapping_supported()
+	{
+		return is_extension_present(GL_ARB_buffer_storage);
 	}
 
 private:
