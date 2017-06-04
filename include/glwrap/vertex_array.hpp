@@ -61,7 +61,7 @@ struct vertex_array_obj
 {
 	static void create_objs(sizei_t _n, uint_t* _objs)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glCreateVertexArrays)(_n, _objs);
 		}
@@ -121,7 +121,7 @@ public:
 			&& s_traits::attrib_index_count == i_traits::attrib_index_count,
 			"Component and/or attribute index counts of input/attrib types does not match. Input is not sensible.");
 		
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_vertex_array_attrib_binding<ShaderType>
 				(native_handle(), _attrib.get_index(), _binding.get_index());
@@ -143,7 +143,7 @@ public:
 	template <typename T, typename A>
 	void set_buffer(const vertex_buffer_binding<T>& _binding, const buffer_iterator<T, A>& _iter)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glVertexArrayVertexBuffer)(native_handle(), _binding.get_index(),
 				_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
@@ -162,7 +162,7 @@ public:
 	template <typename T>
 	void disable_attribute(const attribute_location<T>& _attrib)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_enable_vertex_array_attrib<T>(native_handle(), index);
 		}
@@ -178,7 +178,7 @@ public:
 	template <typename T>
 	void disable_attribute(const attribute_location<T>& _attrib)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_disable_vertex_array_attrib<T>(native_handle(), index);
 		}
@@ -193,7 +193,7 @@ public:
 	template <typename T>
 	void set_divisor(const vertex_buffer_binding<T>& _binding, uint_t _divisor)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glVertexArrayBindingDivisor)(native_handle(), _binding.get_index(), _divisor);
 		}

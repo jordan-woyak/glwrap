@@ -120,7 +120,7 @@ struct texture : regular_parameter_getter<int_t, texture_traits<Type>::binding>
 template <texture_type Type, typename T>
 void set_texture_parameter(uint_t _texture, enum_t _pname, T _value)
 {
-	if (GL_ARB_direct_state_access)
+	if (is_extension_present(GL_ARB_direct_state_access))
 	{
 		gl_texture_parameter(_texture, _pname, _value);
 	}

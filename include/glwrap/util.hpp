@@ -21,6 +21,16 @@ namespace GLWRAP_NAMESPACE
 //#define GLWRAP_GL_CALL(x) detail::make_gl_function_caller(x, __PRETTY_FUNCTION__)
 #define GLWRAP_GL_CALL(x) detail::make_gl_function_caller(x, #x) 
 
+template <typename T>
+bool inline is_extension_present(const T& _ext)
+{
+#if 0
+	return _ext;
+#else
+	return false;
+#endif
+}
+
 namespace detail
 {
 
@@ -169,8 +179,7 @@ gl_function_caller<R, Args...> make_gl_function_caller(R(*_func)(Args...), const
 }
 
 template <typename T, typename Enable = void>
-struct is_gl_integral : std::false_type
-{};
+struct is_gl_integral : std::false_type {};
 
 template <typename T>
 struct is_gl_integral<T, typename std::enable_if<
@@ -255,79 +264,73 @@ constexpr inline GLenum data_type_enum<double_t>()
 	return GL_DOUBLE;
 }
 
-template <typename T>
-struct remove_reference_cv : std::remove_cv<typename std::remove_reference<T>::type>
-{};
-
-template <typename T, typename U>
-struct is_same_ignore_reference_cv : std::is_same<
-	typename remove_reference_cv<T>::type,
-	typename remove_reference_cv<U>::type
-	>
-{};
+// C++17's void_t
+template <class...>
+using void_t = void;
 
 template <typename T>
-struct is_std_vector : std::false_type
-{};
-
-template <typename U>
-struct is_std_vector<std::vector<U>> : std::true_type
-{};
+struct remove_cvref : std::remove_cv<typename std::remove_reference<T>::type> {};
 
 template <typename T>
-struct is_std_array : std::false_type
-{};
+struct is_std_vector : std::false_type {};
 
-template <typename U, std::size_t V>
-struct is_std_array<std::array<U, V>> : std::true_type
-{};
+template <typename... T>
+struct is_std_vector<std::vector<T...>> : std::true_type {};
+
+template <typename T>
+struct is_std_vector_of_bool : std::false_type {};
+
+template <typename A>
+struct is_std_vector_of_bool<std::vector<bool, A>> : std::true_type {};
+
+template <typename T>
+struct is_std_array : std::false_type {};
+
+template <typename T, std::size_t N>
+struct is_std_array<std::array<T, N>> : std::true_type {};
+
+template <typename T>
+struct is_std_initializer_list : std::false_type {};
+
+template <typename T>
+struct is_std_initializer_list<std::initializer_list<T>> : std::true_type {};
+
+template<typename T, typename Enable = void>
+struct is_range : std::false_type {};
+
+template<typename T>
+struct is_range<T, void_t<
+		//typename T::value_type,
+		//typename T::size_type,
+		//typename T::allocator_type,
+		//typename T::iterator,
+		//typename T::const_iterator,
+		decltype(std::begin(std::declval<T>())),
+		decltype(std::end(std::declval<T>()))
+		//decltype(std::declval<T>().end()),
+		//decltype(std::declval<T>().cbegin()),
+		//decltype(std::declval<T>().cend())
+			>> : std::true_type {};
 
 // TODO: initializer list?
 
 template <typename T>
-struct is_contiguous : std::integral_constant<bool,
-	(is_std_vector<typename remove_reference_cv<T>::type>::value ||
-	is_std_array<typename remove_reference_cv<T>::type>::value ||
-	std::is_array<typename remove_reference_cv<T>::type>::value) &&
-	!std::is_same<std::vector<bool>, typename remove_reference_cv<T>::type>::value
-	>
-{};
+struct is_contiguous
+{
+	typedef typename remove_cvref<T>::type adj_type;
+
+	static const bool value =
+		(is_std_vector<adj_type>::value && !is_std_vector_of_bool<adj_type>::value)
+		|| is_std_array<adj_type>::value
+		|| std::is_array<adj_type>::value;
+};
 
 static_assert(is_contiguous<std::vector<int>&>::value, "fail");
 static_assert(is_contiguous<const std::array<float, 4>&>::value, "fail");
 static_assert(is_contiguous<int[5]>::value, "fail");
 static_assert(is_contiguous<float(&)[1]>::value, "fail");
 static_assert(!is_contiguous<std::list<char>>::value, "fail");
-
-// TODO: boost provide something for this?
-template <typename T>
-struct range_traits
-{
-	// am I being stupid?
-	template <typename U>
-	static U return_t();
-
-	typedef decltype(*std::begin(return_t<T>())) value_type;
-};
-
-template <typename T, typename U>
-typename std::enable_if<is_contiguous<U>::value &&
-	is_same_ignore_reference_cv<T, typename range_traits<U>::value_type>::value, U>::type
-get_contiguous_range(U&& _range)
-{
-	return std::forward<U>(_range);
-}
-
-// TODO: should I really just copy to a vector if the data is of the wrong type?
-template <typename T, typename U>
-typename std::enable_if<!is_contiguous<U>::value ||
-	!is_same_ignore_reference_cv<T, typename range_traits<U>::value_type>::value, std::vector<T>>::type
-get_contiguous_range(U&& _range)
-{
-	static_assert(sizeof(T) == 0, "using this guy");
-	
-	return {std::begin(_range), std::end(_range)};
-}
+static_assert(!is_contiguous<std::vector<bool>>::value, "fail");
 
 template <typename T, typename M>
 constexpr std::intptr_t get_member_offset(M T::*_member)
@@ -357,21 +360,6 @@ std::string get_shader_string(uint_t _handle, LFunc&& _len_func, enum_t _param, 
 	return str;
 }
 
-}
-
-/*
-// TODO: do something when not contiguous?
-template <typename IterIn, typename IterOut>
-void copy(IterIn _begin, IterIn _end, IterOut _dest)
-{
-
-}
-*/
-
-template <typename T, typename Min, typename Max>
-auto clamp(T&& _val, Min&& _min, Max&& _max) -> typename std::remove_reference<T>::type
-{
-	return _val < _min ? _min : (_val < _max ? _val : _max);
 }
 
 // TODO: detail namespace
@@ -519,43 +507,6 @@ using buffer_index = typed_index<uint_t, B, T>;
 // TODO: kill this?
 template <typename B, typename T>
 using buffer_index_attribute = typed_index_attribute<uint_t, B, T>;
-
-/*
-template <typename T, typename A>
-class buffer_iterator;
-
-template <typename T>
-class optional_buffer_ptr
-{
-public:
-	optional_buffer_ptr(const T* _ptr)
-		: m_buffer()
-		, m_ptr(_ptr)
-	{}
-
-	// TODO: ugly:
-	template <typename A>
-	//optional_buffer_ptr(const buffer_iterator<T, A>& _iter)
-	optional_buffer_ptr(const A& _iter)
-		: m_buffer(_iter.get_buffer())
-		, m_ptr(reinterpret_cast<const T*>(_iter.get_offset()))
-	{}
-
-	uint_t get_buffer() const
-	{
-		return m_buffer;
-	}
-
-	const T* get_ptr() const
-	{
-		return m_ptr;
-	}
-
-private:
-	uint_t m_buffer;
-	const T* m_ptr;
-};
-*/
 
 }
 

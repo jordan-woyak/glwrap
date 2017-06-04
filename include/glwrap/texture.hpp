@@ -97,7 +97,7 @@ struct texture_obj
 {
 	static void create_objs(enum_t _target, sizei_t _n, uint_t* _objs)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glCreateTextures)(_target, _n, _objs);
 		}
@@ -141,7 +141,7 @@ public:
 	// TexStorage also sets the max mipmap level
 	void define_storage(sizei_t _levels, internal_format_type _ifmt, detail::tex_dims<Type> const& _dims)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_texture_storage<Type>(native_handle(), _levels, static_cast<enum_t>(_ifmt), _dims);
 		}
@@ -171,7 +171,7 @@ public:
 	template <typename T>
 	void load_subimage(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_texture_sub_image<Type>(native_handle(), _level, _offset, _buffer.m_dims,
 				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
@@ -198,7 +198,7 @@ public:
 	// MAX_LEVEL is observed
 	void generate_mipmaps()
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glGenerateTextureMipmap)(native_handle());
 		}

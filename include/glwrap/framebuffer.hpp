@@ -74,7 +74,7 @@ struct framebuffer_obj
 {
 	static void create_objs(sizei_t _n, uint_t* _objs)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glCreateFramebuffers)(_n, _objs);
 		}
@@ -104,7 +104,7 @@ public:
 	// TODO: support depth and stencil attachments
 	void bind_attachment(color_attachment const& _point, renderbuffer const& _attachment)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, _attachment.native_handle());
 		}
@@ -122,7 +122,7 @@ public:
 	// TODO: I don't like this level interface
 	void bind_attachment(color_attachment const& _point, texture_2d const& _attachment, uint_t _level)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glNamedFramebufferTexture)(native_handle(), _point.get_index(), _attachment.native_handle(), _level);
 		}
@@ -137,7 +137,7 @@ public:
 	// TODO: support depth and stencil attachments
 	void unbind_attachment(color_attachment const& _point)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glNamedFramebufferRenderbuffer)(native_handle(), _point.get_index(), GL_RENDERBUFFER, 0);
 		}
@@ -156,7 +156,7 @@ public:
 		std::vector<enum_t> bufs(_attachments.size());
 		std::transform(_attachments.begin(), _attachments.end(), bufs.begin(), std::mem_fn(&color_attachment::get_index));
 		
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glNamedFramebufferDrawBuffers)(native_handle(), bufs.size(), bufs.data());
 		}
@@ -171,7 +171,7 @@ public:
 	// TODO: support depth and stencil attachments
 	void bind_read_buffer(color_attachment const& _attachment)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glNamedFramebufferReadBuffer)(native_handle(), _attachment.get_index());
 		}
@@ -188,7 +188,7 @@ public:
 	{
 		enum_t status = GL_FRAMEBUFFER_UNDEFINED;
 		
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			status = GLWRAP_GL_CALL(glCheckNamedFramebufferStatus)(native_handle(), GL_DRAW_FRAMEBUFFER);
 		}

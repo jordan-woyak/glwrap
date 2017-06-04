@@ -31,6 +31,7 @@ int main()
 	std::cout << "GLSL Version: " << glc.get_shading_language_version() << std::endl;
 
 	glc.enable_debugging();
+	//glc.enable_profiling();
 
 	// load textures
 	gl::texture_2d tex_color(glc), tex_spec(glc), tex_normal(glc);

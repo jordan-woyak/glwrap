@@ -94,7 +94,7 @@ public:
 	// TODO: do I want this?
 	std::vector<value_type> get_range(uint_t _start, uint_t _count)
 	{
-		auto mbuf = map_buffer(*this);
+		auto mbuf = map_buffer(*this, gl::map_access::read);
 		
 		// TODO: should I just return the mapped buffer?
 		return std::vector<value_type>(mbuf.begin(), mbuf.end());
@@ -113,8 +113,8 @@ public:
 		static_assert(detail::is_contiguous<R>::value,
 			"range must be contiguous");
 
-		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
-			"range must contain value_type");
+		static_assert(std::is_trivially_assignable<value_type, decltype(*begin)>::value,
+			"range must be binary compatible with value_type");
 
 		auto const str = stride();
 
@@ -125,7 +125,7 @@ public:
 		auto func = GLWRAP_GL_CALL(glNamedBufferSubData);
 		uint_t target = buffer();
 
-		if (!GL_ARB_direct_state_access)
+		if (!is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, target);
 			
@@ -144,7 +144,7 @@ public:
 	void invalidate_range(uint_t _offset, uint_t _length)
 	{
 		// TODO: allow checking if supported
-		if (GL_ARB_invalidate_subdata)
+		if (is_extension_present(GL_ARB_invalidate_subdata))
 		{
 			auto const str = stride();
 			

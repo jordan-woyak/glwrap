@@ -57,7 +57,7 @@ struct transform_feedback_obj
 {
 	static void create_objs(sizei_t _n, uint_t* _objs)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glCreateTransformFeedbacks)(_n, _objs);
 		}

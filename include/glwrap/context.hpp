@@ -340,7 +340,7 @@ public:
 	{
 		m_draw_indirect_buffer_binding.set(_cmd.get_buffer());
 
-		if (GL_ARB_multi_draw_indirect)
+		if (is_extension_present(GL_ARB_multi_draw_indirect))
 		{
 			GLWRAP_GL_CALL(glMultiDrawArraysIndirect)(
 				static_cast<enum_t>(_mode),
@@ -388,7 +388,7 @@ public:
 	{
 		m_draw_indirect_buffer_binding.set(_cmd.get_buffer());
 
-		if (GL_ARB_multi_draw_indirect)
+		if (is_extension_present(GL_ARB_multi_draw_indirect))
 		{
 			GLWRAP_GL_CALL(glMultiDrawElementsIndirect)(
 				static_cast<enum_t>(_mode),

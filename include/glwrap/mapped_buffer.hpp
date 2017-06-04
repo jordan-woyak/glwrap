@@ -52,7 +52,7 @@ public:
 	{
 		auto const access = static_cast<bitfield_t>(_access);
 		
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			m_ptr = static_cast<ubyte_t*>(GLWRAP_GL_CALL(glMapNamedBufferRange)(m_buffer,
 				_view.byte_offset(), _view.byte_length(), access));
@@ -72,7 +72,7 @@ public:
 		if (!m_buffer)
 			return;
 			
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glUnmapNamedBuffer)(m_buffer);
 		}
@@ -88,7 +88,7 @@ public:
 		intptr_t const gl_offset = _start * get_stride();
 		intptr_t const gl_length = _length * get_stride();
 		
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glFlushMappedBufferRange)(m_buffer, gl_offset, gl_length);
 		}

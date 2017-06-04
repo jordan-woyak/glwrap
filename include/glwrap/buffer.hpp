@@ -97,7 +97,7 @@ struct buffer_obj
 {
 	static void create_objs(sizei_t _n, uint_t* _objs)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glCreateBuffers)(_n, _objs);
 		}
@@ -156,13 +156,13 @@ public:
 		: m_alignment(sizeof(value_type))
 	{}
 
-	void storage(std::size_t _size, buffer_access _access)
+	void storage(sizei_t _size, buffer_access _access)
 	{
 		storage(_size, nullptr, _access);
 	}
 
 	template <typename R>
-	void storage(const R& _range, buffer_access _access)
+	void storage(const typename std::enable_if<detail::is_range<R>::value>::type& _range, buffer_access _access)
 	{
 		// TODO: work around these limitations with compute shaders
 		static_assert(detail::is_contiguous<R>::value,
@@ -179,7 +179,7 @@ public:
 	// TODO: discourage use of mutable buffers
 	void assign(buffer const& _other, buffer_usage _usage)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			sizei_t sz = 0;
 			GLWRAP_GL_CALL(glGetNamedBufferParameteriv)(_other.native_handle(), GL_BUFFER_SIZE, &sz);
@@ -201,13 +201,13 @@ public:
 	}
 
 private:
-	void storage(std::size_t _size, const value_type* _data, buffer_access _access)
+	void storage(sizei_t _size, const value_type* _data, buffer_access _access)
 	{
-		if (GL_ARB_buffer_storage)
+		if (is_extension_present(GL_ARB_buffer_storage))
 		{
 			bitfield_t const flags = static_cast<bitfield_t>(_access);
 				
-			if (GL_ARB_direct_state_access)
+			if (is_extension_present(GL_ARB_direct_state_access))
 			{
 				GLWRAP_GL_CALL(glNamedBufferStorage)(native_handle(), _size * get_stride(), _data, flags);
 			}
@@ -222,7 +222,7 @@ private:
 		{
 			auto const usage = detail::get_emulated_usage_from_access_flags(_access);
 			
-			if (GL_ARB_direct_state_access)
+			if (is_extension_present(GL_ARB_direct_state_access))
 			{
 				GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), _size * get_stride(), _data, static_cast<enum_t>(usage));
 			}
@@ -249,7 +249,7 @@ private:
 		// TODO: cache this?
 		sizei_t sz = 0;
 		
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glGetNamedBufferParameteriv)(native_handle(), GL_BUFFER_SIZE, &sz);
 		}

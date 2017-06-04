@@ -305,7 +305,7 @@ template <typename T, typename V>
 void set_program_uniform(uint_t _program, int_t _loc, V const& _value)
 {	
 	// TODO: is the proper check?
-	if (GL_ARB_separate_shader_objects)
+	if (is_extension_present(GL_ARB_separate_shader_objects))
 	{
 		detail::uniform_value<T>::convert_and_set(bindless_uniform_setter(_program), _loc, 1, &_value);
 	}

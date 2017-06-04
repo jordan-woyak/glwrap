@@ -20,7 +20,7 @@ struct query_obj
 {
 	static void create_objs(enum_t _type, sizei_t _n, uint_t* _objs)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glCreateQueries)(_type, _n, _objs);
 		}

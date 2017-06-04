@@ -12,7 +12,7 @@ struct renderbuffer_obj
 {
 	static void create_objs(sizei_t _n, uint_t* _objs)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glCreateRenderbuffers)(_n, _objs);
 		}
@@ -41,7 +41,7 @@ public:
 	// TODO: internal format
 	void storage(ivec2 const& _dims, sizei_t _samples = 0)
 	{
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glNamedRenderbufferStorageMultisample)(native_handle(), _samples, GL_RGBA, _dims.x, _dims.y);
 		}
@@ -58,7 +58,7 @@ public:
 
 		GLint samples{}, format{};
 		
-		if (GL_ARB_direct_state_access)
+		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glGetNamedRenderbufferParameteriv)(native_handle(), GL_RENDERBUFFER_SAMPLES, &samples);
 			GLWRAP_GL_CALL(glGetNamedRenderbufferParameteriv)(native_handle(), GL_RENDERBUFFER_INTERNAL_FORMAT, &format);
