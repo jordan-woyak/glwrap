@@ -113,15 +113,6 @@ int main()
 
 	auto light_dir_uni = vshad.create_uniform(gl::variable<gl::vec3>("light_dir", uniforms));
 	auto ambient_uni = vshad.create_uniform(gl::variable<gl::vec4>("ambient", uniforms));
-
-	// TESTING
-#if 0
-	auto test_uni = vshad.create_uniform(gl::variable<gl::float_t[4]>("test_var", uniforms));
-	auto test2_uni = vshad.create_uniform(gl::variable<gl::shader::sampler_2d[2]>("test2_var", uniforms));
-	auto test3_uni = vshad.create_uniform(gl::variable<gl::bool_t>("test3_var", uniforms));
-	auto test4_uni = vshad.create_uniform(gl::variable<gl::bool_t[2]>("test4_var", uniforms));
-	auto test5_uni = vshad.create_uniform(gl::variable<gl::float_t[2][2]>("test5_var", uniforms));
-#endif
 	
 	vshad.set_source(
 		R"(out vec2 tpos;
@@ -204,17 +195,17 @@ int main()
 		return 1;
 
 	// load vertex data
-	gl::buffer<FooVertex> verbuf(glc);
-
-	//verbuf.assign(vertices, gl::buffer_usage::static_draw);
+	auto verbuf = gl::make_buffer(glc, vertices, gl::buffer_access::none);
+	//gl::buffer<FooVertex> verbuf(glc);
+	//verbuf.storage(vertices, gl::buffer_access::none);
 	// Using buffer mapping just because
-	verbuf.storage(vertices.size(), gl::buffer_access::map_write);
-	std::copy(vertices.begin(), vertices.end(), gl::map_buffer(verbuf, gl::map_access::write).begin());
+	//verbuf.storage(vertices.size(), gl::buffer_access::map_write);
+	//std::copy(vertices.begin(), vertices.end(), gl::map_buffer(verbuf, gl::map_access::write).begin());
 
 	// load index data
-	gl::buffer<gl::uint_t> indbuf(glc);
-	// TODO: make this work with no buffer access
-	indbuf.assign(indices, gl::buffer_access::dynamic_storage);
+	auto indbuf = gl::make_buffer(glc, indices, gl::buffer_access::none);
+	//gl::buffer<gl::uint_t> indbuf(glc);
+	//indbuf.storage(indices, gl::buffer_access::none);
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
@@ -239,14 +230,6 @@ int main()
 	prog.set_uniform(tex_color_uni, tex_color_unit);
 	prog.set_uniform(tex_spec_uni, tex_spec_unit);
 	prog.set_uniform(tex_normal_uni, tex_normal_unit);
-
-#if 0
-	prog.set_uniform(test_uni, {1.5f, 2.f});
-	prog.set_uniform(test2_uni, {tex_color_unit, tex_spec_unit});
-	prog.set_uniform(test3_uni, true);
-	prog.set_uniform(test4_uni, {false, true});
-	prog.set_uniform(test5_uni, {});
-#endif
 
 	glc.bind_texture(tex_color_unit, tex_color);
 	glc.bind_texture(tex_spec_unit, tex_spec);

@@ -126,9 +126,9 @@ inline gl::buffer_usage get_emulated_usage_from_access_flags(buffer_access _acce
 	{
 		usage = gl::buffer_usage::dynamic_draw;
 	}
-	// If they don't want either of those but want client storage and map read,
+	// If they don't want either of those but want client storage or map read,
 	// then give them dynamic read
-	else if ((flags & GL_CLIENT_STORAGE_BIT) && (flags & GL_MAP_READ_BIT))
+	else if (flags & (GL_CLIENT_STORAGE_BIT | GL_MAP_READ_BIT))
 	{
 		usage = gl::buffer_usage::dynamic_read;
 	}
@@ -158,46 +158,22 @@ public:
 
 	void storage(std::size_t _size, buffer_access _access)
 	{
-		if (GL_ARB_buffer_storage)
-		{
-			bitfield_t const flags = static_cast<bitfield_t>(_access);
-				
-			if (GL_ARB_direct_state_access)
-			{
-				GLWRAP_GL_CALL(glNamedBufferStorage)(native_handle(), _size * get_stride(), nullptr, flags);
-			}
-			else
-			{
-				GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());				
-				GLWRAP_GL_CALL(glBufferStorage)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, flags);
-			}
-		}
-		// Emulate buffer storage support:
-		else
-		{
-			auto const usage = detail::get_emulated_usage_from_access_flags(_access);
-			
-			if (GL_ARB_direct_state_access)
-			{
-				GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), _size * get_stride(), nullptr, static_cast<enum_t>(usage));
-			}
-			else
-			{
-				GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-				GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(usage));
-			}
-		}
+		storage(_size, nullptr, _access);
 	}
 
-	// TODO: discourage use of mutable buffers
-	// TODO: rename
 	template <typename R>
-	void assign(R&& _range, buffer_access _access)
+	void storage(const R& _range, buffer_access _access)
 	{
+		// TODO: work around these limitations with compute shaders
+		static_assert(detail::is_contiguous<R>::value,
+			"Range must be contiguous.");
+
+		static_assert(sizeof(R) && std::is_same<alignment_type, detail::tight_buffer_alignment<T>>::value,
+			"glStorage with non-null ptr is only sensible with tight alignments.");
+			
 		auto const size = std::distance(std::begin(_range), std::end(_range));
 
-		storage(size, _access);
-		view_type::assign_range(std::forward<R>(_range), 0);
+		storage(size, &*std::begin(_range), _access);
 	}
 
 	// TODO: discourage use of mutable buffers
@@ -225,6 +201,39 @@ public:
 	}
 
 private:
+	void storage(std::size_t _size, const value_type* _data, buffer_access _access)
+	{
+		if (GL_ARB_buffer_storage)
+		{
+			bitfield_t const flags = static_cast<bitfield_t>(_access);
+				
+			if (GL_ARB_direct_state_access)
+			{
+				GLWRAP_GL_CALL(glNamedBufferStorage)(native_handle(), _size * get_stride(), _data, flags);
+			}
+			else
+			{
+				GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());				
+				GLWRAP_GL_CALL(glBufferStorage)(GL_COPY_WRITE_BUFFER, _size * get_stride(), _data, flags);
+			}
+		}
+		// Emulate buffer storage support:
+		else
+		{
+			auto const usage = detail::get_emulated_usage_from_access_flags(_access);
+			
+			if (GL_ARB_direct_state_access)
+			{
+				GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), _size * get_stride(), _data, static_cast<enum_t>(usage));
+			}
+			else
+			{
+				GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
+				GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), _data, static_cast<enum_t>(usage));
+			}
+		}
+	}
+
 	uint_t get_buffer() const
 	{
 		return native_handle();
@@ -266,5 +275,14 @@ private:
 	// TODO: generate the alignment on the fly?
 	alignment_type m_alignment;
 };
+
+template <typename R>
+auto make_buffer(context& _glc, const R& _range, buffer_access _access) -> buffer<typename R::value_type>
+{
+	buffer<typename R::value_type> buf(_glc);
+	buf.storage(_range, _access);
+
+	return buf;
+}
 
 }

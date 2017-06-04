@@ -100,15 +100,15 @@ public:
 		return std::vector<value_type>(mbuf.begin(), mbuf.end());
 	}
 
-	// TODO: broken for non-tight alignment
+	// TODO: parameter order?
 	template <typename R>
 	void assign_range(R&& _range, sizei_t _offset)
 	{
 		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
 		auto& contig_range = _range;
 
-		auto const begin = std::begin(contig_range);
-		auto const size = std::distance(begin, std::end(contig_range));
+		auto begin = std::begin(contig_range);
+		auto const end = std::end(contig_range);
 
 		static_assert(detail::is_contiguous<R>::value,
 			"range must be contiguous");
@@ -116,18 +116,28 @@ public:
 		static_assert(detail::is_same_ignore_reference_cv<decltype(*begin), value_type>::value,
 			"range must contain value_type");
 
-		// TODO: clamp size so data isn't written into other sub-buffers?
-
 		auto const str = stride();
 
-		if (GL_ARB_direct_state_access)
+		// If alignment doesn't match we need to copy just one value at a time..
+		// TODO: use a compute shader + shader storage to work around this.
+		uint_t const batch_amt = (sizeof(value_type) == str) ? std::distance(begin, end) : 1;
+
+		auto func = GLWRAP_GL_CALL(glNamedBufferSubData);
+		uint_t target = buffer();
+
+		if (!GL_ARB_direct_state_access)
 		{
-			GLWRAP_GL_CALL(glNamedBufferSubData)(buffer(), byte_offset() + _offset * str, size * str, &*begin);
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, target);
+			
+			func = GLWRAP_GL_CALL(glBufferSubData);
+			target = GL_COPY_WRITE_BUFFER;
 		}
-		else
+			 
+		while (begin != end)
 		{
-			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, buffer());
-			GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, byte_offset() + _offset * str, size * str, &*begin);
+			func(target, byte_offset() + _offset * str, batch_amt * sizeof(value_type), &*begin);
+			begin += batch_amt;
+			_offset += batch_amt;
 		}
 	}
 	
