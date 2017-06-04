@@ -113,7 +113,7 @@ struct buffer_obj
 	}
 };
 
-// TODO: this function is a joke:
+// TODO: this function is a joke.. but so is the usage hint.
 inline gl::buffer_usage get_emulated_usage_from_access_flags(buffer_access _access)
 {
 	bitfield_t const flags = static_cast<bitfield_t>(_access);

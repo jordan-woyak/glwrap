@@ -239,7 +239,9 @@ enum class map_access : bitfield_t
 	persistent = GL_MAP_PERSISTENT_BIT,
 	coherent = GL_MAP_COHERENT_BIT,
 
+	// TODO: should I even expose this with sub buffers..
 	invalidate_buffer = GL_MAP_INVALIDATE_BUFFER_BIT,
+
 	flush_explicit = GL_MAP_FLUSH_EXPLICIT_BIT,
 	unsynchronized = GL_MAP_UNSYNCHRONIZED_BIT,
 };

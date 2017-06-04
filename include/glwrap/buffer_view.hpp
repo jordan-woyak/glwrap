@@ -140,6 +140,17 @@ public:
 			_offset += batch_amt;
 		}
 	}
+
+	void invalidate_range(uint_t _offset, uint_t _length)
+	{
+		// TODO: allow checking if supported
+		if (GL_ARB_invalidate_subdata)
+		{
+			auto const str = stride();
+			
+			GLWRAP_GL_CALL(glInvalidateBufferSubData)(buffer(), _offset * str, _length * str);
+		}
+	}
 	
 private:
 	// TODO: I don't like these function names
