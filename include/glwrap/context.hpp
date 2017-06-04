@@ -278,16 +278,6 @@ public:
 		GLWRAP_GL_CALL(glBindSampler)(_unit.get_index(), 0);
 	}
 
-/*
-	// TODO: should allow reference to buffer element as well
-	// range is probably not needed/wanted for uniform buffer
-	template <typename T>
-	void bind_buffer(uniform_block_binding<T> const& _unit, uniform_buffer_iterator<T> const& _iter, uint_t _size)
-	{
-		GLWRAP_GL_CALL(glBindBufferRange)(GL_UNIFORM_BUFFER, _unit.get_index(),
-			_iter.get_buffer(),	_iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _size);
-	}
-*/
 	void start_transform_feedback(primitive _mode)
 	{
 		GLWRAP_GL_CALL(glBeginTransformFeedback)(static_cast<GLenum>(_mode));
@@ -485,7 +475,7 @@ public:
 		static_assert(S % 4 == 0, "Atomic counter buffer must be aligned to 4 bytes.");
 		
 		GLWRAP_GL_CALL(glBindBufferRange)(GL_ATOMIC_COUNTER_BUFFER, _binding.get_index(),
-			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * 1);
 	}
 
 	template <typename T>

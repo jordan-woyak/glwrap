@@ -374,7 +374,6 @@ auto clamp(T&& _val, Min&& _min, Max&& _max) -> typename std::remove_reference<T
 	return _val < _min ? _min : (_val < _max ? _val : _max);
 }
 
-// TODO: something better than int for offsets
 // TODO: detail namespace
 // TODO: modify an index inside state?
 // TODO: more members
@@ -384,6 +383,8 @@ class indexing_iterator : public std::iterator<std::random_access_iterator_tag, 
 public:
 	typedef typename State::index_type index_type;
 	typedef typename State::value_type value_type;
+
+	typedef std::intptr_t diff_type;
 	
 	indexing_iterator(index_type _index, const State& _state)
 		: m_index(_index)
@@ -400,13 +401,13 @@ public:
 		return *this -= 1;
 	}
 
-	indexing_iterator& operator+=(int _val)
+	indexing_iterator& operator+=(diff_type _val)
 	{
 		m_index += _val;
 		return *this;
 	}
 
-	indexing_iterator& operator-=(int _val)
+	indexing_iterator& operator-=(diff_type _val)
 	{
 		return *this += -_val;
 	}
@@ -431,15 +432,19 @@ public:
 		return !(*this == _rhs);
 	}
 
-	int operator-(indexing_iterator const& _rhs) const
+	friend diff_type operator-(indexing_iterator const& _lhs, indexing_iterator const& _rhs)
 	{
-		return m_index - _rhs.m_index;
+		return _lhs.m_index - _rhs.m_index;
 	}
 
-	// TODO: member or free func?
-	friend indexing_iterator operator+(const indexing_iterator& _lhs, int _offset)
+	friend indexing_iterator operator+(indexing_iterator _lhs, diff_type _offset)
 	{
 		return _lhs += _offset;
+	}
+
+	friend indexing_iterator operator-(const indexing_iterator& _lhs, diff_type _offset)
+	{
+		return _lhs + -_offset;
 	}
 
 private:

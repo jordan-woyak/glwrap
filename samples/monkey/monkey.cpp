@@ -19,8 +19,6 @@ gl::uvec2 getSFImageSize(const sf::Image& img)
 
 int main()
 {
-	glewExperimental = true;
-	
 	gl::ivec2 window_size{640, 480};
 
 	gl::context glc;
@@ -32,8 +30,7 @@ int main()
 	std::cout << "Version: " << glc.get_version() << std::endl;
 	std::cout << "GLSL Version: " << glc.get_shading_language_version() << std::endl;
 
-	//glc.enable_debugging();
-	//glc.disable_debugging();
+	glc.enable_debugging();
 
 	// load textures
 	gl::texture_2d tex_color(glc), tex_spec(glc), tex_normal(glc);
@@ -268,6 +265,9 @@ int main()
 	
 	prog.set_uniform(projection_uni, proj);
 
+	glc.set_clear_depth(1.0);
+	glc.set_clear_color({0.2, 0.2, 0.2, 1});
+
 	dsp.set_display_func([&]
 	{
 		// rotating model
@@ -277,15 +277,7 @@ int main()
 		if ((rotate += 3.14 * 2 / 360) >= 3.14 * 2)
 			rotate -= 3.14 * 2;
 
-		glc.clear_depth(1.0);
-		glc.clear_color({0.2, 0.2, 0.2, 1});
-
-		//glnew::context glnc;
-
-		//auto const val = glnc.clear_color().get().r;
-		//auto const val = glnc.parameter<glnew::detail::parameter::clear_color>().get().r;
-		
-		//std::cout << val << std::endl;
+		glc.clear(gl::buffer_mask::color | gl::buffer_mask::depth);
 		
 		glc.draw_elements(gl::primitive::triangles, 0, indices.size());
 	});
