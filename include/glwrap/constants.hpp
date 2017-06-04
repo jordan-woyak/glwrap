@@ -211,7 +211,43 @@ enum class buffer_mask : enum_t
 inline buffer_mask operator|(buffer_mask _lhs, buffer_mask _rhs)
 {
 	return static_cast<buffer_mask>
-	(static_cast<enum_t>(_lhs) | static_cast<enum_t>(_rhs));
+		(static_cast<enum_t>(_lhs) | static_cast<enum_t>(_rhs));
+}
+
+enum class buffer_access : bitfield_t
+{
+	none = 0,
+	dynamic_storage = GL_DYNAMIC_STORAGE_BIT,
+	map_read = GL_MAP_READ_BIT,
+	map_write = GL_MAP_WRITE_BIT,
+	//map_rw = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT,
+	map_persistent = GL_MAP_PERSISTENT_BIT,
+	map_coherent = GL_MAP_COHERENT_BIT,
+	client_storage = GL_CLIENT_STORAGE_BIT,
+};
+
+inline buffer_access operator|(buffer_access _lhs, buffer_access _rhs)
+{
+	return static_cast<buffer_access>
+		(static_cast<bitfield_t>(_lhs) | static_cast<bitfield_t>(_rhs));
+}
+
+enum class map_access : bitfield_t
+{
+	read = GL_MAP_READ_BIT,
+	write = GL_MAP_WRITE_BIT,
+	persistent = GL_MAP_PERSISTENT_BIT,
+	coherent = GL_MAP_COHERENT_BIT,
+
+	invalidate_buffer = GL_MAP_INVALIDATE_BUFFER_BIT,
+	flush_explicit = GL_MAP_FLUSH_EXPLICIT_BIT,
+	unsynchronized = GL_MAP_UNSYNCHRONIZED_BIT,
+};
+
+inline map_access operator|(map_access _lhs, map_access _rhs)
+{
+	return static_cast<map_access>
+		(static_cast<bitfield_t>(_lhs) | static_cast<bitfield_t>(_rhs));
 }
 
 }

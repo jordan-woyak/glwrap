@@ -175,9 +175,13 @@ public:
 
 			uint_t const new_buf_size = std::max(next_pow2, (uint_t)min_buffer_size);
 
+			// TODO: don't hardcode buffer access
+			auto access = buffer_access::dynamic_storage
+				| buffer_access::map_read | buffer_access::map_write
+				| buffer_access::map_coherent | buffer_access::map_persistent;
+
 			buffer_type buf(m_glc);
-			// TODO: don't hardcode dynamic_draw
-			buf.storage(new_buf_size, gl::buffer_usage::dynamic_draw);
+			buf.storage(new_buf_size, access);
 
 			std::cout << "#" << buf.native_handle() << " size: " << new_buf_size << std::endl;
 			

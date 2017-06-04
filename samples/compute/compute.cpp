@@ -175,7 +175,6 @@ void main(void)
 
 	glc.memory_barrier(gl::memory_barrier::buffer_update);
 
-	// TODO: eliminating rng variable breaks everything. is this a clang bug?
 	auto rng = storage_buffer.get_range(0, 1);
 	for (auto& datum : rng.front().data1)
 		std::cout << datum << ' ';

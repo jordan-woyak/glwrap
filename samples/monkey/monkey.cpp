@@ -208,12 +208,13 @@ int main()
 
 	//verbuf.assign(vertices, gl::buffer_usage::static_draw);
 	// Using buffer mapping just because
-	verbuf.storage(vertices.size(), gl::buffer_usage::static_draw);
-	std::copy(vertices.begin(), vertices.end(), gl::map_buffer(verbuf).begin());
+	verbuf.storage(vertices.size(), gl::buffer_access::map_write);
+	std::copy(vertices.begin(), vertices.end(), gl::map_buffer(verbuf, gl::map_access::write).begin());
 
 	// load index data
 	gl::buffer<gl::uint_t> indbuf(glc);
-	indbuf.assign(indices, gl::buffer_usage::static_draw);
+	// TODO: make this work with no buffer access
+	indbuf.assign(indices, gl::buffer_access::dynamic_storage);
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);

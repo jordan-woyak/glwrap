@@ -44,28 +44,25 @@ public:
 	}
 
 	template <template <typename, typename> class B>
-	explicit mapped_buffer(buffer_view<B, T, A>& _view)
+	explicit mapped_buffer(buffer_view<B, T, A>& _view, map_access _access)
 		: m_ptr()
 		, m_size(_view.size())
 		, m_buffer(_view.buffer())
 		, m_alignment(_view.alignment())
 	{
-		// TODO: don't hardcode access mode
-		// TODO: allow for all the other flags: persistent and such.
-
-		bitfield_t const access_mode = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;
+		auto const access = static_cast<bitfield_t>(_access);
 		
 		if (GL_ARB_direct_state_access)
 		{
 			m_ptr = static_cast<ubyte_t*>(GLWRAP_GL_CALL(glMapNamedBufferRange)(m_buffer,
-				_view.byte_offset(), _view.byte_length(), access_mode));
+				_view.byte_offset(), _view.byte_length(), access));
 		}
 		else
 		{
 			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, m_buffer);
 
 			m_ptr = static_cast<ubyte_t*>(GLWRAP_GL_CALL(glMapBufferRange)(GL_COPY_WRITE_BUFFER,
-				_view.byte_offset(), _view.byte_length(), access_mode));
+				_view.byte_offset(), _view.byte_length(), access));
 		}		
 	}
 
@@ -150,9 +147,9 @@ private:
 };
 
 template <template <typename, typename> class B, typename T, typename A>
-mapped_buffer<T, A> map_buffer(buffer_view<B, T, A>& _view)
+mapped_buffer<T, A> map_buffer(buffer_view<B, T, A>& _view, map_access _access)
 {
-	return mapped_buffer<T, A>(_view);
+	return mapped_buffer<T, A>(_view, _access);
 }
 
 }

@@ -113,6 +113,29 @@ struct buffer_obj
 	}
 };
 
+// TODO: this function is a joke:
+inline gl::buffer_usage get_emulated_usage_from_access_flags(buffer_access _access)
+{
+	bitfield_t const flags = static_cast<bitfield_t>(_access);
+
+	// Start out with dynamic copy
+	gl::buffer_usage usage = gl::buffer_usage::dynamic_copy;
+
+	// If user wants to BufferSubData or map write then give them dynamic draw
+	if (flags & (GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT))
+	{
+		usage = gl::buffer_usage::dynamic_draw;
+	}
+	// If they don't want either of those but want client storage and map read,
+	// then give them dynamic read
+	else if ((flags & GL_CLIENT_STORAGE_BIT) && (flags & GL_MAP_READ_BIT))
+	{
+		usage = gl::buffer_usage::dynamic_read;
+	}
+
+	return usage;
+}
+
 }
 
 template <typename T, typename A = detail::tight_buffer_alignment<T>>
@@ -133,14 +156,12 @@ public:
 		: m_alignment(sizeof(value_type))
 	{}
 
-	void storage(std::size_t _size, buffer_usage _usage)
+	void storage(std::size_t _size, buffer_access _access)
 	{
-		// TODO: proper use of flags
-		bitfield_t const flags =
-			GL_DYNAMIC_STORAGE_BIT | GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-		
 		if (GL_ARB_buffer_storage)
 		{
+			bitfield_t const flags = static_cast<bitfield_t>(_access);
+				
 			if (GL_ARB_direct_state_access)
 			{
 				GLWRAP_GL_CALL(glNamedBufferStorage)(native_handle(), _size * get_stride(), nullptr, flags);
@@ -154,14 +175,16 @@ public:
 		// Emulate buffer storage support:
 		else
 		{
+			auto const usage = detail::get_emulated_usage_from_access_flags(_access);
+			
 			if (GL_ARB_direct_state_access)
 			{
-				GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
+				GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), _size * get_stride(), nullptr, static_cast<enum_t>(usage));
 			}
 			else
 			{
 				GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-				GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(_usage));
+				GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, _size * get_stride(), nullptr, static_cast<enum_t>(usage));
 			}
 		}
 	}
@@ -169,11 +192,11 @@ public:
 	// TODO: discourage use of mutable buffers
 	// TODO: rename
 	template <typename R>
-	void assign(R&& _range, buffer_usage _usage)
+	void assign(R&& _range, buffer_access _access)
 	{
 		auto const size = std::distance(std::begin(_range), std::end(_range));
 
-		storage(size, _usage);
+		storage(size, _access);
 		view_type::assign_range(std::forward<R>(_range), 0);
 	}
 
