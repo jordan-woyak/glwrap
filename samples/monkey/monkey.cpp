@@ -232,9 +232,16 @@ int main()
 	prog.set_uniform(tex_spec_uni, tex_spec_unit);
 	prog.set_uniform(tex_normal_uni, tex_normal_unit);
 
+	gl::sampler samp(glc);
+	samp.set_mag_filter(gl::texture_filter::linear);
+	samp.set_min_filter(gl::texture_filter::linear, gl::mipmap_filter::linear);
+
 	glc.bind_texture(tex_color_unit, tex_color);
+	glc.bind_sampler(tex_color_unit, samp);
 	glc.bind_texture(tex_spec_unit, tex_spec);
+	glc.bind_sampler(tex_spec_unit, samp);
 	glc.bind_texture(tex_normal_unit, tex_normal);
+	glc.bind_sampler(tex_normal_unit, samp);
 
 	glc.enable(gl::capability::depth_test);
 	glc.enable(gl::capability::cull_face);

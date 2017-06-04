@@ -176,7 +176,7 @@ int main()
 		glc.draw_elements(gl::primitive::triangles, 0, indices.size());
 	});
 
-	dsp.set_resize_func([&](gl::ivec2 const& _size)
+	dsp.set_resize_func([&](gl::ivec2 _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);
 	});
