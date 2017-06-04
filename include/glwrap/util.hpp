@@ -379,15 +379,16 @@ auto clamp(T&& _val, Min&& _min, Max&& _max) -> typename std::remove_reference<T
 // TODO: modify an index inside state?
 // TODO: more members
 template <typename State>
-class indexing_iterator : public std::iterator<std::random_access_iterator_tag, typename State::value_type>
+class indexing_iterator : public std::iterator<std::random_access_iterator_tag, typename State::value_type>, public State
 {
 public:
-	typedef typename State::index_type index_type;
 	typedef typename State::value_type value_type;
-	
-	indexing_iterator(index_type _index, const State& _state)
-		: m_index(_index)
-		, m_state(_state)
+	typedef typename State::index_type index_type;
+
+	typedef std::ptrdiff_t diff_type;
+
+	indexing_iterator(const State& _state)
+		: State{_state}
 	{}
 
 	indexing_iterator& operator++()
@@ -400,20 +401,20 @@ public:
 		return *this -= 1;
 	}
 
-	indexing_iterator& operator+=(int _val)
+	indexing_iterator& operator+=(diff_type _val)
 	{
-		m_index += _val;
+		State::get_index() += _val;
 		return *this;
 	}
 
-	indexing_iterator& operator-=(int _val)
+	indexing_iterator& operator-=(diff_type _val)
 	{
 		return *this += -_val;
 	}
 
 	value_type& operator*() const
 	{
-		return m_state.deref(m_index);
+		return State::deref();
 	}
 
 	value_type* operator->() const
@@ -423,7 +424,7 @@ public:
 
 	bool operator==(indexing_iterator const& _rhs) const
 	{
-		return m_index == _rhs.m_index;
+		return State::get_index() == _rhs.State::get_index();
 	}
 
 	bool operator!=(indexing_iterator const& _rhs) const
@@ -431,20 +432,25 @@ public:
 		return !(*this == _rhs);
 	}
 
-	int operator-(indexing_iterator const& _rhs) const
+	friend diff_type operator-(indexing_iterator const& _lhs, indexing_iterator const& _rhs)
 	{
-		return m_index - _rhs.m_index;
+		return _lhs.State::get_index() - _rhs.State::get_index();
 	}
 
 	// TODO: member or free func?
-	friend indexing_iterator operator+(const indexing_iterator& _lhs, int _offset)
+	friend indexing_iterator operator+(indexing_iterator _lhs, diff_type _offset)
 	{
 		return _lhs += _offset;
 	}
 
+	friend indexing_iterator operator-(const indexing_iterator& _lhs, diff_type _offset)
+	{
+		return _lhs + -_offset;
+	}
+
 private:
-	index_type m_index;
-	State m_state;
+	//index_type m_index;
+	//State m_state;
 };
 
 namespace detail

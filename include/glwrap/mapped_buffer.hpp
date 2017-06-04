@@ -112,15 +112,30 @@ public:
 private:
 	struct iter_state
 	{
-		typedef sizei_t index_type;
+		friend class indexing_iterator<iter_state>;
+
+		typedef uint_t index_type;
 		typedef T value_type;
+	// TODO: make private:
+	//private:
+		index_type m_index;
 		
 		ubyte_t* m_ptr;
-		alignment_type m_alignment;
+		uint_t m_stride;
 
-		value_type& deref(index_type _index) const
+		index_type& get_index()
 		{
-			return *reinterpret_cast<value_type*>(m_ptr + _index * m_alignment.get_stride());
+			return m_index;
+		}
+
+		const index_type& get_index() const
+		{
+			return m_index;
+		}
+
+		value_type& deref() const
+		{
+			return *reinterpret_cast<value_type*>(m_ptr + m_index * m_stride);
 		}
 	};
 
@@ -129,22 +144,22 @@ public:
 
 	iterator begin()
 	{
-		return {0, iter_state{m_ptr, m_alignment}};
+		return {iter_state{0, m_ptr, get_stride()}};
 	}
 
 	iterator end()
 	{
-		return {m_size, iter_state{m_ptr, m_alignment}};
+		return {iter_state{m_size, m_ptr, get_stride()}};
 	}
 
 private:
-	sizei_t get_stride() const
+	uint_t get_stride() const
 	{
 		return m_alignment.get_stride();
 	}
 
 	ubyte_t* m_ptr;
-	sizei_t m_size;
+	uint_t m_size;
 	uint_t m_buffer;
 	alignment_type m_alignment;
 };

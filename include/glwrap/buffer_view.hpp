@@ -6,65 +6,66 @@ namespace GLWRAP_NAMESPACE
 template <typename T, typename A>
 class mapped_buffer;
 
-// TODO: move this into the buffer class?
-template <typename T, typename A>
-class buffer_iterator
+template <template <typename, typename> class Underlying, typename T, typename A>
+class buffer_view;
+
+namespace detail
 {
-	//template <typename, typename>
-	//friend class buffer;
 
-public:
+template <typename T, typename A>
+struct buffer_iterator_state
+{
+	friend class indexing_iterator<buffer_iterator_state>;
+
+	//template <template <typename, typename> class Underlying>
+	//friend class buffer_view<Underlying, T, A>;
+	
 	typedef T value_type;
-	typedef A alignment_type;
+	typedef uint_t index_type;
+	//friend class context;
 
-	buffer_iterator& operator++()
-	{
-		return *this +=1;
-	}
-
-	buffer_iterator& operator+=(std::size_t _val)
-	{
-		m_offset += _val * get_stride();
-		return *this;
-	}
-
-	friend buffer_iterator operator+(buffer_iterator _lhs, std::size_t _offset)
-	{
-		return _lhs += _offset;
-	}
-
-	// TODO: this should be private
-	buffer_iterator(uint_t _buffer, ubyte_t* _offset, const alignment_type& _alignment)
-		: m_offset(_offset)
-		, m_alignment(_alignment)
-		, m_buffer(_buffer)
-	{}
-
+	// TODO: these are ugly:
 	uint_t get_buffer() const
 	{
 		return m_buffer;
 	}
-	
+
+	// TODO: ptr == ugly
 	ubyte_t* get_offset() const
 	{
-		return m_offset;
+		return (ubyte_t*)0 + m_byte_offset + m_index * m_stride;
 	}
 
-	sizei_t get_stride() const
+	uint_t get_stride() const
 	{
-		return m_alignment.get_stride();
+		return m_stride;
 	}
 
-	const alignment_type& get_alignment() const
-	{
-		return m_alignment;
-	}
-
-private:
-	ubyte_t* m_offset;
-	alignment_type m_alignment;
+// TODO: make private:
+//private:
+	index_type m_index;
+	
 	uint_t m_buffer;
+	uint_t m_byte_offset;
+	uint_t m_stride;
+
+	index_type& get_index()
+	{
+		return m_index;
+	}
+
+	// TODO: fix
+	value_type deref() const
+	{
+		//return *reinterpret_cast<value_type*>(m_ptr + _index * m_alignment.get_stride());
+		return value_type();
+	}
 };
+
+}
+
+template <typename T, typename A>
+using buffer_iterator = indexing_iterator<detail::buffer_iterator_state<T, A>>;
 
 template <template <typename, typename> class Underlying, typename T, typename A>
 class buffer_view
@@ -78,12 +79,12 @@ public:
 
 	iterator begin()
 	{
-		return {buffer(), (ubyte_t*)0 + byte_offset(), alignment()};
+		return {detail::buffer_iterator_state<T, A>{0, buffer(), byte_offset(), stride()}};
 	}
 
 	iterator end()
 	{
-		return {buffer(), (ubyte_t*)0 + byte_offset() + byte_length(), alignment()};
+		return {detail::buffer_iterator_state<T, A>{size(), buffer(), byte_offset(), stride()}};
 	}
 
 	uint_t size() const
@@ -130,7 +131,7 @@ public:
 			GLWRAP_GL_CALL(glBufferSubData)(GL_COPY_WRITE_BUFFER, byte_offset() + _offset * str, size * str, &*begin);
 		}
 	}
-	
+
 private:
 	// TODO: I don't like these function names
 	// lacking "get_" is to not clash with the underlying function names
