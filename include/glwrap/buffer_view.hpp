@@ -94,7 +94,7 @@ public:
 	// TODO: do I want this?
 	std::vector<value_type> get_range(uint_t _start, uint_t _count)
 	{
-		auto mbuf = map_buffer(*this, gl::map_access::read);
+		auto mbuf = map_buffer(*this, map_access::read);
 		
 		// TODO: should I just return the mapped buffer?
 		return std::vector<value_type>(mbuf.begin(), mbuf.end());

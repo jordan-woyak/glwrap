@@ -74,12 +74,12 @@ struct is_gl_integral : std::false_type {};
 
 template <typename T>
 struct is_gl_integral<T, typename std::enable_if<
-		std::is_same<gl::byte_t, T>::value ||
-		std::is_same<gl::ubyte_t, T>::value ||
-		std::is_same<gl::short_t, T>::value ||
-		std::is_same<gl::ushort_t, T>::value ||
-		std::is_same<gl::int_t, T>::value ||
-		std::is_same<gl::uint_t, T>::value>::type> : std::true_type
+		std::is_same<byte_t, T>::value ||
+		std::is_same<ubyte_t, T>::value ||
+		std::is_same<short_t, T>::value ||
+		std::is_same<ushort_t, T>::value ||
+		std::is_same<int_t, T>::value ||
+		std::is_same<uint_t, T>::value>::type> : std::true_type
 {};
 
 template <typename T, typename Enable = void>
@@ -89,9 +89,9 @@ struct is_gl_floating_point : std::false_type
 // TODO: half_t
 template <typename T>
 struct is_gl_floating_point<T, typename std::enable_if<
-		//std::is_same<gl::half_t, T>::value ||
-		std::is_same<gl::float_t, T>::value ||
-		std::is_same<gl::double_t, T>::value>::type> : std::true_type
+		//std::is_same<half_t, T>::value ||
+		std::is_same<float_t, T>::value ||
+		std::is_same<double_t, T>::value>::type> : std::true_type
 {};
 
 template <typename T>

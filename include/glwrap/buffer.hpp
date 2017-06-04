@@ -114,23 +114,23 @@ struct buffer_obj
 };
 
 // TODO: this function is a joke.. but so is the usage hint.
-inline gl::buffer_usage get_emulated_usage_from_access_flags(buffer_access _access)
+inline buffer_usage get_emulated_usage_from_access_flags(buffer_access _access)
 {
 	bitfield_t const flags = static_cast<bitfield_t>(_access);
 
 	// Start out with dynamic copy
-	gl::buffer_usage usage = gl::buffer_usage::dynamic_copy;
+	buffer_usage usage = buffer_usage::dynamic_copy;
 
 	// If user wants to BufferSubData or map write then give them dynamic draw
 	if (flags & (GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT))
 	{
-		usage = gl::buffer_usage::dynamic_draw;
+		usage = buffer_usage::dynamic_draw;
 	}
 	// If they don't want either of those but want client storage or map read,
 	// then give them dynamic read
 	else if (flags & (GL_CLIENT_STORAGE_BIT | GL_MAP_READ_BIT))
 	{
-		usage = gl::buffer_usage::dynamic_read;
+		usage = buffer_usage::dynamic_read;
 	}
 
 	return usage;

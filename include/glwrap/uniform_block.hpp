@@ -13,30 +13,6 @@ class program;
 
 namespace detail
 {
-/*
-class uniform_block_variable
-{
-	friend class gl::program;
-
-public:
-	std::string const& get_name() const
-	{
-		return m_name;
-	}
-
-private:
-	uniform_block_variable(std::string const& _name)
-		: m_name(_name)
-		, m_location()
-		, m_members()
-	{}
-
-	std::string m_name;
-	uint_t m_location;
-	// TODO: shared_ptr can be killed
-	std::map<std::size_t, std::shared_ptr<variable_base>> m_members;
-};
-*/
 
 struct uniform_block_index
 {};

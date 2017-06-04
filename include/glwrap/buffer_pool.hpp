@@ -130,8 +130,9 @@ class buffer_pool
 	typedef typename buffer_type::native_handle_type buffer_handle_type;
 	
 public:
-	buffer_pool(context& _glc)
+	buffer_pool(context& _glc, buffer_access _access)
 		: m_glc(_glc)
+		, m_access(_access)
 	{}
 
 	template <typename T, typename A = detail::tight_buffer_alignment<T>>
@@ -174,14 +175,9 @@ public:
 			uint_t const next_pow2 = 1 << glm::log2(req_size);
 
 			uint_t const new_buf_size = std::max(next_pow2, (uint_t)min_buffer_size);
-
-			// TODO: don't hardcode buffer access
-			auto access = buffer_access::dynamic_storage
-				| buffer_access::map_read | buffer_access::map_write
-				| buffer_access::map_coherent | buffer_access::map_persistent;
-
+			
 			buffer_type buf(m_glc);
-			buf.storage(new_buf_size, access);
+			buf.storage(new_buf_size, m_access);
 
 			std::cout << "#" << buf.native_handle() << " size: " << new_buf_size << std::endl;
 			
@@ -227,11 +223,12 @@ private:
 	// TODO: kill this:
 	context& m_glc;
 
-	// TODO: A vector would be nicer..
-	std::list<buffer_type> m_buffers;
+	std::vector<buffer_type> m_buffers;
 
 	// TODO: use vector and std::make_heap ?
 	std::multiset<block> m_blocks;
+
+	buffer_access m_access;
 };
 
 // TODO: move this back into the class def:

@@ -211,13 +211,13 @@ public:
 		GLWRAP_GL_CALL(glHint)(static_cast<GLenum>(_target), static_cast<GLenum>(_value));
 	}
 
-	// TODO: function name?
-	void memory_barrier(gl::memory_barrier _barrier)
+	// TODO: function name? insert_* ?
+	void memory_barrier(enum memory_barrier _barrier)
 	{
 		GLWRAP_GL_CALL(glMemoryBarrier)(static_cast<GLenum>(_barrier));
 	}
 
-	void memory_barrier_by_region(gl::memory_barrier _barrier)
+	void memory_barrier_by_region(enum memory_barrier _barrier)
 	{
 		GLWRAP_GL_CALL(glMemoryBarrierByRegion)(static_cast<GLenum>(_barrier));
 	}

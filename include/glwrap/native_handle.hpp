@@ -30,7 +30,13 @@ public:
 		
 		return nh;
 	}
-
+/*
+	// TODO: allow comparison with the underlying type?
+	friend bool operator<(const native_handle_base& _lhs, const native_handle_base& _rhs)
+	{
+		return _lhs.native_handle() < _rhs.native_handle();
+	}
+*/
 protected:
 	template <typename... T>
 	explicit native_handle_base(T&&... _args)

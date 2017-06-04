@@ -117,7 +117,7 @@ void main(void)
 	if (!prog.is_good())
 		return 1;
 
-	gl::buffer_pool bpool(glc);
+	gl::buffer_pool bpool(glc, gl::buffer_access::dynamic_storage | gl::buffer_access::map_read);
 
 	//bpool.get<gl::int_t>(45);
 	//bpool.get<gl::int_t>(45);

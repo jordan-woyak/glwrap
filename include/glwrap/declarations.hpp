@@ -83,7 +83,7 @@ typedef normalized<ushort_t> norm_ushort_t;
 typedef normalized<int_t> norm_int_t;
 typedef normalized<uint_t> norm_uint_t;
 
-// TODO: gl::array probably isn't needed
+// TODO: an array typedef probably isn't needed
 template <typename T, sizei_t N>
 using array = std::array<T, N>;
 
