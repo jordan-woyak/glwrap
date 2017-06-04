@@ -92,6 +92,20 @@ struct framebuffer_obj
 
 }
 
+enum class framebuffer_status : enum_t
+{
+	// "Additionally, if an error occurs, zero is returned."
+	error = 0,
+	undefined = GL_FRAMEBUFFER_UNDEFINED,
+	incomplete_attachment = GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT,
+	incomplete_missing_attachment = GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT,
+	incomplete_draw_buffer = GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER,
+	incomplete_read_buffer = GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER,
+	unsupported = GL_FRAMEBUFFER_UNSUPPORTED,
+	incomplete_multisample = GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE,
+	incomplete_layer_target = GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS,
+};
+
 class framebuffer : public detail::globject<detail::framebuffer_obj>
 {
 public:
@@ -183,26 +197,77 @@ public:
 		}
 	}
 
-	// TODO: other statuses and read status too
-	bool is_draw_complete()
+	framebuffer_status get_draw_status()
 	{
-		enum_t status = GL_FRAMEBUFFER_UNDEFINED;
+		return get_status<detail::parameter::draw_framebuffer, GL_DRAW_FRAMEBUFFER>();
+	}
+
+	framebuffer_status get_read_status()
+	{
+		return get_status<detail::parameter::read_framebuffer, GL_READ_FRAMEBUFFER>();
+	}
+
+	void set_default_width(uint_t _val)
+	{
+		set_parameter_raw(GL_FRAMEBUFFER_DEFAULT_WIDTH, _val);
+	}
+
+	void set_default_height(uint_t _val)
+	{
+		set_parameter_raw(GL_FRAMEBUFFER_DEFAULT_HEIGHT, _val);
+	}
+
+	void set_default_samples(uint_t _val)
+	{
+		set_parameter_raw(GL_FRAMEBUFFER_DEFAULT_SAMPLES, _val);
+	}
+
+	void set_default_fixed_sample_locations(bool _val)
+	{
+		set_parameter_raw(GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS, _val);
+	}
+
+/*
+	// Not in GL ES
+	void set_default_layers(uint_t _val)
+	{
+		set_parameter_raw(GL_FRAMEBUFFER_DEFAULT_LAYERS, _val);
+	}
+*/
+
+private:
+	template <typename Param, enum_t Target>
+	framebuffer_status get_status()
+	{
+		enum_t status = {};
 		
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
-			status = GLWRAP_GL_CALL(glCheckNamedFramebufferStatus)(native_handle(), GL_DRAW_FRAMEBUFFER);
+			status = GLWRAP_GL_CALL(glCheckNamedFramebufferStatus)(native_handle(), Target);
 		}
 		else
 		{
-			detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
+			detail::scoped_value<Param> binding(native_handle());
 
-			status = GLWRAP_GL_CALL(glCheckFramebufferStatus)(GL_DRAW_FRAMEBUFFER);
+			status = GLWRAP_GL_CALL(glCheckFramebufferStatus)(Target);
 		}
 
-		return (GL_FRAMEBUFFER_COMPLETE == status);
+		return static_cast<framebuffer_status>(status);
 	}
 
-private:
+	void set_parameter_raw(GLenum _pname, int_t _val)
+	{
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			GLWRAP_GL_CALL(glNamedFramebufferParameteri)(native_handle(), _pname, _val);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::read_framebuffer> binding(native_handle());
+
+			GLWRAP_GL_CALL(glFramebufferParameteri)(GL_READ_FRAMEBUFFER, _pname, _val);
+		}
+	}
 };
 
 // TODO: this should take a color attachment enumerator and bind attachments to fragdatas
