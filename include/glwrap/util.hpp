@@ -20,10 +20,9 @@ namespace GLWRAP_NAMESPACE
 //#define GLWRAP_GL_CALL(x) detail::make_gl_function_caller(x, __PRETTY_FUNCTION__)
 #define GLWRAP_GL_CALL(x) detail::make_gl_function_caller(x, #x) 
 
-template <typename T>
-bool inline is_extension_present(const T& _ext)
+bool inline is_extension_present(bool _ext)
 {
-#if 0
+#if 1
 	return _ext;
 #else
 	return false;
