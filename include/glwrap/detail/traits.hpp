@@ -212,6 +212,7 @@ struct is_contiguous
 
 	static const bool value =
 		(is_std_vector<adj_type>::value && !is_std_vector_of_bool<adj_type>::value)
+		|| is_std_initializer_list<adj_type>::value
 		|| is_std_array<adj_type>::value
 		|| std::is_array<adj_type>::value;
 };
@@ -219,6 +220,7 @@ struct is_contiguous
 static_assert(is_contiguous<std::vector<int>&>::value, "fail");
 static_assert(is_contiguous<const std::array<float, 4>&>::value, "fail");
 static_assert(is_contiguous<int[5]>::value, "fail");
+static_assert(is_contiguous<std::initializer_list<double>>::value, "fail");
 static_assert(is_contiguous<float(&)[1]>::value, "fail");
 static_assert(!is_contiguous<std::list<char>>::value, "fail");
 static_assert(!is_contiguous<std::vector<bool>>::value, "fail");

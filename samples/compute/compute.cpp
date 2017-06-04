@@ -132,7 +132,7 @@ void main(void)
 
 	// Create shader storage
 	auto storage_buffer = bpool.get<MyShaderStorageData, gl::detail::shader_storage_buffer_alignment>(1);
-	storage_buffer.assign_range(std::vector<MyShaderStorageData>(1), 0);
+	storage_buffer.assign_range({MyShaderStorageData{}}, 0);
 	glc.bind_buffer(storage_loc, storage_buffer.begin());
 
 	// Create counter buffer
@@ -141,11 +141,11 @@ void main(void)
 
 	// Create uniform block storage
 	auto uniform_buffer = bpool.get<MyUniformBlockData, gl::detail::uniform_buffer_alignment>(1);
-	uniform_buffer.assign_range((MyUniformBlockData[]){{72, 31}}, 0);
+	uniform_buffer.assign_range({{72, 31}}, 0);
 	glc.bind_buffer(uniblock_loc, uniform_buffer.begin());
 
 	auto cmdbuf = bpool.get<gl::uvec3>(1);
-	cmdbuf.assign_range((gl::uvec3[]){{5, 1, 1}}, 0);
+	cmdbuf.assign_range({{5, 1, 1}}, 0);
 
 	bpool.debug_stats();
 

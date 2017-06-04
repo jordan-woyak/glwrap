@@ -101,8 +101,33 @@ public:
 	}
 
 	// TODO: parameter order?
+	void assign_range(const std::initializer_list<value_type>& _range, sizei_t _offset)
+	{
+		assign_from_range(_range, _offset);
+	}
+
+	// TODO: parameter order?
 	template <typename R>
-	void assign_range(R&& _range, sizei_t _offset)
+	void assign_range(const R& _range, sizei_t _offset)
+	{
+		assign_from_range(_range, _offset);
+	}
+
+	void invalidate_range(uint_t _offset, uint_t _length)
+	{
+		// TODO: allow checking if supported
+		if (is_extension_present(GL_ARB_invalidate_subdata))
+		{
+			auto const str = stride();
+			
+			GLWRAP_GL_CALL(glInvalidateBufferSubData)(buffer(), _offset * str, _length * str);
+		}
+	}
+	
+private:
+	// TODO: parameter order?
+	template <typename R>
+	void assign_from_range(const R& _range, sizei_t _offset)
 	{
 		//auto& contig_range = detail::get_contiguous_range<element_type>(std::forward<R>(_range));
 		auto& contig_range = _range;
@@ -140,19 +165,7 @@ public:
 			_offset += batch_amt;
 		}
 	}
-
-	void invalidate_range(uint_t _offset, uint_t _length)
-	{
-		// TODO: allow checking if supported
-		if (is_extension_present(GL_ARB_invalidate_subdata))
-		{
-			auto const str = stride();
-			
-			GLWRAP_GL_CALL(glInvalidateBufferSubData)(buffer(), _offset * str, _length * str);
-		}
-	}
 	
-private:
 	// TODO: I don't like these function names
 	// lacking "get_" is to not clash with the underlying function names
 	const Underlying<T, A>& underlying() const
