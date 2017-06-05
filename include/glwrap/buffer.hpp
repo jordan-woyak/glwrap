@@ -170,6 +170,9 @@ public:
 		static_assert(detail::is_contiguous<R>::value,
 			"Range must be contiguous.");
 
+		static_assert(std::is_trivially_assignable<value_type&, decltype(*std::begin(_range))>::value,
+			"range must be binary compatible with value_type");
+
 		static_assert(sizeof(R) && std::is_same<alignment_type, detail::tight_buffer_alignment<T>>::value,
 			"glStorage with non-null ptr is only sensible with tight alignments.");
 			

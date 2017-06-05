@@ -157,7 +157,7 @@ private:
 		static_assert(detail::is_contiguous<R>::value,
 			"range must be contiguous");
 
-		static_assert(std::is_trivially_assignable<value_type, decltype(*begin)>::value,
+		static_assert(std::is_trivially_assignable<value_type&, decltype(*begin)>::value,
 			"range must be binary compatible with value_type");
 
 		auto const str = stride();
