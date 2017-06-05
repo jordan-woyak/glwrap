@@ -206,7 +206,8 @@ int main()
 	// load index data
 	auto indbuf = gl::make_buffer(glc, indices, gl::buffer_access::none);
 	//gl::buffer<gl::uint_t> indbuf(glc);
-	//indbuf.storage(indices, gl::buffer_access::none);
+	//indbuf.storage(indices.size(), gl::buffer_access::none);
+	//indbuf.assign_range(indbuf_test, 0);
 
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);

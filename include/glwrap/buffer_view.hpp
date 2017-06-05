@@ -108,9 +108,28 @@ public:
 
 	// TODO: parameter order?
 	template <typename R>
-	void assign_range(const R& _range, sizei_t _offset)
+	typename std::enable_if<detail::is_range<R>::value>::type
+	assign_range(const R& _range, sizei_t _offset)
 	{
 		assign_from_range(_range, _offset);
+	}
+
+	// TODO: parameter order?
+	void assign_range(buffer_view& _other, sizei_t _offset)
+	{
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			GLWRAP_GL_CALL(glCopyNamedBufferSubData)(_other.buffer(), buffer(),
+				_other.byte_offset(), byte_offset(), _other.byte_length());
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.buffer());
+			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, buffer());
+			
+			GLWRAP_GL_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
+				_other.byte_offset(), byte_offset(), _other.byte_length());
+		}
 	}
 
 	void invalidate_range(uint_t _offset, uint_t _length)
@@ -120,7 +139,7 @@ public:
 		{
 			auto const str = stride();
 			
-			GLWRAP_GL_CALL(glInvalidateBufferSubData)(buffer(), _offset * str, _length * str);
+			GLWRAP_GL_CALL(glInvalidateBufferSubData)(buffer(), byte_offset() + _offset * str, _length * str);
 		}
 	}
 	

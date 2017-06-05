@@ -156,6 +156,7 @@ public:
 		: m_alignment(sizeof(value_type))
 	{}
 
+	// TODO: rename one of these two overloads
 	void storage(sizei_t _size, buffer_access _access)
 	{
 		storage(_size, nullptr, _access);
@@ -175,30 +176,6 @@ public:
 		auto const size = std::distance(std::begin(_range), std::end(_range));
 
 		storage(size, &*std::begin(_range), _access);
-	}
-
-	// TODO: discourage use of mutable buffers
-	void assign(buffer const& _other, buffer_usage _usage)
-	{
-		if (is_extension_present(GL_ARB_direct_state_access))
-		{
-			sizei_t sz = 0;
-			GLWRAP_GL_CALL(glGetNamedBufferParameteriv)(_other.native_handle(), GL_BUFFER_SIZE, &sz);
-			
-			GLWRAP_GL_CALL(glNamedBufferData)(native_handle(), sz, nullptr, static_cast<enum_t>(_usage));
-			GLWRAP_GL_CALL(glCopyNamedBufferSubData)(_other.native_handle(), native_handle(), 0, 0, sz);
-		}
-		else
-		{
-			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_READ_BUFFER, _other.native_handle());
-			GLWRAP_GL_CALL(glBindBuffer)(GL_COPY_WRITE_BUFFER, native_handle());
-
-			sizei_t sz = 0;
-			GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &sz);
-		
-			GLWRAP_GL_CALL(glBufferData)(GL_COPY_WRITE_BUFFER, sz, nullptr, static_cast<enum_t>(_usage));
-			GLWRAP_GL_CALL(glCopyBufferSubData)(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sz);
-		}
 	}
 
 	// naming ?
@@ -266,7 +243,7 @@ private:
 			GLWRAP_GL_CALL(glGetBufferParameteriv)(GL_COPY_WRITE_BUFFER, GL_BUFFER_SIZE, &sz);
 		}
 		
-		return sz / get_stride();
+		return sz;
 	}
 
 	const alignment_type& get_alignment() const
