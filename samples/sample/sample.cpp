@@ -121,7 +121,7 @@ int main()
 		{{9, -9}, {1, 1}, {0, 0, 1}},
 		{{9, 9}, {1, 0}, {0, 0, 0}},
 	};
-	verbuf.assign(verts, gl::buffer_usage::static_draw);
+	verbuf.storage(verts, gl::buffer_access::none);
 	}
 
 	// Testing if a rotating buffer helps performance
@@ -129,7 +129,7 @@ int main()
 	gl::uint_t rotating_buffer_iter = 0;
 
 	gl::buffer<gl::mat4> matbuf(glc);
-	matbuf.storage(rotating_buffer_count, gl::buffer_usage::stream_draw);
+	matbuf.storage(rotating_buffer_count, gl::buffer_access::dynamic_storage);
 
 	gl::vertex_buffer_binding_enumerator vbuflocs(glc);
 	auto input_loc = vbuflocs.get<FooVertex>();
@@ -185,7 +185,7 @@ int main()
 	glc.use_read_framebuffer(fbuf);
 
 	gl::buffer<gl::draw_arrays_indirect_cmd> cmdbuf(glc);
-	cmdbuf.storage(1, gl::buffer_usage::static_draw);
+	cmdbuf.storage(1, gl::buffer_access::dynamic_storage);
 
 	gl::draw_arrays_indirect_cmd draw_cmd = {};
 	draw_cmd.count = 4;
@@ -202,7 +202,7 @@ int main()
 
 		// rotating ortho projection
 		gl::mat4 const model = gl::rotate(rotate, 0.f, 0.f, 1.f) *
-			gl::scale(0.1f * gl::clamp(ratio, ratio, 1), 0.1f / gl::clamp(ratio, 1, ratio), 1.f);
+			gl::scale(0.1f * glm::clamp(ratio, ratio, 1.f), 0.1f / glm::clamp(ratio, 1.f, ratio), 1.f);
 
 		//prog.set_uniform(model_uni, model);
 		matbuf.assign_range((gl::mat4[]){ model }, rotating_buffer_iter);
@@ -215,6 +215,7 @@ int main()
 
 		glc.use_draw_framebuffer(fbuf);
 		glc.clear(gl::buffer_mask::color);
+		//fbuf.clear_color_buffer(fragdata, {1, 1, 1, 1});
 
 		//glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
 		glc.draw_arrays_indirect(gl::primitive::triangle_fan, cmdbuf.begin());

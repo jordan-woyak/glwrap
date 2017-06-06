@@ -5,6 +5,8 @@
 #include "texture.hpp"
 #include "renderbuffer.hpp"
 
+#include "detail/framebuffer.hpp"
+
 namespace GLWRAP_NAMESPACE
 {
 
@@ -235,7 +237,86 @@ public:
 	}
 */
 
+	// TODO: unsigned and signed versions:
+	template <typename T>
+	void clear_color_buffer(const fragdata_location<T>& _loc, vec4 _val)
+	{
+		clear_buffer(GL_COLOR, _loc.get_index(), _val);
+	}
+
+	// TODO: remove the location param?
+	template <typename T>
+	void clear_depth_buffer(const fragdata_location<T>& _loc, float_t _val)
+	{
+		clear_buffer(GL_DEPTH, _loc.get_index(), _val);
+	}
+
+	// TODO: remove the location param?
+	template <typename T>
+	void clear_stencil_buffer(const fragdata_location<T>& _loc, int_t _val)
+	{
+		clear_buffer(GL_DEPTH, _loc.get_index(), _val);
+	}
+
+	// TODO: remove the location param?
+	template <typename T>
+	void clear_depth_stencil_buffer(const fragdata_location<T>& _loc, float_t _depth, int_t _stencil)
+	{
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			GLWRAP_GL_CALL(glClearNamedFramebufferfi)(native_handle(), _loc.get_index(), _depth, _stencil);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
+
+			GLWRAP_GL_CALL(glClearBufferfi)(_loc.get_index(), _depth, _stencil);
+		}
+	}
+
+	// TODO: rename
+	void blit(framebuffer& _read_fb,
+		ivec2 const& _src_begin, ivec2 const& _src_end,
+		ivec2 const& _dst_begin, ivec2 const& _dst_end, buffer_mask _mask, filter _filter)
+	{
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			GLWRAP_GL_CALL(glBlitNamedFramebuffer)(
+				_read_fb.native_handle(), native_handle(),
+				_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
+				_dst_begin.x, _dst_begin.y, _dst_end.x, _dst_end.y,
+				static_cast<bitfield_t>(_mask), static_cast<enum_t>(_filter));
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::read_framebuffer> r_binding(_read_fb.native_handle());
+			detail::scoped_value<detail::parameter::draw_framebuffer> d_binding(native_handle());
+			
+			GLWRAP_GL_CALL(glBlitFramebuffer)(
+				_src_begin.x, _src_begin.y, _src_end.x, _src_end.y,
+				_dst_begin.x, _dst_begin.y, _dst_end.x, _dst_end.y,
+				static_cast<bitfield_t>(_mask), static_cast<enum_t>(_filter));
+		}
+	}
+
 private:
+	// TODO: Get out of this class..
+	template <typename V>
+	void clear_buffer(enum_t _buffer, int_t _index, const V& _val)
+	{
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			detail::gl_clear_named_framebuffer(native_handle(), _buffer, _index, value_ptr(_val));
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::draw_framebuffer> binding(native_handle());
+
+			detail::gl_clear_buffer(_buffer, _index, value_ptr(_val));
+		}
+	}
+
+	// TODO: Get out of this class..
 	template <typename Param, enum_t Target>
 	framebuffer_status get_status()
 	{

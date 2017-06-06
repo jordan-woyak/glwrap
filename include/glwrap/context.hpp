@@ -172,9 +172,9 @@ public:
 		GLWRAP_GL_CALL(glDepthFunc)(static_cast<GLenum>(_compar));
 	}
 
-	void depth_range(depth_t _near, depth_t _far)
+	void depth_range(float_t _near, float_t _far)
 	{
-		GLWRAP_GL_CALL(glDepthRange)(_near, _far);
+		GLWRAP_GL_CALL(glDepthRangef)(_near, _far);
 	}
 
 	void depth_mask(bool_t _enable)
@@ -230,6 +230,11 @@ public:
 	void disable(capability _cap)
 	{
 		GLWRAP_GL_CALL(glDisable)(static_cast<GLenum>(_cap));
+	}
+
+	bool is_enabled(capability _cap)
+	{
+		return GLWRAP_GL_CALL(glIsEnabled)(static_cast<GLenum>(_cap));
 	}
 
 	template <texture_type T, typename D>
@@ -298,6 +303,8 @@ public:
 		GLWRAP_GL_CALL(glEndTransformFeedback)();
 	}
 
+	// TODO: move into fbo class?
+	// TODO: rename
 	void blit_pixels(ivec2 const& _src_begin, ivec2 const& _src_end,
 		ivec2 const& _dst_begin, ivec2 const& _dst_end, buffer_mask _mask, filter _filter)
 	{
@@ -599,7 +606,7 @@ public:
 
 	void disable_profiling()
 	{
-		detail::g_profile_every_gl_call = true;
+		detail::g_profile_every_gl_call = false;
 	}
 
 private:

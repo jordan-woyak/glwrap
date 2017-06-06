@@ -196,8 +196,8 @@ struct is_range<T, void_t<
 		//typename T::allocator_type,
 		//typename T::iterator,
 		//typename T::const_iterator,
-		decltype(std::begin(std::declval<T>())),
-		decltype(std::end(std::declval<T>()))
+		decltype(std::begin(std::declval<T&>())),
+		decltype(std::end(std::declval<T&>()))
 		//decltype(std::declval<T>().end()),
 		//decltype(std::declval<T>().cbegin()),
 		//decltype(std::declval<T>().cend())
