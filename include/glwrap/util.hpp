@@ -143,8 +143,8 @@ public:
 			{
 				if (g_profile_every_gl_call)
 				{
-					//glFlush();
-					//glFinish();
+					glFlush();
+					glFinish();
 					
 					auto end_time = clock::now();
 					auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);

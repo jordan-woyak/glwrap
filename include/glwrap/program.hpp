@@ -148,6 +148,7 @@ public:
 	}
 
 	// TODO: accept a shader_builder as well?
+	// both shader_builder and shader could fulfil some sort of shader_source requirement
 	template <shader_type T>
 	void attach(const basic_shader<T>& _shad)
 	{

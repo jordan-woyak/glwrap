@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include "variable.hpp"
 #include "texture.hpp"
 #include "renderbuffer.hpp"
@@ -115,6 +117,9 @@ public:
 	{}
 
 	// TODO: glInvalidateFramebuffer
+
+	// TODO: go back to the gl::renderbuffer_attachment, gl::texture_attachment impl
+	// or a single overload with an internal functor
 
 	// TODO: almost think the implementation of this belongs in renderbuffer
 	// TODO: support depth and stencil attachments
