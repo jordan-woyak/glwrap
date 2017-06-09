@@ -240,8 +240,15 @@ public:
 	template <texture_type T, typename D>
 	void bind_texture(texture_unit<shader::basic_sampler<T, D>> const& _unit, basic_texture<T, D> const& _texture)
 	{
-		GLWRAP_GL_CALL(glActiveTexture)(GL_TEXTURE0 + _unit.get_index());
-		GLWRAP_GL_CALL(glBindTexture)(_texture.target, _texture.native_handle());
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			GLWRAP_GL_CALL(glBindTextureUnit)(_unit.get_index(), _texture.native_handle());
+		}
+		else
+		{
+			GLWRAP_GL_CALL(glActiveTexture)(GL_TEXTURE0 + _unit.get_index());
+			GLWRAP_GL_CALL(glBindTexture)(_texture.target, _texture.native_handle());
+		}
 	}
 
 	// TODO: work for more than image_2d
