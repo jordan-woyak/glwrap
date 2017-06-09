@@ -10,7 +10,10 @@ namespace GLWRAP_NAMESPACE
 {
 
 // TODO: rename this to drawbuffer ?
-// TODO: does it make sense for this to have a type
+// TODO: does it make sense for this to have a type?
+// color_number ?
+// "fragment_color"
+// buffer index
 template <typename T>
 class fragdata_location
 {

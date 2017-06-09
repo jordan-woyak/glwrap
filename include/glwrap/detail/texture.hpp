@@ -50,7 +50,7 @@ struct texture_dims<T, typename std::enable_if<
 	>::type>
 {
 	static const int value = 2;
-	typedef basic_vec<sizei_t, value> type;
+	typedef ivec2 type;
 };
 
 template <texture_type T>
@@ -60,7 +60,7 @@ struct texture_dims<T, typename std::enable_if<
 	>::type>
 {
 	static const int value = 3;
-	typedef basic_vec<sizei_t, value> type;
+	typedef ivec3 type;
 };
 
 template <texture_type T>
@@ -219,10 +219,10 @@ gl_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 // TODO: kinda ugly that these two need the texture_type just to get the dimension type
 template <texture_type TexType, typename DataType>
 typename std::enable_if<2 == texture_dims<TexType>::value>::type
-gl_texture_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _offset,
+gl_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_GL_CALL(glTextureSubImage2D)(_target, _level,
+	GLWRAP_GL_CALL(glTextureSubImage2D)(_texture, _level,
 		_offset.x, _offset.y,
 		_dims.x, _dims.y,
 		_format, detail::data_type_enum<DataType>(), _data);
@@ -230,13 +230,61 @@ gl_texture_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _off
 
 template <texture_type TexType, typename DataType>
 typename std::enable_if<3 == texture_dims<TexType>::value>::type
-gl_texture_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _offset,
+gl_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
-	GLWRAP_GL_CALL(glTextureSubImage3D)(_target, _level,
+	GLWRAP_GL_CALL(glTextureSubImage3D)(_texture, _level,
 		_offset.x, _offset.y, _offset.z,
 		_dims.x, _dims.y, _dims.z,
 		_format, detail::data_type_enum<DataType>(), _data);
+}
+
+// glCopyTexSubImage*
+
+template <texture_type TexType>
+typename std::enable_if<2 == texture_dims<TexType>::value>::type
+gl_copy_tex_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _offset,
+	const ivec2& _pos, const ivec2& _size)
+{
+	GLWRAP_GL_CALL(glCopyTexSubImage2D)(texture_traits<TexType>::target, _level,
+		_offset.x, _offset.y,
+		_pos.x, _pos.y,
+		_size.x, _size.y);
+}
+
+template <texture_type TexType>
+typename std::enable_if<3 == texture_dims<TexType>::value>::type
+gl_copy_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
+	const ivec2& _pos, const ivec2& _size)
+{
+	GLWRAP_GL_CALL(glCopyTexSubImage3D)(texture_traits<TexType>::target, _level,
+		_offset.x, _offset.y, _offset.z,
+		_pos.x, _pos.y,
+		_size.x, _size.y);
+}
+
+// glCopyTextureSubImage*
+
+template <texture_type TexType>
+typename std::enable_if<2 == texture_dims<TexType>::value>::type
+gl_copy_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
+	const ivec2& _pos, const ivec2& _size)
+{
+	GLWRAP_GL_CALL(glCopyTextureSubImage2D)(_texture, _level,
+		_offset.x, _offset.y,
+		_pos.x, _pos.y,
+		_size.x, _size.y);
+}
+
+template <texture_type TexType>
+typename std::enable_if<3 == texture_dims<TexType>::value>::type
+gl_copy_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
+	const ivec2& _pos, const ivec2& _size)
+{
+	GLWRAP_GL_CALL(glCopyTextureSubImage3D)(_texture, _level,
+		_offset.x, _offset.y, _offset.z,
+		_pos.x, _pos.y,
+		_size.x, _size.y);
 }
 
 }

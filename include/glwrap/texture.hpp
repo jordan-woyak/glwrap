@@ -152,24 +152,11 @@ public:
 			detail::gl_tex_storage<Type>(_levels, static_cast<enum_t>(_ifmt), _dims);
 		}
 	}
-/*
-	// TODO: force same internal format for each level
-	template <typename T>
-	void load_image(int_t _level, unpack_buffer<T, dimensions> const& _buffer, internal_format_type _ifmt)
-	{
-		// TODO: ugly
-		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
-
-		// TODO: allow more than level 0
-		detail::gl_tex_image<Type>(_level, static_cast<enum_t>(_ifmt), _buffer.m_dims,
-			static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
-	}
-*/
 
 	// TODO: require unpack_buffer is of the proper type and has the right number of components
 
 	template <typename T>
-	void load_subimage(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
+	void load_sub_image(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
 	{
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
@@ -185,16 +172,24 @@ public:
 		}
 	}
 
-/*
-	// TODO: rename / can I allow for the "assign" function to do this?
-	void resize(sizei_t _level, internal_format_type _ifmt, detail::tex_dims<Type> const& _dims)
+	// TODO: rename?
+	// TODO: should this take and bind a framebuffer?
+	void copy_sub_image(int_t _level, detail::tex_dims<Type> const& _offset, const ivec2& _pos, const ivec2& _size)
 	{
-		// TODO: ugly
-		detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			detail::gl_copy_texture_sub_image<Type>(native_handle(), _level,
+				_offset, _pos, _size);
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
-		detail::gl_tex_image<Type>(_level, static_cast<enum_t>(_ifmt), _dims, GL_RED, (ubyte_t*)nullptr);
+			detail::gl_copy_tex_sub_image<Type>(_level,
+				_offset, _pos, _size);
+		}
 	}
-*/
+
 	// MAX_LEVEL is observed
 	void generate_mipmaps()
 	{

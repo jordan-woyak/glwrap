@@ -16,7 +16,6 @@ int main()
 
 	glc.enable_debugging();
 
-	// create a texture, load the data (this needs some work)
 	gl::texture_2d tex_data_front(glc), tex_data_back(glc);
 	tex_data_front.define_storage(1, gl::normalized_internal_format::r8u, grid_size);
 	tex_data_back.define_storage(1, gl::normalized_internal_format::r8u, grid_size);
@@ -24,15 +23,16 @@ int main()
 	// initial random grid state
 	{
 	std::uniform_int_distribution<gl::ubyte_t> distribution(0, 15);
-	std::mt19937 rng;
-	// TODO: ugg
-	rng.seed((std::chrono::system_clock::now() - std::chrono::system_clock::time_point()).count());
+	std::random_device rd;
 
 	std::vector<gl::ubyte_t> initial_grid_data(grid_size.x * grid_size.y);
 	for (auto& cell : initial_grid_data)
-		cell = (0 == distribution(rng)) * std::numeric_limits<gl::ubyte_t>::max();
+	{
+		// 0x00 for dead and 0xff for alive
+		cell = 0x00 - (0 == distribution(rd));
+	}
 
-	tex_data_back.load_subimage(0, {}, gl::unpack(initial_grid_data.data(), gl::pixel_format::r, grid_size));
+	tex_data_back.load_sub_image(0, {}, gl::unpack(initial_grid_data.data(), gl::pixel_format::r, grid_size));
 	}
 
 	// used connect array_buffer vertex data and program attributes together
@@ -44,7 +44,8 @@ int main()
 	auto position_attrib = vshad.create_input(gl::variable<gl::vec2>("position", attribs));
 	
 	vshad.set_source(
-R"(void main(void)
+R"(
+void main(void)
 {
 	gl_Position = vec4(position, 0, 1);
 })"
@@ -65,7 +66,9 @@ R"(void main(void)
 	auto color_out = fshad.create_output(gl::variable<gl::vec4>("color_out", fragdatas));
 	
 	fshad.set_source(
-R"(int is_cell_alive(in ivec2 pos)
+R"(
+
+int is_cell_alive(in ivec2 pos)
 {
 	return int(texelFetch(cell_in, pos, 0).r > 0.5);
 }
@@ -95,15 +98,8 @@ void main(void)
 
 	gl::program prog(glc);
 
-	auto vshader = vshad.create_shader(glc);
-	auto fshader = fshad.create_shader(glc);
-
-	prog.attach(vshader);
-	prog.attach(fshader);
-
-	// bind attribute and fragdata location before linking
-	//prog.bind_fragdata(cell_out, glc.draw_buffer(0));
-	//prog.bind_fragdata(color_out, glc.draw_buffer(1));
+	prog.attach(vshad.create_shader(glc));
+	prog.attach(fshad.create_shader(glc));
 
 	prog.link();
 
@@ -168,7 +164,6 @@ void main(void)
 		glc.bind_texture(cell_in_unit, tex_data_back);
 		fbo.bind_attachment(cell_att, tex_data_front, 0);
 
-		//tex_data_back.swap(tex_data_front);
 		std::swap(tex_data_back, tex_data_front);
 
 		glc.use_draw_framebuffer(fbo);
@@ -179,17 +174,17 @@ void main(void)
 
 		auto const scale = std::min((float)window_size.x / grid_size.x, (float)window_size.y / grid_size.y);
 
-		// lame, need to define more vec2 ops
-		gl::ivec2 display_size(grid_size.x * scale, grid_size.y * scale);
+		gl::ivec2 display_size((gl::vec2)grid_size * scale);
 		auto offset = (window_size - display_size) / 2;
 
 		glc.blit_pixels({0, 0}, grid_size, offset, offset + display_size,
 			gl::buffer_mask::color, gl::filter::nearest);
 	});
 
-	dsp.set_resize_func([&](gl::ivec2 const& _size)
+	dsp.set_resize_func([&](gl::ivec2 _size)
 	{
 		window_size = _size;
+		//glc.viewport({0, 0}, grid_size);
 	});
 
 	dsp.run_loop();

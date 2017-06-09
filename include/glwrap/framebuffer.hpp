@@ -41,6 +41,7 @@ public:
 	enum_t m_index;
 };
 
+// rename color_buffer_enumerator?
 class color_attachment_enumerator
 {
 public:	
@@ -189,7 +190,7 @@ public:
 		}
 	}
 
-	// TODO: support depth and stencil attachments
+	// TODO: support constants GL_BACK and GL_NONE
 	void bind_read_buffer(color_attachment const& _attachment)
 	{
 		if (is_extension_present(GL_ARB_direct_state_access))

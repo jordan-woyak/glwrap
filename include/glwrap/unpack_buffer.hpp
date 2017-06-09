@@ -8,12 +8,15 @@ namespace GLWRAP_NAMESPACE
 // TODO: lame
 enum class pixel_format : GLenum
 {
+	// TODO: integer types
 	r = GL_RED,
 	rg = GL_RG,
 	rgb = GL_RGB,
-	bgr = GL_BGR,
+	//bgr = GL_BGR,
 	rgba = GL_RGBA,
-	bgra = GL_BGRA
+	//bgra = GL_BGRA
+
+	// depth and stencil?
 };
 
 template <typename T, int D>
