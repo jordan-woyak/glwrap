@@ -28,44 +28,6 @@ void gl_texture_parameter(uint_t _texture, enum_t _pname, int_t _value)
 	GLWRAP_GL_CALL(glTextureParameteri)(_texture, _pname, _value);
 }
 
-
-template <texture_type T, typename Enable = void>
-struct texture_dims;
-
-/*
-template <texture_type T>
-struct texture_dims<T, typename std::enable_if<
-	(T == texture_type::texture_1d) ||
-	(T == texture_type::texture_buffer)
-	>::type>
-{
-	static const int value = 1;
-	typedef float_t type;
-};
-*/
-
-template <texture_type T>
-struct texture_dims<T, typename std::enable_if<
-	(T == texture_type::texture_2d)
-	>::type>
-{
-	static const int value = 2;
-	typedef ivec2 type;
-};
-
-template <texture_type T>
-struct texture_dims<T, typename std::enable_if<
-	(T == texture_type::texture_3d) ||
-	(T == texture_type::texture_2d_array)
-	>::type>
-{
-	static const int value = 3;
-	typedef ivec3 type;
-};
-
-template <texture_type T>
-using tex_dims = typename texture_dims<T>::type;
-
 template <texture_type T>
 struct texture_traits;
 
@@ -83,6 +45,11 @@ struct texture_traits<texture_type::texture_2d>
 {
 	static const enum_t target = GL_TEXTURE_2D;
 	static const enum_t binding = GL_TEXTURE_BINDING_2D;
+
+	static const bool has_layers = false;
+
+	static const int_t dimensions = 2;
+	typedef ivec2 dimension_type;
 };
 
 template <>
@@ -90,7 +57,27 @@ struct texture_traits<texture_type::texture_3d>
 {
 	static const enum_t target = GL_TEXTURE_3D;
 	static const enum_t binding = GL_TEXTURE_BINDING_3D;
+
+	static const bool has_layers = true;
+	static const texture_type	layer_target = texture_type::texture_2d;
+
+	static const int_t dimensions = 3;
+	typedef ivec3 dimension_type;
 };
+
+template <>
+struct texture_traits<texture_type::texture_2d_array>
+{
+	static const enum_t target = GL_TEXTURE_2D_ARRAY;
+	static const enum_t binding = GL_TEXTURE_BINDING_2D_ARRAY;
+
+	static const bool has_layers = true;
+	static const texture_type	layer_target = texture_type::texture_2d;
+
+	static const int_t dimensions = 2;
+	typedef ivec2 dimension_type;
+};
+
 /*
 template <>
 struct texture_traits<texture_type::texture_buffer>
@@ -99,6 +86,10 @@ struct texture_traits<texture_type::texture_buffer>
 	static const enum_t binding = GL_TEXTURE_BINDING_BUFFER;
 };
 */
+
+template <texture_type T>
+using tex_dims = typename texture_traits<T>::dimension_type;
+
 namespace parameter
 {
 
@@ -135,7 +126,7 @@ void set_texture_parameter(uint_t _texture, enum_t _pname, T _value)
 // glTexStorage*
 
 template <texture_type TexType>
-typename std::enable_if<2 == texture_dims<TexType>::value>::type
+typename std::enable_if<2 == texture_traits<TexType>::dimensions>::type
 gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
 	GLWRAP_GL_CALL(glTexStorage2D)(texture_traits<TexType>::target, _levels, _internal_format,
@@ -143,7 +134,7 @@ gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _
 }
 
 template <texture_type TexType>
-typename std::enable_if<3 == texture_dims<TexType>::value>::type
+typename std::enable_if<3 == texture_traits<TexType>::dimensions>::type
 gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
 	GLWRAP_GL_CALL(glTexStorage3D)(texture_traits<TexType>::target, _levels, _internal_format,
@@ -153,7 +144,7 @@ gl_tex_storage(int_t _levels, int_t _internal_format, const tex_dims<TexType>& _
 // glTextureStorage*
 
 template <texture_type TexType>
-typename std::enable_if<2 == texture_dims<TexType>::value>::type
+typename std::enable_if<2 == texture_traits<TexType>::dimensions>::type
 gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
 	GLWRAP_GL_CALL(glTextureStorage2D)(_texture, _levels, _internal_format,
@@ -161,7 +152,7 @@ gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const
 }
 
 template <texture_type TexType>
-typename std::enable_if<3 == texture_dims<TexType>::value>::type
+typename std::enable_if<3 == texture_traits<TexType>::dimensions>::type
 gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const tex_dims<TexType>& _dims)
 {
 	GLWRAP_GL_CALL(glTextureStorage3D)(_texture, _levels, _internal_format,
@@ -171,7 +162,7 @@ gl_texture_storage(uint_t _texture, int_t _levels, int_t _internal_format, const
 // glTexImage*
 
 template <texture_type TexType, typename DataType>
-typename std::enable_if<2 == texture_dims<TexType>::value>::type
+typename std::enable_if<2 == texture_traits<TexType>::dimensions>::type
 gl_tex_image(int_t _level, int_t _internal_format,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
@@ -181,7 +172,7 @@ gl_tex_image(int_t _level, int_t _internal_format,
 }
 
 template <texture_type TexType, typename DataType>
-typename std::enable_if<3 == texture_dims<TexType>::value>::type
+typename std::enable_if<3 == texture_traits<TexType>::dimensions>::type
 gl_tex_image(int_t _level, int_t _internal_format,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
@@ -193,7 +184,7 @@ gl_tex_image(int_t _level, int_t _internal_format,
 // glTexSubImage*
 
 template <texture_type TexType, typename DataType>
-typename std::enable_if<2 == texture_dims<TexType>::value>::type
+typename std::enable_if<2 == texture_traits<TexType>::dimensions>::type
 gl_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
@@ -204,7 +195,7 @@ gl_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 }
 
 template <texture_type TexType, typename DataType>
-typename std::enable_if<3 == texture_dims<TexType>::value>::type
+typename std::enable_if<3 == texture_traits<TexType>::dimensions>::type
 gl_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
@@ -218,7 +209,7 @@ gl_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 
 // TODO: kinda ugly that these two need the texture_type just to get the dimension type
 template <texture_type TexType, typename DataType>
-typename std::enable_if<2 == texture_dims<TexType>::value>::type
+typename std::enable_if<2 == texture_traits<TexType>::dimensions>::type
 gl_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
@@ -229,7 +220,7 @@ gl_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _of
 }
 
 template <texture_type TexType, typename DataType>
-typename std::enable_if<3 == texture_dims<TexType>::value>::type
+typename std::enable_if<3 == texture_traits<TexType>::dimensions>::type
 gl_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
 	const tex_dims<TexType>& _dims, enum_t _format, const DataType* _data)
 {
@@ -242,7 +233,7 @@ gl_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _of
 // glCopyTexSubImage*
 
 template <texture_type TexType>
-typename std::enable_if<2 == texture_dims<TexType>::value>::type
+typename std::enable_if<2 == texture_traits<TexType>::dimensions>::type
 gl_copy_tex_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _offset,
 	const ivec2& _pos, const ivec2& _size)
 {
@@ -253,7 +244,7 @@ gl_copy_tex_sub_image(uint_t _target, int_t _level, const tex_dims<TexType>& _of
 }
 
 template <texture_type TexType>
-typename std::enable_if<3 == texture_dims<TexType>::value>::type
+typename std::enable_if<3 == texture_traits<TexType>::dimensions>::type
 gl_copy_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 	const ivec2& _pos, const ivec2& _size)
 {
@@ -266,7 +257,7 @@ gl_copy_tex_sub_image(int_t _level, const tex_dims<TexType>& _offset,
 // glCopyTextureSubImage*
 
 template <texture_type TexType>
-typename std::enable_if<2 == texture_dims<TexType>::value>::type
+typename std::enable_if<2 == texture_traits<TexType>::dimensions>::type
 gl_copy_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
 	const ivec2& _pos, const ivec2& _size)
 {
@@ -277,7 +268,7 @@ gl_copy_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>
 }
 
 template <texture_type TexType>
-typename std::enable_if<3 == texture_dims<TexType>::value>::type
+typename std::enable_if<3 == texture_traits<TexType>::dimensions>::type
 gl_copy_texture_sub_image(uint_t _texture, int_t _level, const tex_dims<TexType>& _offset,
 	const ivec2& _pos, const ivec2& _size)
 {

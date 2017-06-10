@@ -46,7 +46,6 @@ struct texture_unit_index
 template <typename T>
 using texture_unit = detail::buffer_index<detail::texture_unit_index, T>;
 
-// TODO: name?
 class texture_unit_enumerator
 {
 public:
@@ -71,6 +70,42 @@ public:
 private:
 	int_t m_current_index;
 	int_t m_max_comb_tunits;
+};
+
+namespace detail
+{
+
+struct image_unit_index
+{};
+
+}
+
+template <typename T>
+using image_unit = detail::buffer_index<detail::image_unit_index, T>;
+
+class image_unit_enumerator
+{
+public:
+	// TODO: really need context?
+	image_unit_enumerator(context& _context)
+		: m_current_index()
+		, m_max_index()
+	{
+		detail::gl_get(GL_MAX_IMAGE_UNITS, &m_max_index);
+	}
+
+	template <typename T>
+	image_unit<T> get()
+	{
+		if (m_current_index == m_max_index)
+			throw exception(0);
+
+		return image_unit<T>(m_current_index++);
+	}
+
+private:
+	int_t m_current_index;
+	int_t m_max_index;
 };
 
 namespace texture_parameter
@@ -125,7 +160,8 @@ class basic_texture : public detail::globject<detail::texture_obj>
 
 public:
 	static const texture_type type = Type;
-	static const int dimensions = detail::texture_dims<type>::value;
+	static const int dimensions = detail::texture_traits<type>::dimensions;
+	typedef typename detail::texture_traits<type>::dimension_type dimension_type;
 
 	// TODO: this is more of a detail..
 	static const enum_t target = detail::texture_traits<type>::target;
@@ -139,7 +175,7 @@ public:
 	// TODO: this can only be done once. do it in the constructor?
 	// TODO: storage makes immutable textures. make this more obvious
 	// TexStorage also sets the max mipmap level
-	void define_storage(sizei_t _levels, internal_format_type _ifmt, detail::tex_dims<Type> const& _dims)
+	void define_storage(sizei_t _levels, internal_format_type _ifmt, dimension_type const& _dims)
 	{
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
@@ -176,7 +212,7 @@ public:
 
 	// TODO: rename?
 	// TODO: should this take and bind a framebuffer?
-	void copy_sub_image(int_t _level, detail::tex_dims<Type> const& _offset, const ivec2& _pos, const ivec2& _size)
+	void copy_sub_image(int_t _level, dimension_type const& _offset, const ivec2& _pos, const ivec2& _size)
 	{
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{

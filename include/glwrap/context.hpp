@@ -251,30 +251,46 @@ public:
 		}
 	}
 
-	// TODO: work for more than image_2d
-	void bind_image_texture(texture_unit<shader::image_2d> const& _unit, texture_2d const& _texture)
+	// TODO: replace the integer level parameter with a template so a special "all layers" type can be passed
+	// TODO: the format parameter, embed it into the image_unit type
+
+	// Layered Binding (all layers):
+	template <texture_type T, typename D>
+	void bind_image_texture(image_unit<shader::basic_image<T, D>> const& _unit,
+		basic_texture<T, D> const& _texture, int_t _level, image_access _access)
 	{
-		// TODO: levels
-		// TODO: layer
-		// TODO: access
-		// TODO: format
+		static_assert(detail::texture_traits<T>::has_layers,
+			"Layered image binding is only valid for textures with layers.");
+		
+		// TODO: impl
+		enum_t _format = GL_RGBA8;
 		
 		GLWRAP_GL_CALL(glBindImageTexture)(
 			_unit.get_index(),
 			_texture.native_handle(),
+			_level,
+			GL_TRUE,
 			0,
+			static_cast<enum_t>(_access),
+			_format);
+	}
+
+	// Non-Layered Binding (single layer):
+	template <texture_type T, typename D>
+	void bind_image_texture(image_unit<shader::basic_image<detail::texture_traits<T>::layer_target, D>> const& _unit,
+		basic_texture<T, D> const& _texture, int_t _level, int_t _layer, image_access _access)
+	{
+		// TODO: impl
+		enum_t _format = GL_RGBA8;
+		
+		GLWRAP_GL_CALL(glBindImageTexture)(
+			_unit.get_index(),
+			_texture.native_handle(),
+			_level,
 			GL_FALSE,
-			0,
-			GL_READ_WRITE,
-
-			// TODO: this format must match exactly the format declared in the shader
-			// (if reads are to be performed)
-
-			// it also needs to match by size (or more safely, by class) with the texture's
-			// internal format
-
-			// TODO: perhaps I could type the texture_unit_location with this format?
-			GL_RGBA8);
+			_layer,
+			static_cast<enum_t>(_access),
+			_format);
 	}
 
 	template <typename T>

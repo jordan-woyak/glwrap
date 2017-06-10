@@ -252,4 +252,11 @@ inline map_access operator|(map_access _lhs, map_access _rhs)
 		(static_cast<bitfield_t>(_lhs) | static_cast<bitfield_t>(_rhs));
 }
 
+enum class image_access : enum_t
+{
+	read_only = GL_READ_ONLY,
+	write_only = GL_WRITE_ONLY,
+	read_write = GL_READ_WRITE,
+};
+
 }
