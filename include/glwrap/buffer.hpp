@@ -75,6 +75,7 @@ private:
 
 }
 
+// TODO: move these into buffer_view.hpp ?
 template <typename T>
 using uniform_buffer_iterator = buffer_iterator<T, detail::uniform_buffer_alignment>;
 

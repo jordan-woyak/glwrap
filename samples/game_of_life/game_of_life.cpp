@@ -7,8 +7,8 @@
 
 int main()
 {
-	gl::ivec2 const grid_size{640, 640};
-	gl::ivec2 window_size{640, 640};
+	gl::ivec2 const grid_size{1024, 640};
+	gl::ivec2 window_size{1024, 640};
 
 	gl::context glc;
 	gl::display dsp(glc, window_size);

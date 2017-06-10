@@ -158,6 +158,8 @@ public:
 	template <typename T>
 	void load_sub_image(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
 	{
+		_buffer.bind();
+		
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_texture_sub_image<Type>(native_handle(), _level, _offset, _buffer.m_dims,

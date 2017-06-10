@@ -2,6 +2,7 @@
 #pragma once
 
 #include "declarations.hpp"
+#include "constants.hpp"
 
 #include "detail/layout.hpp"
 
