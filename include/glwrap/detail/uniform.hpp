@@ -248,7 +248,7 @@ struct uniform_value<T, typename std::enable_if<
 	}
 };
 
-// TODO: basic_image
+// Samplers
 template <texture_type T, typename D>
 struct uniform_value<shader::basic_sampler<T, D>>
 {
@@ -257,12 +257,29 @@ struct uniform_value<shader::basic_sampler<T, D>>
 	
 	typedef texture_unit<shader::basic_sampler<T, D>> type;
 
-	// texture_uint value can be interpreted as an int and uploaded:
+	// texture_unit value can be interpreted as an int and uploaded:
 	template <typename S>
 	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
 	{
 		static_assert(sizeof(type) == sizeof(int_t),
 			"sanity check. texture_unit should be binary compatible with int_t.");
+		
+		setter.set(_loc, _count, reinterpret_cast<const int_t*>(_val));
+	}
+};
+
+// Images
+template <texture_type T, typename D>
+struct uniform_value<shader::basic_image<T, D>>
+{	
+	typedef image_unit<shader::basic_image<T, D>> type;
+
+	// image_unit value can be interpreted as an int and uploaded:
+	template <typename S>
+	static void convert_and_set(S&& setter, int_t _loc, sizei_t _count, const type* _val)
+	{
+		static_assert(sizeof(type) == sizeof(int_t),
+			"sanity check. image_unit should be binary compatible with int_t.");
 		
 		setter.set(_loc, _count, reinterpret_cast<const int_t*>(_val));
 	}

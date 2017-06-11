@@ -31,11 +31,12 @@ enum class data_type
 	rgb##bitdepth##dtype = GL_RGB##bitdepth##suffix, \
 	rgba##bitdepth##dtype = GL_RGBA##bitdepth##suffix, \
 
-enum class normalized_internal_format
+enum class normalized_internal_format : enum_t
 {
 	GLWRAP_ENUM_DEF(u, 8, )
 	GLWRAP_ENUM_DEF(u, 16, )
 
+	// i or s ?
 	GLWRAP_ENUM_DEF(s, 8, _SNORM)
 	GLWRAP_ENUM_DEF(s, 16, _SNORM)
 
@@ -43,15 +44,16 @@ enum class normalized_internal_format
 	GLWRAP_ENUM_DEF(f, 32, F)
 };
 
-enum class signed_internal_format
+enum class signed_internal_format : enum_t
 {
 	GLWRAP_ENUM_DEF(i, 8, I)
 	GLWRAP_ENUM_DEF(i, 16, I)
 	GLWRAP_ENUM_DEF(i, 32, I)
 };
 
-enum class unsigned_internal_format
+enum class unsigned_internal_format : enum_t
 {
+	// u or ui ?
 	GLWRAP_ENUM_DEF(ui, 8, UI)
 	GLWRAP_ENUM_DEF(ui, 16, UI)
 	GLWRAP_ENUM_DEF(ui, 32, UI)
@@ -192,6 +194,52 @@ inline image_format specific_image_format(base_format _bfmt, data_type _dtype, i
 
 	// TODO: throw if invalid?
 	return {base_format()};
+}
+
+namespace detail
+{
+
+inline const char* format_qualifier_string(enum_t _format)
+{
+
+#define GLWRAP_FORMAT_STR_DEF(enum_suffix, str_suffix) \
+	case (GL_RGBA##enum_suffix): return "rgba" #str_suffix; break; \
+	case (GL_RG##enum_suffix): return "rg" #str_suffix; break; \
+	case (GL_R##enum_suffix): return "r" #str_suffix; break;
+	
+	// TODO: is r8_snorm not allowed?
+		
+	switch (_format)
+	{
+	GLWRAP_FORMAT_STR_DEF(32F, 32f)
+	GLWRAP_FORMAT_STR_DEF(16F, 16f)
+
+	GLWRAP_FORMAT_STR_DEF(16, 16)
+	GLWRAP_FORMAT_STR_DEF(8, 8)
+
+	GLWRAP_FORMAT_STR_DEF(16_SNORM, 16_snorm)
+	GLWRAP_FORMAT_STR_DEF(8_SNORM, 8_snorm)
+
+	GLWRAP_FORMAT_STR_DEF(32UI, 32ui)
+	GLWRAP_FORMAT_STR_DEF(16UI, 16ui)
+	GLWRAP_FORMAT_STR_DEF(8UI, 8ui)
+
+	GLWRAP_FORMAT_STR_DEF(32I, 32i)
+	GLWRAP_FORMAT_STR_DEF(16I, 16i)
+	GLWRAP_FORMAT_STR_DEF(8I, 8i)
+		
+	// TODO: the few odd ones..
+
+	default:
+		// TODO: throw exception?
+		return 0;
+		break;
+	}
+
+#undef GLWRAP_FORMAT_STR_DEF
+
+}
+
 }
 
 }

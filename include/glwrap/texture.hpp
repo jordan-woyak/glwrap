@@ -43,6 +43,7 @@ struct texture_unit_index
 
 }
 
+// TODO: buffer_index doesn't make sense..
 template <typename T>
 using texture_unit = detail::buffer_index<detail::texture_unit_index, T>;
 
@@ -80,6 +81,7 @@ struct image_unit_index
 
 }
 
+// TODO: buffer_index doesn't make sense..
 template <typename T>
 using image_unit = detail::buffer_index<detail::image_unit_index, T>;
 
