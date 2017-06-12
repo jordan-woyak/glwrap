@@ -201,18 +201,33 @@ public:
 	void load_sub_image(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
 	{
 		_buffer.bind();
+
+		enum_t pfmt = static_cast<enum_t>(_buffer.m_pfmt);
+		// TODO: this is lame, and seems like it isn't needed with gl4?
+		// and it belongs somewhere else
+		if (!std::is_same<float_t, DataType>::value)
+		{
+			if (pixel_format::r == _buffer.m_pfmt)
+				pfmt = GL_RED_INTEGER;
+			else if (pixel_format::rg == _buffer.m_pfmt)
+				pfmt = GL_RG_INTEGER;
+			else if (pixel_format::rgb == _buffer.m_pfmt)
+				pfmt = GL_RGB_INTEGER;
+			else if (pixel_format::rgba == _buffer.m_pfmt)
+				pfmt = GL_RGBA_INTEGER;
+		}
 		
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_texture_sub_image<Type>(native_handle(), _level, _offset, _buffer.m_dims,
-				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
+				pfmt, _buffer.m_data);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
 
 			detail::gl_tex_sub_image<Type>(_level, _offset, _buffer.m_dims,
-				static_cast<enum_t>(_buffer.m_pfmt), _buffer.m_data);
+				pfmt, _buffer.m_data);
 		}
 	}
 

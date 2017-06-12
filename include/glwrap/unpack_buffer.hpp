@@ -3,23 +3,10 @@
 // TODO: rename/move this whole file is lame
 
 #include "buffer.hpp"
+#include "image_format.hpp"
 
 namespace GLWRAP_NAMESPACE
 {
-
-// TODO: lame
-enum class pixel_format : GLenum
-{
-	// TODO: integer types
-	r = GL_RED,
-	rg = GL_RG,
-	rgb = GL_RGB,
-	//bgr = GL_BGR,
-	rgba = GL_RGBA,
-	//bgra = GL_BGRA
-
-	// depth and stencil?
-};
 
 template <typename T, int D>
 class unpack_buffer
@@ -38,17 +25,23 @@ public:
 	{	
 		GLWRAP_GL_CALL(glBindBuffer)(GL_PIXEL_UNPACK_BUFFER, m_buffer);
 
-		// TODO: implement
-		// swap_types not in GL ES.
+		// SWAP_BYTES and LSB_FIRST not in GL ES.
 		//GLWRAP_GL_CALL(glPixelStorei)(GL_UNPACK_SWAP_BYTES, 0);
 		//GLWRAP_GL_CALL(glPixelStorei)(GL_UNPACK_LSB_FIRST, 0);
-		//GLWRAP_GL_CALL(glPixelStorei)(GL_UNPACK_ROW_LENGTH, 0);
-		//GLWRAP_GL_CALL(glPixelStorei)(GL_UNPACK_ALIGNMENT, 0);
+		
+		GLWRAP_GL_CALL(glPixelStorei)(GL_UNPACK_ROW_LENGTH, m_ps_row_length);
+		GLWRAP_GL_CALL(glPixelStorei)(GL_UNPACK_IMAGE_HEIGHT, m_ps_image_height);
+		GLWRAP_GL_CALL(glPixelStorei)(GL_UNPACK_ALIGNMENT, m_ps_alignment);
 	}
 
 // TODO: fix privacy
 //private:
 	uint_t m_buffer;
+
+	int_t m_ps_row_length = 0;
+	int_t m_ps_image_height = 0;
+	int_t m_ps_alignment = 4;
+	
 	T const* const m_data;
 	pixel_format const m_pfmt;
 	basic_vec<sizei_t, D> const m_dims;
