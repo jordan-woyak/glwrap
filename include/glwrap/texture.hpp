@@ -62,6 +62,8 @@ public:
 	template <typename T>
 	texture_unit<T> get()
 	{
+		// TODO: static_assert that T is basic_sampler
+		
 		if (m_current_index == m_max_comb_tunits)
 			throw exception(0);
 
@@ -99,6 +101,8 @@ public:
 	template <typename T>
 	image_unit<T> get()
 	{
+		// TODO: static_assert that T is basic_image
+		
 		if (m_current_index == m_max_index)
 			throw exception(0);
 

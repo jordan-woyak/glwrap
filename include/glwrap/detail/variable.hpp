@@ -284,48 +284,58 @@ struct glsl_var_type<T, typename std::enable_if<is_mat<T>::value>::type>
 
 // TODO: template to get the sampler/image texture-type suffix
 
-template <typename T>
-struct glsl_var_type<shader::basic_sampler_2d<T>>
+template <texture_type T>
+std::string texture_target_suffix()
+{
+	static_assert(false && static_cast<bool>(T), "Unsupported texture target");
+	return nullptr;
+}
+
+template <>
+inline std::string texture_target_suffix<texture_type::texture_2d>()
+{
+	return "2D";
+}
+
+template <>
+inline std::string texture_target_suffix<texture_type::texture_3d>()
+{
+	return "3D";
+}
+
+template <>
+inline std::string texture_target_suffix<texture_type::texture_2d_array>()
+{
+	return "2DArray";
+}
+
+template <>
+inline std::string texture_target_suffix<texture_type::texture_cube_map>()
+{
+	return "Cube";
+}
+
+template <>
+inline std::string texture_target_suffix<texture_type::texture_2d_multisample>()
+{
+	return "2DMS";
+}
+
+template <texture_type T, typename D>
+struct glsl_var_type<shader::basic_sampler<T, D>>
 {
 	static type_name_t name()
 	{
-		return vec_prefix<T>() + "sampler2D";
+		return vec_prefix<D>() + "sampler" + texture_target_suffix<T>();
 	}
 };
 
-template <typename T>
-struct glsl_var_type<shader::basic_sampler_3d<T>>
+template <texture_type T, typename D>
+struct glsl_var_type<shader::basic_image<T, D>>
 {
 	static type_name_t name()
 	{
-		return vec_prefix<T>() + "sampler3D";
-	}
-};
-
-template <typename T>
-struct glsl_var_type<shader::basic_sampler_2d_array<T>>
-{
-	static type_name_t name()
-	{
-		return vec_prefix<T>() + "sampler2DArray";
-	}
-};
-
-template <typename T>
-struct glsl_var_type<shader::basic_sampler_cube_map<T>>
-{
-	static type_name_t name()
-	{
-		return vec_prefix<T>() + "samplerCube";
-	}
-};
-
-template <typename T>
-struct glsl_var_type<shader::basic_sampler_2d_multisample<T>>
-{
-	static type_name_t name()
-	{
-		return vec_prefix<T>() + "sampler2DMS";
+		return vec_prefix<D>() + "image" + texture_target_suffix<T>();
 	}
 };
 

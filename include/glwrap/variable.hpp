@@ -39,6 +39,9 @@ public:
 		return m_layout;
 	}
 
+	// TODO: private:
+	std::vector<std::string> m_memory_qualifiers;
+
 private:
 	std::string m_name;
 	layout_type m_layout;

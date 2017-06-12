@@ -56,6 +56,13 @@ void main(void)
 	gl::uniform_location_enumerator uniforms(glc);
 
 	auto cell_in_uni = fshad.create_uniform(gl::variable<gl::shader::sampler_2d>("cell_in", uniforms));
+
+	auto cell_image_desc = gl::variable<gl::shader::image_2d>("cell_image", uniforms);
+	// TODO: format in layout
+	//cell_image_desc.m_memory_qualifiers.emplace_back(gl::detail::format_qualifier_string((gl::enum_t)gl::normalized_internal_format::r8u));
+	cell_image_desc.m_memory_qualifiers.emplace_back("writeonly");
+	
+	auto cell_image_uni = fshad.create_uniform(cell_image_desc);
 	
 	auto color_dead_uni = fshad.create_uniform(gl::variable<gl::vec3>("color_dead", uniforms));
 	auto color_live_uni = fshad.create_uniform(gl::variable<gl::vec3>("color_live", uniforms));
@@ -98,8 +105,17 @@ void main(void)
 
 	gl::program prog(glc);
 
-	prog.attach(vshad.create_shader(glc));
-	prog.attach(fshad.create_shader(glc));
+	auto vshader = vshad.create_shader(glc);
+	auto fshader = fshad.create_shader(glc);
+
+	if (!vshader.compile_status())
+		std::cout << "vshad src: " << vshader.get_source();
+
+	if (!fshader.compile_status())
+		std::cout << "fshad src: " << fshader.get_source();
+
+	prog.attach(vshader);
+	prog.attach(fshader);
 
 	prog.link();
 
@@ -154,6 +170,12 @@ void main(void)
 	// alive and dead colors
 	prog.set_uniform(color_dead_uni, {1, 1, 1});
 	prog.set_uniform(color_live_uni, {0, 0, 0});
+
+	gl::image_unit_enumerator iunits(glc);
+	auto cell_image_unit = iunits.get<gl::shader::image_2d>();
+	prog.set_uniform(cell_image_uni, cell_image_unit);
+
+	glc.bind_image_texture(cell_image_unit, tex_data_back, 0, gl::image_access::read_write);
 
 	glc.viewport({0, 0}, grid_size);
 

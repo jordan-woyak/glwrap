@@ -168,6 +168,11 @@ precision mediump float;
 		std::string layout = _desc.get_layout().get_string();
 		if (!layout.empty())
 			result += "layout(" + layout + ") ";
+
+		for (auto& qual : _desc.m_memory_qualifiers)
+		{
+			result += qual + ' ';
+		}
 		
 		result += _storage_qualifier + " "
 			+ detail::get_type_name<P>()

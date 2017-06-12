@@ -85,11 +85,13 @@ public:
 		GLWRAP_GL_CALL(glClearDepth)(_depth);
 	}
 
+	// TODO: rename clear_draw_buffers?
 	void clear(buffer_mask _mask)
 	{
 		GLWRAP_GL_CALL(glClear)(static_cast<bitfield_t>(_mask));
 	};
 
+	// TODO: rename all these to set_* ?
 	void line_width(float_t _width)
 	{
 		GLWRAP_GL_CALL(glLineWidth)(_width);
