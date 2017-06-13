@@ -57,15 +57,16 @@ int main()
 	auto texpos_attrib = vshad.create_input(gl::variable<gl::vec2>("texpos", attribs));
 
 	vshad.set_source(
-		"out vec3 col;"
-		"out vec2 uv;"
-		"void main(void)"
-		"{"
-			"col = color.rgb;"
-			"uv = texpos;"
-			"gl_Position = model * vec4(position, 0, 1);"
-		"}"
-	);
+R"(
+out vec3 col;
+out vec2 uv;
+void main(void)
+{
+	col = color.rgb;
+	uv = texpos;
+	gl_Position = model * vec4(position, 0, 1);
+}
+	)");
 
 	gl::fragment_shader_builder fshad(glc);
 
@@ -73,13 +74,14 @@ int main()
 	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
 
 	fshad.set_source(
-		"in vec3 col;"
-		"in vec2 uv;"
-		"void main(void)"
-		"{"
-			"fragdata = vec4(col - texture(tex, uv).rrr, 1);"
-		"}"
-	);
+R"(
+in vec3 col;
+in vec2 uv;
+void main(void)
+{
+	fragdata = vec4(col - texture(tex, uv).rrr, 1);
+}
+	)");
 
 	auto vert_shader = vshad.create_shader(glc);
 	if (!vert_shader.compile_status())

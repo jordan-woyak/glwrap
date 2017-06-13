@@ -44,8 +44,8 @@ int main()
 	{
 		auto sz = getSFImageSize(texdata);
 
-		tex_color.define_storage(1, gl::normalized_internal_format::rgb8u, sz);
-		tex_color.load_subimage(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
+		tex_color.define_storage(1, gl::normalized_image_format::rgb8u, sz);
+		tex_color.load_sub_image(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
 	}
 	else
 		std::cerr << "failed to load color.png" << std::endl;
@@ -54,22 +54,22 @@ int main()
 	{
 		auto sz = getSFImageSize(texdata);
 
-		tex_spec.define_storage(1, gl::normalized_internal_format::rgb8u, sz);
-		tex_spec.load_subimage(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
+		tex_spec.define_storage(1, gl::normalized_image_format::rgb8u, sz);
+		tex_spec.load_sub_image(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
 	}
 
 	if (texdata.loadFromFile("normal.png"))
 	{
 		auto sz = getSFImageSize(texdata);
 
-		tex_normal.define_storage(1, gl::normalized_internal_format::rgb8u, sz);
-		tex_normal.load_subimage(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
+		tex_normal.define_storage(1, gl::normalized_image_format::rgb8u, sz);
+		tex_normal.load_sub_image(0, {}, gl::unpack(texdata.getPixelsPtr(), gl::pixel_format::rgba, sz));
 	}
 
 	tex_color.generate_mipmaps();
 	tex_spec.generate_mipmaps();
 	tex_normal.generate_mipmaps();
-	
+
 	// custom vertex type
 	struct FooVertex
 	{
@@ -97,8 +97,8 @@ int main()
 	gl::attribute_location_enumerator attribs(glc);
 	gl::uniform_location_enumerator uniforms(glc);
 	gl::fragdata_location_enumerator fragdatas(glc);
-
 	gl::texture_unit_enumerator units(glc);
+	
 	auto tex_color_unit = units.get<gl::shader::sampler_2d>();
 	auto tex_spec_unit = units.get<gl::shader::sampler_2d>();
 	auto tex_normal_unit = units.get<gl::shader::sampler_2d>();
@@ -108,13 +108,13 @@ int main()
 	auto pos_attrib = vshad.create_input(gl::variable<gl::vec3>("pos", attribs));
 	auto norm_attrib = vshad.create_input(gl::variable<gl::vec3>("norm", attribs));
 	auto texpos_attrib = vshad.create_input(gl::variable<gl::vec2>("texpos", attribs));
-	
+
 	auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
 	auto projection_uni = vshad.create_uniform(gl::variable<gl::mat4>("projection", uniforms));
 
 	auto light_dir_uni = vshad.create_uniform(gl::variable<gl::vec3>("light_dir", uniforms));
 	auto ambient_uni = vshad.create_uniform(gl::variable<gl::vec4>("ambient", uniforms));
-	
+
 	vshad.set_source(
 		R"(out vec2 tpos;
 		out vec3 vertex_normal, norm_light_dir, Ia, E;
@@ -146,7 +146,7 @@ int main()
 	auto diff_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("diff_color", uniforms));
 	auto spec_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("spec_color", uniforms));
 	auto shininess_uni = fshad.create_uniform(gl::variable<gl::float_t>("shininess", uniforms));
-	
+
 	fshad.set_source(
 		R"(in vec2 tpos;
 		in vec3 vertex_normal, norm_light_dir, Ia, E;
@@ -157,7 +157,7 @@ int main()
 			//vec3 adjusted_normal = normalize(vertex_normal + (texture2D(tex_normal, tpos).rgb * 2 - 1));
 
 			vec4 mat_color = texture2D(tex_color, tpos);
-			
+
 			float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);
 			vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;
 
@@ -184,12 +184,12 @@ int main()
 
 	// create program pipeline
 	gl::program prog(glc);
-	
+
 	prog.attach(vert_shader);
 	prog.attach(frag_shader);
 
 	prog.link();
-	
+
 	std::cout << "program log:\n" << prog.get_log() << std::endl;
 
 	if (!prog.is_valid())
@@ -214,7 +214,7 @@ int main()
 
 	gl::vertex_buffer_binding_enumerator vbufs(glc);
 	auto input_loc = vbufs.get<FooVertex>();
-	
+
 	arr.set_attribute_format(pos_attrib, input_loc | &FooVertex::pos);
 	arr.set_attribute_format(norm_attrib, input_loc | &FooVertex::norm);
 	arr.set_attribute_format(texpos_attrib, input_loc | &FooVertex::texpos);
@@ -255,7 +255,7 @@ int main()
 		gl::perspective(glm::radians(45.f), (float_t)window_size.x / window_size.y, 1.f, 100.f) *
 		glm::lookAt(glm::vec3{0.f, 0.f, 3.5f}, glm::vec3{}, glm::vec3{0.f, 1.f, 0.f});
 		//gl::ortho(-1.f, 1.f, -1.f, 1.f);
-	
+
 	prog.set_uniform(projection_uni, proj);
 
 	glc.set_clear_depth(1.0);
@@ -271,10 +271,10 @@ int main()
 			rotate -= 3.14 * 2;
 
 		glc.clear(gl::buffer_mask::color | gl::buffer_mask::depth);
-		
+
 		glc.draw_elements(gl::primitive::triangles, 0, indices.size());
 	});
-	
+
 	dsp.set_resize_func([&](gl::ivec2 const& _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);
