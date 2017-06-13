@@ -25,7 +25,7 @@ enum class pixel_format : enum_t
 	rgba##bitdepth##dtype = GL_RGBA##bitdepth##suffix, \
 
 // TODO: rename to *_image_format
-enum class normalized_internal_format : enum_t
+enum class normalized_image_format : enum_t
 {
 	// TODO: suffix? "u" or "".. or both?
 	GLWRAP_ENUM_DEF(u, 8, )
@@ -46,25 +46,26 @@ enum class normalized_internal_format : enum_t
 	
 	rgb5u_a1u = GL_RGB5_A1,
 	rgb10u_a2u = GL_RGB10_A2,
-	rgb10ui_a2ui = GL_RGB10_A2UI,
 };
 
-enum class signed_internal_format : enum_t
+enum class signed_image_format : enum_t
 {
 	GLWRAP_ENUM_DEF(i, 8, I)
 	GLWRAP_ENUM_DEF(i, 16, I)
 	GLWRAP_ENUM_DEF(i, 32, I)
 };
 
-enum class unsigned_internal_format : enum_t
+enum class unsigned_image_format : enum_t
 {
 	// u or ui ?
 	GLWRAP_ENUM_DEF(ui, 8, UI)
 	GLWRAP_ENUM_DEF(ui, 16, UI)
 	GLWRAP_ENUM_DEF(ui, 32, UI)
+
+	rgb10ui_a2ui = GL_RGB10_A2UI,
 };
 
-enum class compressed_internal_format : enum_t
+enum class compressed_image_format : enum_t
 {
 	r11_eac = GL_COMPRESSED_R11_EAC,
 	signed_r11_eac = GL_COMPRESSED_SIGNED_R11_EAC,
@@ -93,30 +94,29 @@ enum class compressed_internal_format : enum_t
 #undef GLWRAP_ENUM_DEF
 
 // TODO: kill this template?
-// TODO: rename image_format?
 template <typename DataType>
-struct internal_format;
+struct image_format;
 
 template <>
-struct internal_format<float_t>
+struct image_format<float_t>
 {
-	typedef normalized_internal_format enum_type;
+	typedef normalized_image_format enum_type;
 	
 	enum_type value;
 };
 
 template <>
-struct internal_format<int_t>
+struct image_format<int_t>
 {
-	typedef signed_internal_format enum_type;
+	typedef signed_image_format enum_type;
 	
 	enum_type value;
 };
 
 template <>
-struct internal_format<uint_t>
+struct image_format<uint_t>
 {
-	typedef unsigned_internal_format enum_type;
+	typedef unsigned_image_format enum_type;
 	
 	enum_type value;
 };
@@ -124,16 +124,14 @@ struct internal_format<uint_t>
 namespace detail
 {
 
-// TODO: separate function for each of the 3 image format types
-inline const char* format_qualifier_string(enum_t _format)
-{
-
 #define GLWRAP_FORMAT_STR_DEF(enum_suffix, str_suffix) \
 	case (GL_RGBA##enum_suffix): return "rgba" #str_suffix; break; \
 	case (GL_RG##enum_suffix): return "rg" #str_suffix; break; \
 	case (GL_R##enum_suffix): return "r" #str_suffix; break;
-		
-	switch (_format)
+
+inline const char* format_qualifier_string(normalized_image_format _fmt)
+{		
+	switch (static_cast<enum_t>(_fmt))
 	{
 	GLWRAP_FORMAT_STR_DEF(32F, 32f)
 	GLWRAP_FORMAT_STR_DEF(16F, 16f)
@@ -143,17 +141,8 @@ inline const char* format_qualifier_string(enum_t _format)
 
 	GLWRAP_FORMAT_STR_DEF(16_SNORM, 16_snorm)
 	GLWRAP_FORMAT_STR_DEF(8_SNORM, 8_snorm)
-
-	GLWRAP_FORMAT_STR_DEF(32UI, 32ui)
-	GLWRAP_FORMAT_STR_DEF(16UI, 16ui)
-	GLWRAP_FORMAT_STR_DEF(8UI, 8ui)
-
-	GLWRAP_FORMAT_STR_DEF(32I, 32i)
-	GLWRAP_FORMAT_STR_DEF(16I, 16i)
-	GLWRAP_FORMAT_STR_DEF(8I, 8i)
 		
 	case (GL_R11F_G11F_B10F): return "r11f_g11f_b10f"; break;
-	case (GL_RGB10_A2UI): return "rgb10_a2ui"; break;
 	case (GL_RGB10_A2): return "rgb10_a2"; break;
 
 	default:
@@ -161,10 +150,41 @@ inline const char* format_qualifier_string(enum_t _format)
 		return 0;
 		break;
 	}
+}
+
+inline const char* format_qualifier_string(signed_image_format _fmt)
+{
+	switch (static_cast<enum_t>(_fmt))
+	{
+	GLWRAP_FORMAT_STR_DEF(32I, 32i)
+	GLWRAP_FORMAT_STR_DEF(16I, 16i)
+	GLWRAP_FORMAT_STR_DEF(8I, 8i)
+	
+	default:
+		// TODO: throw exception?
+		return 0;
+		break;
+	}
+}
+
+inline const char* format_qualifier_string(unsigned_image_format _fmt)
+{
+	switch (static_cast<enum_t>(_fmt))
+	{
+	GLWRAP_FORMAT_STR_DEF(32UI, 32ui)
+	GLWRAP_FORMAT_STR_DEF(16UI, 16ui)
+	GLWRAP_FORMAT_STR_DEF(8UI, 8ui)
+
+	case (GL_RGB10_A2UI): return "rgb10_a2ui"; break;
+	
+	default:
+		// TODO: throw exception?
+		return 0;
+		break;
+	}
+}
 
 #undef GLWRAP_FORMAT_STR_DEF
-
-}
 
 }
 

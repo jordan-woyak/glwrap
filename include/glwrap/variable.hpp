@@ -15,8 +15,6 @@
 namespace GLWRAP_NAMESPACE
 {
 
-// TODO: variable_description should just hold the name
-// not the location..
 template <typename T, typename L>
 class variable_description
 {

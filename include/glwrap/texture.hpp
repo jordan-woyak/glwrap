@@ -172,7 +172,7 @@ public:
 	// TODO: this is more of a detail..
 	static const enum_t target = detail::texture_traits<type>::target;
 
-	typedef typename internal_format<DataType>::enum_type internal_format_type;
+	typedef typename image_format<DataType>::enum_type image_format_type;
 
 	explicit basic_texture(context&)
 		: detail::globject<detail::texture_obj>(static_cast<enum_t>(Type))
@@ -181,7 +181,7 @@ public:
 	// TODO: this can only be done once. do it in the constructor?
 	// TODO: storage makes immutable textures. make this more obvious
 	// TexStorage also sets the max mipmap level
-	void define_storage(sizei_t _levels, internal_format_type _ifmt, dimension_type const& _dims)
+	void define_storage(sizei_t _levels, image_format_type _ifmt, dimension_type const& _dims)
 	{
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{

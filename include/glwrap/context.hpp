@@ -253,20 +253,16 @@ public:
 		}
 	}
 
-	// TODO: replace the integer level parameter with a template so a special "all layers" type can be passed
 	// TODO: the format parameter, embed it into the image_unit type
 
 	// Layered Binding (all layers) for layered textures
 	// Non-layered (layer-0) for non-layered textures.
 	template <texture_type T, typename D>
 	void bind_image_texture(image_unit<shader::basic_image<T, D>> const& _unit,
-		basic_texture<T, D> const& _texture, int_t _level, image_access _access)
+		basic_texture<T, D> const& _texture, int_t _level, image_access _access, typename image_format<D>::enum_type _format)
 	{
 		//static_assert(detail::texture_traits<T>::has_layers,
 			//"Layered image binding is only valid for textures with layers.");
-		
-		// TODO: impl
-		enum_t _format = GL_RGBA8;
 		
 		GLWRAP_GL_CALL(glBindImageTexture)(
 			_unit.get_index(),
@@ -275,19 +271,16 @@ public:
 			detail::texture_traits<T>::has_layers,
 			0,
 			static_cast<enum_t>(_access),
-			_format);
+			static_cast<enum_t>(_format));
 	}
 
 	// Non-Layered Binding (single layer):
 	template <texture_type T, typename D>
 	void bind_image_texture(image_unit<shader::basic_image<detail::texture_traits<T>::layer_target, D>> const& _unit,
-		basic_texture<T, D> const& _texture, int_t _level, int_t _layer, image_access _access)
+		basic_texture<T, D> const& _texture, int_t _level, int_t _layer, image_access _access, typename image_format<D>::enum_type _format)
 	{
 		// TODO: should this fail to compile for non-layered textures?
 		// force use of the other overload?
-		
-		// TODO: impl
-		enum_t _format = GL_RGBA8;
 		
 		GLWRAP_GL_CALL(glBindImageTexture)(
 			_unit.get_index(),
@@ -296,7 +289,7 @@ public:
 			GL_FALSE,
 			_layer,
 			static_cast<enum_t>(_access),
-			_format);
+			static_cast<enum_t>(_format));
 	}
 
 	template <typename T>
