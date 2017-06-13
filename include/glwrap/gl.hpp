@@ -22,7 +22,7 @@
 #include "buffer.hpp"
 #include "buffer_pool.hpp"
 #include "mapped_buffer.hpp"
-#include "unpack_buffer.hpp"
+#include "pixel_store.hpp"
 
 #include "sampler.hpp"
 #include "texture.hpp"

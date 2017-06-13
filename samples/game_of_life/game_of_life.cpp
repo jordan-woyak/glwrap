@@ -14,6 +14,12 @@ int main()
 	gl::display dsp(glc, window_size);
 	dsp.set_caption("glwrap-game_of_life");
 
+	std::cout << "Vendor: " << glc.get_vendor_name() << std::endl;
+	std::cout << "Renderer: " << glc.get_renderer_name() << std::endl;
+	std::cout << "Version: " << glc.get_version() << std::endl;
+	std::cout << "GLSL Version: " << glc.get_shading_language_version() << std::endl;
+
+	//glc.enable_profiling();
 	glc.enable_debugging();
 
 	gl::texture_2d tex_data_front(glc), tex_data_back(glc);
@@ -108,10 +114,10 @@ void main(void)
 	auto vshader = vshad.create_shader(glc);
 	auto fshader = fshad.create_shader(glc);
 
-	if (!vshader.compile_status())
+	//if (!vshader.compile_status())
 		std::cout << "vshad src: " << vshader.get_source();
 
-	if (!fshader.compile_status())
+	//if (!fshader.compile_status())
 		std::cout << "fshad src: " << fshader.get_source();
 
 	prog.attach(vshader);

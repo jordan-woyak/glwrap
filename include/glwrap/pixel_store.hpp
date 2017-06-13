@@ -1,13 +1,13 @@
 #pragma once
 
-// TODO: rename/move this whole file is lame
-
 #include "buffer.hpp"
 #include "image_format.hpp"
 
 namespace GLWRAP_NAMESPACE
 {
 
+// TODO: take a range instead of _data for compressed formats that need a size
+// TODO: do packing as well
 template <typename T, int D>
 class unpack_buffer
 {

@@ -3,7 +3,7 @@
 #include "vector.hpp"
 #include "native_handle.hpp"
 #include "util.hpp"
-#include "unpack_buffer.hpp"
+#include "pixel_store.hpp"
 #include "image_format.hpp"
 #include "buffer.hpp"
 #include "detail/texture.hpp"
