@@ -34,8 +34,8 @@ int main()
 		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 	};
 
-	tex.define_storage(1, gl::normalized_internal_format::r8u, {8, 8});
-	tex.load_subimage(0, {}, gl::unpack(texdata.data(), gl::pixel_format::r, gl::ivec2{8, 8}));
+	tex.define_storage(1, gl::normalized_image_format::r8u, {8, 8});
+	tex.load_sub_image(0, {}, gl::unpack(texdata.data(), gl::pixel_format::r, gl::ivec2{8, 8}));
 
 	gl::vertex_shader_builder vshad(glc);
 
@@ -44,7 +44,7 @@ int main()
 	gl::uniform_location_enumerator uniforms(glc);
 	gl::fragdata_location_enumerator fragdatas(glc);
 	gl::texture_unit_enumerator tunits(glc);
-	
+
 	// define some variables in the program,
 	// they are automatically added to the program source
 	//auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
@@ -88,7 +88,7 @@ int main()
 	auto frag_shader = fshad.create_shader(glc);
 	if (!frag_shader.compile_status())
 		std::cout << "fshad log:\n" << frag_shader.get_log() << std::endl << frag_shader.get_source();
-	
+
 	// create a program
 	gl::program prog(glc);
 
@@ -153,7 +153,7 @@ int main()
 	gl::framebuffer_builder fbuf_builder(glc);
 	fbuf_builder.bind_draw_buffer(fragdata, color0);
 	fbuf_builder.bind_read_buffer(color0);
-	
+
 	gl::framebuffer fbuf = fbuf_builder.create_framebuffer(glc);
 
 	// multisampled renderbuffer
@@ -165,7 +165,7 @@ int main()
 	// ensures the correct type of texture is used
 
 	auto texunit = tunits.get<gl::shader::sampler_2d>();
-		
+
 	glc.bind_texture(texunit, tex);
 	prog.set_uniform(tex_uni, texunit);
 
