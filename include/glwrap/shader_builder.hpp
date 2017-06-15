@@ -47,7 +47,7 @@ public:
 	// TODO: need context
 	shader_builder(context&)
 	{}
-	
+
 	void set_source(std::string const& _src)
 	{
 		m_source = _src;
@@ -107,6 +107,32 @@ public:
 		return _desc.get_layout().get_location();
 	}
 
+	// TODO: kill/rename
+	template <typename P, typename L>
+	auto create_storage_array(const variable_description<P, L>& _desc)
+		-> typename variable_description<P, L>::layout_type::location_type
+	{
+		typedef P var_type[];
+
+		// TODO: clean up all this duplicate code...
+		std::string result;
+
+		std::string layout = _desc.get_layout().get_string();
+		if (!layout.empty())
+			result += "layout(" + layout + ") ";
+
+		// TODO: allow for unique names
+		result += "buffer " + _desc.get_name() + " \n{\n";
+
+		result += detail::get_type_name<var_type>() + " " +  _desc.get_name()
+			+ detail::glsl_var_suffix<var_type>::suffix()
+			+ ";\n};\n";
+
+		m_header_lines.emplace_back(result);
+
+		return _desc.get_layout().get_location();
+	}
+
 	// TODO: should this just take and modify a shader?
 	// TODO: rename to generate_ or build_ ?
 	basic_shader<T> create_shader(context& _glc) const
@@ -147,7 +173,7 @@ private:
 precision mediump float;
 #endif
 )";
-		
+
 		for (auto& line : m_header_lines)
 			src += line;
 		src += m_source;
@@ -173,7 +199,7 @@ precision mediump float;
 		{
 			result += qual + ' ';
 		}
-		
+
 		result += _storage_qualifier + " "
 			+ detail::get_type_name<P>()
 			+ " " + _desc.get_name()
@@ -188,7 +214,7 @@ precision mediump float;
 	std::string get_glsl_block_definition(const std::string& _storage_qualifier, const variable_description<P, L>& _desc) const
 	{
 		// TODO: need to allow for unique block names..
-		
+
 		std::string result;
 
 		detail::struct_layout<P> sl;
@@ -197,7 +223,7 @@ precision mediump float;
 		std::string layout = _desc.get_layout().get_string();
 		if (!layout.empty())
 			result += "layout(" + layout + ") ";
-		
+
 		result += _storage_qualifier + " " + sl.get_name() + " \n{\n";
 
 		for (auto& m : sl.members)

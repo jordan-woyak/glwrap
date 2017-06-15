@@ -16,15 +16,15 @@ struct struct_layout
 	{
 		return m_name;
 	}
-	
+
 	void set_name(std::string _name)
 	{
 		m_name = std::move(_name);
 	}
-	
+
 	template <typename M>
 	void add_member(M T::*_member, const std::string& _name)
-	{		
+	{
 		member m;
 
 		m.offset = get_member_offset(_member);
@@ -112,5 +112,13 @@ void main() {}
 };
 
 }
+
+/*
+template <typename T>
+void get_struct_layout(detail::struct_layout<T[]>& _sl)
+{
+	sl.add_member();
+}
+*/
 
 }

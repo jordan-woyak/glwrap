@@ -236,6 +236,7 @@ int main()
 	gl::sampler samp(glc);
 	samp.set_mag_filter(gl::texture_filter::linear);
 	samp.set_min_filter(gl::texture_filter::linear, gl::mipmap_filter::linear);
+	samp.set_max_anisotropy(16.f);
 
 	glc.bind_texture(tex_color_unit, tex_color);
 	glc.bind_sampler(tex_color_unit, samp);
