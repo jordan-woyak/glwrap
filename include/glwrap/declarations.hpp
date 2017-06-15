@@ -64,7 +64,7 @@ struct normalized
 		// This is valid for both signed and unsigned types.
 		// OpenGL defines the range as [MIN + 1, MAX]
 		val = T(_val * std::numeric_limits<T>::max());
-		
+
 		return *this;
 	}
 
@@ -72,7 +72,7 @@ struct normalized
 	{
 		return float_t(val) / std::numeric_limits<T>::max();
 	}
-	
+
 	T val;
 };
 
@@ -98,7 +98,7 @@ thread_local context* g_current_context = {};
 // TODO: Move these into the context class
 thread_local bool g_check_every_gl_call = {};
 thread_local bool g_profile_every_gl_call = {};
-	
+
 static const bool_t IS_UNIFORM_MATRIX_TRANSPOSE_NEEDED = GL_FALSE;
 
 /*
@@ -131,19 +131,6 @@ enum class shader_type : GLenum
 	//tess_evaluation = GL_TESS_EVALUATION_SHADER,
 	//geometry = GL_GEOMETRY_SHADER,
 	fragment = GL_FRAGMENT_SHADER,
-};
-
-// TODO: allow combinations:
-enum class shader_stage : GLenum
-{
-	//compute = GL_COMPUTE_SHADER_BIT,
-	vertex = GL_VERTEX_SHADER_BIT,
-	//tess_control = GL_TESS_CONTROL_SHADER_BIT,
-	//tess_evaluation = GL_TESS_EVALUATION_SHADER_BIT,
-	//geometry = GL_GEOMETRY_SHADER_BIT,
-	fragment = GL_FRAGMENT_SHADER_BIT,
-
-	all = GL_ALL_SHADER_BITS,
 };
 
 template <shader_type T>

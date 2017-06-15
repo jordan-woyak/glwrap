@@ -259,4 +259,22 @@ enum class image_access : enum_t
 	read_write = GL_READ_WRITE,
 };
 
+enum class shader_stage : GLenum
+{
+	vertex = GL_VERTEX_SHADER_BIT,
+	//tess_control = GL_TESS_CONTROL_SHADER_BIT,
+	//tess_evaluation = GL_TESS_EVALUATION_SHADER_BIT,
+	//geometry = GL_GEOMETRY_SHADER_BIT,
+	fragment = GL_FRAGMENT_SHADER_BIT,
+	compute = GL_COMPUTE_SHADER_BIT,
+
+	all = GL_ALL_SHADER_BITS,
+};
+
+inline shader_stage operator|(shader_stage _lhs, shader_stage _rhs)
+{
+	return static_cast<shader_stage>
+		(static_cast<bitfield_t>(_lhs) | static_cast<bitfield_t>(_rhs));
+}
+
 }

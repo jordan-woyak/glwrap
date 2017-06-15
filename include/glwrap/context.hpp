@@ -473,7 +473,7 @@ public:
 	void dispatch_compute_indirect(const buffer_iterator<uvec3, A>& _cmd)
 	{
 		m_dispatch_indirect_buffer_binding.set(_cmd.get_buffer());
-		
+
 		GLWRAP_GL_CALL(glDispatchComputeIndirect)(_cmd.get_offset() - (ubyte_t*)0);
 	}
 
@@ -482,7 +482,14 @@ public:
 		GLWRAP_GL_CALL(glUseProgram)(_prog.native_handle());
 	}
 
-	// TODO: rename to juse use_program?
+	// TODO: Do I like nullptr here?
+	void use_program(std::nullptr_t)
+	{
+		GLWRAP_GL_CALL(glUseProgram)(0);
+	}
+
+	// FYI: "If a program is bound with glUseProgram, then any bound program pipelines will be ignored."
+	// TODO: allow un-using a program pipeline, use nullptr or something
 	void use_program_pipeline(program_pipeline& _prog)
 	{
 		GLWRAP_GL_CALL(glBindProgramPipeline)(_prog.native_handle());

@@ -142,6 +142,7 @@ public:
 	// TODO: support depth and stencil attachments
 	// TODO: support 3d and array textures
 	// TODO: I don't like this level interface
+	// TODO: are unsigned and signed textures allowed?
 	void bind_attachment(color_attachment const& _point, texture_2d const& _attachment, uint_t _level)
 	{
 		if (is_extension_present(GL_ARB_direct_state_access))
