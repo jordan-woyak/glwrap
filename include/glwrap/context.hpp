@@ -521,6 +521,14 @@ public:
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * 1);
 	}
 
+	// TODO: rename?
+	template <typename T>
+	void bind_buffer(shader_storage_location<T[]> const& _binding, const shader_storage_buffer_iterator<T>& _iter, uint_t _count)
+	{
+		GLWRAP_GL_CALL(glBindBufferRange)(GL_SHADER_STORAGE_BUFFER, _binding.get_index(),
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _count);
+	}
+
 	template <typename T>
 	void bind_buffer(uniform_block_location<T> const& _binding, const uniform_buffer_iterator<T>& _iter)
 	{

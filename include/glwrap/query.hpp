@@ -57,11 +57,18 @@ public:
 		GLWRAP_GL_CALL(glEndQuery)(static_cast<enum_t>(m_type));
 	}
 
-	uint64_t result() const
+	uint_t result() const
 	{
-		GLuint64 result = 0;
-		GLWRAP_GL_CALL(glGetQueryObjectui64v)(native_handle(), GL_QUERY_RESULT, &result);
+		GLuint result = 0;
+		GLWRAP_GL_CALL(glGetQueryObjectuiv)(native_handle(), GL_QUERY_RESULT, &result);
 		return result;
+	}
+
+	bool result_available() const
+	{
+		GLuint result = 0;
+		GLWRAP_GL_CALL(glGetQueryObjectuiv)(native_handle(), GL_QUERY_RESULT_AVAILABLE, &result);
+		return GL_TRUE == result;
 	}
 
 private:

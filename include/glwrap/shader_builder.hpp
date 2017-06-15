@@ -109,8 +109,8 @@ public:
 
 	// TODO: kill/rename
 	template <typename P, typename L>
-	auto create_storage_array(const variable_description<P, L>& _desc)
-		-> typename variable_description<P, L>::layout_type::location_type
+	auto create_storage_array(const variable_description<P[], L>& _desc)
+		-> typename variable_description<P[], L>::layout_type::location_type
 	{
 		typedef P var_type[];
 
@@ -122,7 +122,7 @@ public:
 			result += "layout(" + layout + ") ";
 
 		// TODO: allow for unique names
-		result += "buffer " + _desc.get_name() + " \n{\n";
+		result += "buffer " + _desc.get_name() + "_block \n{\n";
 
 		result += detail::get_type_name<var_type>() + " " +  _desc.get_name()
 			+ detail::glsl_var_suffix<var_type>::suffix()
@@ -175,7 +175,10 @@ precision mediump float;
 )";
 
 		for (auto& line : m_header_lines)
+		{
 			src += line;
+		}
+
 		src += m_source;
 
 		return src;
