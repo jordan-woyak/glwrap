@@ -178,7 +178,7 @@ layout(early_fragment_tests) in;
 
 void main()
 {
-	vec3 adjusted_normal = normalize(vertex_normal);
+	vec3 adjusted_normal = normalize(vertex_normal) * (float(gl_FrontFacing) * 2.0 - 1.0);
 
 	float LambertTerm = max(dot(adjusted_normal, norm_light_dir), 0.0);
 	vec3 Id = diff_color.rgb * diff_color.a * LambertTerm;
