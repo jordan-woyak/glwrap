@@ -23,12 +23,12 @@ int main()
 
 	// nonsense to load ply
 	ply::vertex_format<FooVertex> vert_fmt;
-	vert_fmt.bind("x", [](std::istream& s, FooVertex& v){ s >> v.pos.x; });
-	vert_fmt.bind("y", [](std::istream& s, FooVertex& v){ s >> v.pos.y; });
-	vert_fmt.bind("z", [](std::istream& s, FooVertex& v){ s >> v.pos.z; });
-	vert_fmt.bind("nx", [](std::istream& s, FooVertex& v){ s >> v.norm.x; });
-	vert_fmt.bind("ny", [](std::istream& s, FooVertex& v){ s >> v.norm.y; });
-	vert_fmt.bind("nz", [](std::istream& s, FooVertex& v){ s >> v.norm.z; });
+	vert_fmt.bind("x") | &FooVertex::pos | &gl::vec3::x;
+	vert_fmt.bind("y") | &FooVertex::pos | &gl::vec3::y;
+	vert_fmt.bind("z") | &FooVertex::pos | &gl::vec3::z;
+	vert_fmt.bind("nx") | &FooVertex::norm | &gl::vec3::x;
+	vert_fmt.bind("ny") | &FooVertex::norm | &gl::vec3::y;
+	vert_fmt.bind("nz") | &FooVertex::norm | &gl::vec3::z;
 
 	std::vector<FooVertex> vertices;
 	std::vector<gl::uint_t> indices;
@@ -71,7 +71,7 @@ int main()
 	auto spec_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("spec_color", uniforms));
 	auto mat_color_uni = fshad.create_uniform(gl::variable<gl::vec4>("mat_color", uniforms));
 	auto shininess_uni = fshad.create_uniform(gl::variable<gl::float_t>("shininess", uniforms));
-	
+
 	auto fragdata = fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
 	(void)fragdata;
 
@@ -125,6 +125,7 @@ int main()
 	arr.set_attribute_format(norm_attrib, input_loc | &FooVertex::norm);
 
 	arr.set_buffer(input_loc, verbuf.begin());
+	arr.set_element_buffer(indbuf);
 
 	gl::float_t rotate = 0;
 
@@ -141,8 +142,6 @@ int main()
 	//glc.front_face(gl::orientation::cw);
 
 	glc.use_program(prog);
-	glc.use_vertex_array(arr);
-	glc.use_element_array(indbuf);
 
 	// point the rabbit down towards the camera
 	auto const pre_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f);
@@ -153,7 +152,7 @@ int main()
 		gl::perspective(glm::radians(45.f), (float_t)window_size.x / window_size.y, 1.f, 100.f) *
 		glm::lookAt(glm::vec3{0.f, 0.f, 3.f}, glm::vec3{}, glm::vec3{0.f, 1.f, 0.f});
 		//gl::ortho(-1.f, 1.f, -1.f, 1.f);
-		
+
 	prog.set_uniform(projection_uni, proj);
 
 	glc.set_clear_depth(1.0f);
@@ -165,7 +164,7 @@ int main()
 		gl::mat4 model =
 			pre_rotate *
 			gl::rotate(rotate, 0.f, 1.f, 0.f) *
-			post_rotate;			
+			post_rotate;
 
 		prog.set_uniform(model_uni, model);
 
@@ -173,7 +172,7 @@ int main()
 			rotate -= 3.14f * 2;
 
 		glc.clear(gl::buffer_mask::color | gl::buffer_mask::depth);
-		glc.draw_elements(gl::primitive::triangles, 0, indices.size());
+		glc.draw_elements(arr, gl::primitive::triangles, 0, indices.size());
 	});
 
 	dsp.set_resize_func([&](gl::ivec2 _size)

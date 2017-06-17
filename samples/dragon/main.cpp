@@ -360,9 +360,6 @@ void main()
 
 	gl::query sample_query(glc, gl::query_type::samples_passed);
 
-	typedef std::chrono::steady_clock clock;
-	auto prev_frame_tp = clock::now();
-
 	gl::program_pipeline pline(glc);
 	glc.use_program_pipeline(pline);
 
@@ -388,6 +385,10 @@ void main()
 	};
 
 	set_up_textures();
+
+	typedef std::chrono::steady_clock clock;
+	auto prev_frame_tp = clock::now();
+	auto last_caption_update_tp = prev_frame_tp;
 
 	dsp.set_display_func([&]
 	{
@@ -428,7 +429,7 @@ void main()
 		glc.dispatch_compute({1, 1, 1});
 		glc.use_program(nullptr);
 
-		auto const result_available = sample_query.result_available();
+		//auto const result_available = sample_query.result_available();
 		auto const samples_passed = sample_query.result();
 
 		if (samples_passed > 0)
@@ -454,12 +455,17 @@ void main()
 		}
 
 		//std::cout << "samples_passed: " << samples_passed << std::endl;
-		std::cout << "was_available: " << result_available << " avg layers: " << ((gl::float_t)samples_passed / window_size.x / window_size.y) << std::endl;
+		//std::cout << "was_available: " << result_available << " avg layers: " << ((gl::float_t)samples_passed / window_size.x / window_size.y) << std::endl;
 
 		auto const now_tp = clock::now();
 
 		auto const fps = std::chrono::seconds(1) / (now_tp - prev_frame_tp);
-		std::cout << "fps: " << fps << std::endl;
+
+		if (now_tp - last_caption_update_tp > std::chrono::seconds(1))
+		{
+			dsp.set_caption("glwrap-dragon fps:" + std::to_string(fps));
+			last_caption_update_tp = now_tp;
+		}
 
 		prev_frame_tp = now_tp;
 	});
