@@ -81,8 +81,12 @@ struct vertex_array_obj
 
 class vertex_array : public detail::globject<detail::vertex_array_obj>
 {
+	friend context;
+
 public:
 	explicit vertex_array(context&)
+		: m_element_type()
+		, m_element_size()
 	{}
 
 /*
@@ -120,7 +124,7 @@ public:
 		static_assert(s_traits::component_count == i_traits::component_count
 			&& s_traits::attrib_index_count == i_traits::attrib_index_count,
 			"Component and/or attribute index counts of input/attrib types does not match. Input is not sensible.");
-		
+
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_vertex_array_attrib_binding<ShaderType>
@@ -151,7 +155,7 @@ public:
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
-			
+
 			GLWRAP_GL_CALL(glBindVertexBuffer)(_binding.get_index(),
 				_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride());
 		}
@@ -200,10 +204,48 @@ public:
 		else
 		{
 			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
-		
+
 			GLWRAP_GL_CALL(glVertexBindingDivisor)(_binding.get_index(), _divisor);
 		}
 	}
+
+	// TODO: allow unbinding the element array?
+	template <typename T>
+	void set_element_buffer(buffer<T>& _buff)
+	{
+		static_assert(std::is_same<T, ubyte_t>::value
+			|| std::is_same<T, ushort_t>::value
+			|| std::is_same<T, uint_t>::value
+			, "must be ubyte, uint, ushort");
+
+		if (is_extension_present(GL_ARB_direct_state_access))
+		{
+			GLWRAP_GL_CALL(glVertexArrayElementBuffer)(native_handle(), _buff.native_handle());
+		}
+		else
+		{
+			detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
+
+			GLWRAP_GL_CALL(glBindBuffer)(GL_ELEMENT_ARRAY_BUFFER, _buff.native_handle());
+		}
+
+		m_element_type = detail::data_type_enum<T>();
+		m_element_size = sizeof(T);
+	}
+
+private:
+	enum_t get_element_type() const
+	{
+		return m_element_type;
+	}
+
+	uint_t get_element_size() const
+	{
+		return m_element_size;
+	}
+
+	enum_t m_element_type;
+	uint_t m_element_size;
 };
 
 class vertex_array_builder

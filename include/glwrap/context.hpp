@@ -32,13 +32,12 @@ class context
 
 public:
 	explicit context()
-		: m_element_type()
-		, m_element_type_size()
+		: m_draw_indirect_buffer_binding(detail::adopt_value)
+		, m_dispatch_indirect_buffer_binding(detail::adopt_value)
+		, m_vertex_array_binding(detail::adopt_value)
 #ifndef GLWRAP_NO_SFML
 		, m_sf_window(new sf::RenderWindow)
 #endif
-		, m_draw_indirect_buffer_binding(detail::adopt_value)
-		, m_dispatch_indirect_buffer_binding(detail::adopt_value)
 	{
 #if !defined(GLWRAP_FAKE_CONTEXT) && defined(GLWRAP_NO_SFML)
 		int dummy = 0;
@@ -354,8 +353,10 @@ public:
 	// TODO: multi draw (with looping fallback on ES)
 	// TODO: draw range elements base vertex // not on ES
 
-	void draw_arrays(primitive _mode, int_t _offset, sizei_t _count)
+	void draw_arrays(const vertex_array& _vao, primitive _mode, int_t _offset, sizei_t _count)
 	{
+		m_vertex_array_binding.set(_vao.native_handle());
+
 		GLWRAP_GL_CALL(glDrawArrays)(
 			static_cast<enum_t>(_mode),
 			_offset,
@@ -364,9 +365,10 @@ public:
 
 	// TODO: should I break MultiDraw into its own function?
 	template <typename A>
-	void draw_arrays_indirect(primitive _mode, buffer_iterator<draw_arrays_indirect_cmd, A> _cmd,
+	void draw_arrays_indirect(const vertex_array& _vao, primitive _mode, buffer_iterator<draw_arrays_indirect_cmd, A> _cmd,
 		sizei_t _drawcount = 1)
 	{
+		m_vertex_array_binding.set(_vao.native_handle());
 		m_draw_indirect_buffer_binding.set(_cmd.get_buffer());
 
 		if (is_extension_present(GL_ARB_multi_draw_indirect))
@@ -390,8 +392,10 @@ public:
 		}
 	}
 
-	void draw_arrays_instanced(primitive _mode, int_t _offset, sizei_t _count, sizei_t _instances)
+	void draw_arrays_instanced(const vertex_array& _vao, primitive _mode, int_t _offset, sizei_t _count, sizei_t _instances)
 	{
+		m_vertex_array_binding.set(_vao.native_handle());
+
 		GLWRAP_GL_CALL(glDrawArraysInstanced)(
 			static_cast<enum_t>(_mode),
 			_offset,
@@ -399,40 +403,42 @@ public:
 			_instances);
 	}
 
-	// TODO: should these just take the element array and bind it?
 	// TODO: good parameter order?
-	void draw_elements(primitive _mode, sizei_t _start, sizei_t _count)
+	void draw_elements(const vertex_array& _vao, primitive _mode, sizei_t _start, sizei_t _count)
 	{
+		m_vertex_array_binding.set(_vao.native_handle());
+
 		GLWRAP_GL_CALL(glDrawElements)(
 			static_cast<enum_t>(_mode),
 			_count,
-			get_element_type(),
-			(ubyte_t*)0 + _start * m_element_type_size);
+			_vao.get_element_type(),
+			(ubyte_t*)0 + _start * _vao.get_element_size());
 	}
 
 	// TODO: should I break MultiDraw into its own function?
 	template <typename A>
-	void draw_elements_indirect(primitive _mode, buffer_iterator<draw_elements_indirect_cmd, A> _cmd,
+	void draw_elements_indirect(const vertex_array& _vao, primitive _mode, buffer_iterator<draw_elements_indirect_cmd, A> _cmd,
 		sizei_t _drawcount = 1)
 	{
+		m_vertex_array_binding.set(_vao.native_handle());
 		m_draw_indirect_buffer_binding.set(_cmd.get_buffer());
 
 		if (is_extension_present(GL_ARB_multi_draw_indirect))
 		{
 			GLWRAP_GL_CALL(glMultiDrawElementsIndirect)(
 				static_cast<enum_t>(_mode),
-				get_element_type(),
+				_vao.get_element_type(),
 				_cmd.get_offset(),
 				_drawcount,
 				_cmd.get_stride());
 		}
 		else
-		{		
+		{
 			while (_drawcount--)
 			{
 				GLWRAP_GL_CALL(glDrawElementsIndirect)(
 					static_cast<enum_t>(_mode),
-					get_element_type(),
+					_vao.get_element_type(),
 					_cmd.get_offset());
 
 					++_cmd;
@@ -440,27 +446,30 @@ public:
 		}
 	}
 
-	// TODO: should these just take the element array and bind it?
 	// TODO: good parameter order?
-	void draw_elements_instanced(primitive _mode, sizei_t _start, sizei_t _count, sizei_t _instances)
+	void draw_elements_instanced(const vertex_array& _vao, primitive _mode, sizei_t _start, sizei_t _count, sizei_t _instances)
 	{
+		m_vertex_array_binding.set(_vao.native_handle());
+
 		GLWRAP_GL_CALL(glDrawElementsInstanced)(
 			static_cast<enum_t>(_mode),
 			_count,
-			get_element_type(),
-			(ubyte_t*)0 + _start * m_element_type_size,
+			_vao.get_element_type(),
+			(ubyte_t*)0 + _start * _vao.get_element_size(),
 			_instances);
 	}
 
-	void draw_range_elements(primitive _mode, sizei_t _start, uint_t _min, uint_t _max, sizei_t _count)
+	void draw_range_elements(const vertex_array& _vao, primitive _mode, sizei_t _start, uint_t _min, uint_t _max, sizei_t _count)
 	{
+		m_vertex_array_binding.set(_vao.native_handle());
+
 		GLWRAP_GL_CALL(glDrawRangeElements)(
 			static_cast<enum_t>(_mode),
 			_min,
 			_max,
 			_count,
-			get_element_type(),
-			(ubyte_t*)0 + _start * m_element_type_size);
+			_vao.get_element_type(),
+			(ubyte_t*)0 + _start * _vao.get_element_size());
 	}
 
 	void dispatch_compute(const uvec3& _num_groups)
@@ -495,11 +504,6 @@ public:
 		GLWRAP_GL_CALL(glBindProgramPipeline)(_prog.native_handle());
 	}
 
-	void use_vertex_array(vertex_array& _vert)
-	{
-		GLWRAP_GL_CALL(glBindVertexArray)(_vert.native_handle());
-	}
-
 	void use_transform_feedback(transform_feedback& _tf)
 	{
 		GLWRAP_GL_CALL(glBindTransformFeedback)(GL_TRANSFORM_FEEDBACK, _tf.native_handle());
@@ -509,7 +513,7 @@ public:
 	void bind_buffer(atomic_counter_binding<T> const& _binding, const static_buffer_iterator<T, S>& _iter)
 	{
 		static_assert(S % 4 == 0, "Atomic counter buffer must be aligned to 4 bytes.");
-		
+
 		GLWRAP_GL_CALL(glBindBufferRange)(GL_ATOMIC_COUNTER_BUFFER, _binding.get_index(),
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * 1);
 	}
@@ -534,20 +538,6 @@ public:
 	{
 		GLWRAP_GL_CALL(glBindBufferRange)(GL_UNIFORM_BUFFER, _binding.get_index(),
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * 1);
-	}
-	
-	template <typename T>
-	void use_element_array(buffer<T>& _buff)
-	{
-		static_assert(std::is_same<T, ubyte_t>::value
-			|| std::is_same<T, ushort_t>::value
-			|| std::is_same<T, uint_t>::value
-			, "must be ubyte, uint, ushort");
-
-		GLWRAP_GL_CALL(glBindBuffer)(GL_ELEMENT_ARRAY_BUFFER, _buff.native_handle());
-
-		m_element_type = detail::data_type_enum<T>();
-		m_element_type_size = sizeof(T);
 	}
 
 	void use_draw_framebuffer(const framebuffer_reference& _fb)
@@ -682,7 +672,7 @@ private:
 			msg += "UNKNOWN";
 			break;
 		}
-		
+
 		msg += ", type: ";
 		switch (_type)
 		{
@@ -711,7 +701,7 @@ private:
 		}
 
 		msg += ", id: " + std::to_string(_id);
-		
+
 		msg += ", severity: ";
 		switch (_severity)
 		{
@@ -731,7 +721,7 @@ private:
 			msg += "UNKNOWN";
 			break;
 		}
-		
+
 		std::cerr << msg << ", msg: " << std::string(_message, _length) << std::endl;
 	}
 
@@ -748,11 +738,6 @@ private:
 			(_source, _type, _id, _severity, _length, _message);
 	}
 
-	GLenum get_element_type() const
-	{
-		return m_element_type;
-	}
-
 #ifndef GLWRAP_NO_SFML
 	sf::RenderWindow& get_window()
 	{
@@ -760,16 +745,14 @@ private:
 	}
 #endif
 
-	GLenum m_element_type;
-	sizei_t m_element_type_size;
+	// TODO: these will bind 0 on context destruction, that isn't really needed..
+	detail::scoped_value<detail::parameter::draw_indirect_buffer> m_draw_indirect_buffer_binding;
+	detail::scoped_value<detail::parameter::dispatch_indirect_buffer> m_dispatch_indirect_buffer_binding;
+	detail::scoped_value<detail::parameter::vertex_array> m_vertex_array_binding;
 
 #ifndef GLWRAP_NO_SFML
 	std::unique_ptr<sf::RenderWindow> m_sf_window;
 #endif
-
-	// TODO: these will bind 0 on context destruction, that isn't really needed..
-	detail::scoped_value<detail::parameter::draw_indirect_buffer> m_draw_indirect_buffer_binding;
-	detail::scoped_value<detail::parameter::dispatch_indirect_buffer> m_dispatch_indirect_buffer_binding;
 };
 
 }
