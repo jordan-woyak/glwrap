@@ -46,6 +46,9 @@ int main()
 	gl::shader_storage_location_enumerator storages(glc);
 	gl::image_unit_enumerator image_units(glc);
 
+	auto const layer_counts_image_unit = image_units.get<gl::shader::uimage_2d>();
+	auto const base_index_image_unit = image_units.get<gl::shader::uimage_2d>();
+
 	gl::vertex_shader_builder vshad(glc);
 
 	auto model_uni = vshad.create_uniform(gl::variable<gl::mat4>("model", uniforms));
@@ -100,6 +103,8 @@ void main()
 
 	auto count_layers_fshader = count_layers_fshad.create_shader_program(glc);
 
+	count_layers_fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
+
 	gl::compute_shader_builder cshad(glc);
 
 	cshad.create_uniform(layer_counts_image_desc);
@@ -148,6 +153,9 @@ void main()
 
 	auto base_index_cshader = cshad.create_shader_program(glc);
 
+	base_index_cshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
+	base_index_cshader.set_uniform(base_index_image_uni, base_index_image_unit);
+
 	gl::fragment_shader_builder fshad(glc);
 
 	fshad.create_uniform(base_index_image_desc);
@@ -190,6 +198,9 @@ void main()
 	);
 
 	auto fshader = fshad.create_shader_program(glc);
+
+	fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
+	fshader.set_uniform(base_index_image_uni, base_index_image_unit);
 
 	gl::fragment_shader_builder sort_fshad(glc);
 
@@ -234,6 +245,9 @@ void main()
 
 	auto sort_fshader = sort_fshad.create_shader_program(glc);
 
+	sort_fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
+	sort_fshader.set_uniform(base_index_image_uni, base_index_image_unit);
+
 	gl::vertex_shader_builder basic_vshad(glc);
 
 	auto basic_vert_pos_attrib = basic_vshad.create_input(gl::variable<gl::vec2>("pos", attribs));
@@ -254,20 +268,6 @@ void main()
 
 	gl::utexture_2d base_indices_tex(glc);
 	base_indices_tex.define_storage(1, counter_format, window_size);
-
-	auto layer_counts_image_unit = image_units.get<gl::shader::uimage_2d>();
-	auto base_index_image_unit = image_units.get<gl::shader::uimage_2d>();
-
-	count_layers_fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
-
-	base_index_cshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
-	base_index_cshader.set_uniform(base_index_image_uni, base_index_image_unit);
-
-	fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
-	fshader.set_uniform(base_index_image_uni, base_index_image_unit);
-
-	sort_fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
-	sort_fshader.set_uniform(base_index_image_uni, base_index_image_unit);
 
 	glc.bind_image_texture(layer_counts_image_unit, layer_counts_tex, 0, gl::image_access::read_write, counter_format);
 	glc.bind_image_texture(base_index_image_unit, base_indices_tex, 0, gl::image_access::read_write, counter_format);
