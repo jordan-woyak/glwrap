@@ -190,10 +190,14 @@ void main()
 
 	vec4 final_color = vec4((Ia + Id) * base + Is, mat_color.a);
 
-	const uint base_index = imageLoad(base_indices, ivec2(gl_FragCoord.xy)).r;
-	const uint offset = imageAtomicAdd(layer_counts, ivec2(gl_FragCoord.xy), 1u);
+	const ivec2 pos = ivec2(gl_FragCoord.xy);
 
-	fragments[base_index + offset] = final_color;
+	const uint base_index = imageLoad(base_indices, pos).r;
+	const uint offset = imageAtomicAdd(layer_counts, pos, 1u);
+
+	//fragments[base_index + offset] = final_color;
+	// HAX, using .a as depth
+	fragments[base_index + offset] = vec4(final_color.rgb, gl_FragCoord.z);
 })"
 	);
 
@@ -219,6 +223,9 @@ vec4 blend(in vec4 dst, in vec4 src)
 	return vec4(mix(dst.rgb, src.rgb, src.a), src.a);
 }
 
+// Sorts based on alpha currently..
+#define sort_two(v1, v2) { const float swap = float(v1.a < v2.a); const vec4 tmp = mix(v1, v2, swap); v2 = mix(v2, v1, swap); v1 = tmp; }
+
 void main()
 {
 	const ivec2 pos = ivec2(gl_FragCoord.xy);
@@ -234,9 +241,25 @@ void main()
 		return;
 	}
 
-	for (uint i = 0; i != count; ++i)
+	// This makes things not slow...
+	const int c = int(min(count, 100));
+
+	for (int i = c - 1; i > 0; --i)
 	{
-		final_color = blend(final_color, fragments[base_index + i]);
+		for (int j = 0; j < i; ++j)
+		{
+			sort_two(fragments[base_index + j], fragments[base_index + j + 1]);
+		}
+	}
+
+	for (uint i = 0; i != c; ++i)
+	{
+		//const vec4 col = fragments[base_index + i];
+		// HAX, using .a as depth
+		vec4 col = fragments[base_index + i];
+		col.a = 0.5;
+
+		final_color = blend(final_color, col);
 	}
 
 	fragdata = final_color;
@@ -262,15 +285,7 @@ void main()
 
 	auto basic_vshader = basic_vshad.create_shader_program(glc);
 
-	gl::utexture_2d layer_counts_tex(glc);
-	// TODO: make sure this starts cleared to zero
-	layer_counts_tex.define_storage(1, counter_format, window_size);
-
-	gl::utexture_2d base_indices_tex(glc);
-	base_indices_tex.define_storage(1, counter_format, window_size);
-
-	glc.bind_image_texture(layer_counts_image_unit, layer_counts_tex, 0, gl::image_access::read_write, counter_format);
-	glc.bind_image_texture(base_index_image_unit, base_indices_tex, 0, gl::image_access::read_write, counter_format);
+	gl::utexture_2d layer_counts_tex(glc), base_indices_tex(glc);
 
 	//std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
 	//std::cout << "fshad log:\n" << fshad.get_log() << std::endl;
@@ -351,6 +366,26 @@ void main()
 	gl::program_pipeline pline(glc);
 	glc.use_program_pipeline(pline);
 
+	auto set_up_textures = [&]
+	{
+		gl::utexture_2d ltex(glc), btex(glc);
+
+		// TODO: make sure this starts cleared to zero
+		ltex.define_storage(1, counter_format, window_size);
+		layer_counts_tex = std::move(ltex);
+
+		btex.define_storage(1, counter_format, window_size);
+		base_indices_tex = std::move(btex);
+
+		glc.bind_image_texture(layer_counts_image_unit, layer_counts_tex, 0, gl::image_access::read_write, counter_format);
+		glc.bind_image_texture(base_index_image_unit, base_indices_tex, 0, gl::image_access::read_write, counter_format);
+
+		glc.bind_image_texture(layer_counts_image_unit, layer_counts_tex, 0, gl::image_access::read_write, counter_format);
+		glc.bind_image_texture(base_index_image_unit, base_indices_tex, 0, gl::image_access::read_write, counter_format);
+	};
+
+	set_up_textures();
+
 	dsp.set_display_func([&]
 	{
 		auto const proj =
@@ -385,8 +420,7 @@ void main()
 		sample_query.stop();
 
 		// Compute base index
-		//glc.memory_barrier(gl::memory_barrier::shader_image_access);
-		glc.memory_barrier(gl::memory_barrier::all);
+		glc.memory_barrier(gl::memory_barrier::shader_image_access);
 		glc.use_program(base_index_cshader);
 		glc.dispatch_compute({1, 1, 1});
 		glc.use_program(nullptr);
@@ -403,14 +437,12 @@ void main()
 			glc.bind_buffer(frag_buf_loc, dnf.begin(), samples_passed);
 
 			// Render to fragment buffer
-			//glc.memory_barrier(gl::memory_barrier::shader_image_access);
-			glc.memory_barrier(gl::memory_barrier::all);
+			glc.memory_barrier(gl::memory_barrier::shader_image_access);
 			pline.use_stages(gl::shader_stage::fragment, fshader);
 			glc.draw_elements(arr, gl::primitive::triangles, 0, indices.size());
 
 			// Sort fragments, blend, output
-			//glc.memory_barrier(gl::memory_barrier::shader_storage);
-			glc.memory_barrier(gl::memory_barrier::all);
+			glc.memory_barrier(gl::memory_barrier::shader_storage);
 			glc.depth_mask(true);
 			glc.color_mask({true, true, true, true});
 			pline.use_stages(gl::shader_stage::vertex, basic_vshader);
@@ -432,6 +464,8 @@ void main()
 	dsp.set_resize_func([&](gl::ivec2 _size)
 	{
 		glc.viewport({0, 0}, window_size = _size);
+
+		set_up_textures();
 	});
 
 	dsp.run_loop();
