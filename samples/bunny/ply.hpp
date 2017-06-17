@@ -12,30 +12,51 @@
 namespace ply
 {
 
+template <typename T, typename M>
+constexpr std::intptr_t get_member_offset(M T::*_member)
+{
+	// TODO: not portable
+	return reinterpret_cast<std::intptr_t>(&(static_cast<const T*>(nullptr)->*_member));
+}
+
+template <typename T>
+struct attrib_binder
+{
+	typedef std::size_t offset_type;
+
+	offset_type& offset;
+};
+
+template <typename T, typename P, typename M>
+attrib_binder<M> operator|(attrib_binder<T>&& _binder, M P::*_member)
+{
+	_binder.offset += get_member_offset(_member);
+	return attrib_binder<M>{_binder.offset};
+}
+
 template <typename T>
 class vertex_format
 {
 public:
-	// function callback is lameish
-	typedef std::function<void(std::istream&,T&)> callback_type;
+	typedef typename attrib_binder<T>::offset_type offset_type;
 
-	void bind(std::string const& _name, callback_type const& _func)
+	attrib_binder<T> bind(std::string const& _name)
 	{
-		m_callbacks[_name] = _func;
+		return attrib_binder<T>{m_offsets[_name]};
 	}
 
-	callback_type get_callback(std::string const& _name) const
+	offset_type get_offset(std::string const& _name) const
 	{
-		auto const f = m_callbacks.find(_name);
+		auto const f = m_offsets.find(_name);
 
-		if (f != m_callbacks.end())
+		if (f != m_offsets.end())
 			return f->second;
 		else
-			return callback_type{};
+			return sizeof(T);
 	}
 
 private:
-	std::map<std::string, callback_type> m_callbacks;
+	std::map<std::string, offset_type> m_offsets;
 };
 
 template <typename T, typename I>
@@ -44,12 +65,12 @@ void load(std::string const& _filename, vertex_format<T> const& _fmt,
 {
 	std::ifstream file(_filename);
 
-	std::function<void()> propery_handler;
+	std::function<void()> property_handler;
 
 	// TODO: not generic
 	std::size_t vert_count{}, face_count{};
 
-	std::vector<typename vertex_format<T>::callback_type> vert_handlers;
+	std::vector<typename vertex_format<T>::offset_type> attrib_offsets;
 
 	std::string line;
 	while (std::getline(file, line))
@@ -65,26 +86,24 @@ void load(std::string const& _filename, vertex_format<T> const& _fmt,
 			if ("vertex" == cmd)
 			{
 				line_stream >> vert_count;
-				_vertex_data.reserve(vert_count);
 
-				propery_handler = [&]
+				property_handler = [&]
 				{
 					std::string name;
 					line_stream >> name >> name;	// skip type :/
-					vert_handlers.push_back(_fmt.get_callback(name));
+					attrib_offsets.push_back(_fmt.get_offset(name));
 				};
 			}
 			else if ("face" == cmd)
 			{
 				line_stream >> face_count;
-				_index_data.reserve(face_count);
 
-				propery_handler = []{};
+				property_handler = []{};
 			}
 		}
 		else if ("property" == cmd)
 		{
-			propery_handler();
+			property_handler();
 		}
 		else if ("end_header" == cmd)
 		{
@@ -92,39 +111,38 @@ void load(std::string const& _filename, vertex_format<T> const& _fmt,
 		}
 	}
 
+	_vertex_data.reserve(vert_count);
 	while (vert_count--)
 	{
-		std::getline(file, line);
-		std::istringstream line_stream(std::move(line));
+		// Un-binded offsets are size to sizeof(T) and written to dummy value.
+		struct
+		{
+			T val {};
+			float dummy;
+		} vert;
 
-		T vert{};
+		for (auto offset : attrib_offsets)
+		{
+			file >> *reinterpret_cast<float*>(reinterpret_cast<char*>(&vert) + offset);
+		}
 
-		std::string dummy;
-		for (auto& handler : vert_handlers)
-			if (handler)
-				handler(line_stream, vert);
-			else
-				line_stream >> dummy;
-
-		_vertex_data.push_back(vert);
+		_vertex_data.push_back(vert.val);
 	}
 
+	_index_data.reserve(face_count);
 	while (face_count--)
 	{
-		std::getline(file, line);
-		std::istringstream line_stream(std::move(line));
-
 		// TODO: not reading faces properly, just assuming triangles..
 		int face_vert_count = 0;
-		line_stream >> face_vert_count;
+		file >> face_vert_count;
 
 		// TODO: hax for 3 and 4 vert faces
 		if (3 == face_vert_count)
-			std::copy_n(std::istream_iterator<I>(line_stream), 3, std::back_inserter(_index_data));
+			std::copy_n(std::istream_iterator<I>(file), 3, std::back_inserter(_index_data));
 		else if (4 == face_vert_count)
 		{
 			std::vector<I> tmp;
-			std::copy_n(std::istream_iterator<I>(line_stream), 4, std::back_inserter(tmp));
+			std::copy_n(std::istream_iterator<I>(file), 4, std::back_inserter(tmp));
 
 			_index_data.insert(_index_data.end(), tmp.begin(), tmp.end());
 			_index_data.push_back(tmp[0]);

@@ -24,12 +24,12 @@ int main()
 
 	// nonsense to load ply
 	ply::vertex_format<FooVertex> vert_fmt;
-	vert_fmt.bind("x", [](std::istream& s, FooVertex& v){ s >> v.pos.x; });
-	vert_fmt.bind("y", [](std::istream& s, FooVertex& v){ s >> v.pos.y; });
-	vert_fmt.bind("z", [](std::istream& s, FooVertex& v){ s >> v.pos.z; });
-	vert_fmt.bind("nx", [](std::istream& s, FooVertex& v){ s >> v.norm.x; });
-	vert_fmt.bind("ny", [](std::istream& s, FooVertex& v){ s >> v.norm.y; });
-	vert_fmt.bind("nz", [](std::istream& s, FooVertex& v){ s >> v.norm.z; });
+	vert_fmt.bind("x") | &FooVertex::pos | &gl::vec3::x;
+	vert_fmt.bind("y") | &FooVertex::pos | &gl::vec3::y;
+	vert_fmt.bind("z") | &FooVertex::pos | &gl::vec3::z;
+	vert_fmt.bind("nx") | &FooVertex::norm | &gl::vec3::x;
+	vert_fmt.bind("ny") | &FooVertex::norm | &gl::vec3::y;
+	vert_fmt.bind("nz") | &FooVertex::norm | &gl::vec3::z;
 
 	std::vector<FooVertex> vertices;
 	std::vector<gl::uint_t> indices;
