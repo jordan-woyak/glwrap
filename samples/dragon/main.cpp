@@ -92,12 +92,9 @@ R"(
 
 layout(early_fragment_tests) in;
 
-out vec4 foobar;
-
 void main()
 {
 	imageAtomicAdd(layer_counts, ivec2(gl_FragCoord.xy), 1u);
-	foobar = vec4(0.0);
 })"
 	);
 
@@ -140,10 +137,7 @@ void main()
 	{
 		for (pos.y = start_pos.y; pos.y < image_size.y; pos.y += step.y)
 		{
-			//const uint layer_count = imageLoad(layer_counts, pos).r;
-			//imageStore(layer_counts, pos, uvec4(0));
-
-			const uint layer_count = imageAtomicExchange(layer_counts, pos, 0u).r;
+			const uint layer_count = imageAtomicExchange(layer_counts, pos, 0u);
 
 			const uint bi = atomicAdd(base_index, layer_count);
 			imageStore(base_indices, pos, uvec4(bi));
@@ -208,13 +202,33 @@ void main()
 
 	sort_fshad.set_source(
 R"(
+
+vec4 blend(in vec4 dst, in vec4 src)
+{
+	return vec4(mix(dst.rgb, src.rgb, src.a), src.a);
+}
+
 void main()
 {
-	//const uint base_index = imageLoad(base_indices, ivec2(gl_FragCoord.xy)).r;
-	//const uint offset = imageAtomicAdd(layer_counts, ivec2(gl_FragCoord.xy), 1u);
+	const ivec2 pos = ivec2(gl_FragCoord.xy);
 
-	//fragdata = fragments[base_index];
-	fragdata = vec4(1.0, 0.0, 0.0, 1.0);
+	const uint base_index = imageLoad(base_indices, pos).r;
+	const uint count = imageAtomicExchange(layer_counts, pos, 0u);
+
+	vec4 final_color = vec4(0.0);
+
+	if (0 == count)
+	{
+		discard;
+		return;
+	}
+
+	for (uint i = 0; i != count; ++i)
+	{
+		final_color = blend(final_color, fragments[base_index + i]);
+	}
+
+	fragdata = final_color;
 })"
 	);
 
@@ -234,8 +248,8 @@ void main()
 
 	auto basic_vshader = basic_vshad.create_shader_program(glc);
 
-	//std::cout << "fsrc: " << fshader.get_source() << std::endl;
 	gl::utexture_2d layer_counts_tex(glc);
+	// TODO: make sure this starts cleared to zero
 	layer_counts_tex.define_storage(1, counter_format, window_size);
 
 	gl::utexture_2d base_indices_tex(glc);
@@ -244,11 +258,6 @@ void main()
 	auto layer_counts_image_unit = image_units.get<gl::shader::uimage_2d>();
 	auto base_index_image_unit = image_units.get<gl::shader::uimage_2d>();
 
-	gl::program_pipeline pline(glc);
-	glc.use_program_pipeline(pline);
-	pline.use_stages(gl::shader_stage::vertex, vshader);
-	pline.use_stages(gl::shader_stage::fragment, count_layers_fshader);
-
 	count_layers_fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
 
 	base_index_cshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
@@ -256,6 +265,9 @@ void main()
 
 	fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
 	fshader.set_uniform(base_index_image_uni, base_index_image_unit);
+
+	sort_fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
+	sort_fshader.set_uniform(base_index_image_uni, base_index_image_unit);
 
 	glc.bind_image_texture(layer_counts_image_unit, layer_counts_tex, 0, gl::image_access::read_write, counter_format);
 	glc.bind_image_texture(base_index_image_unit, base_indices_tex, 0, gl::image_access::read_write, counter_format);
@@ -275,7 +287,7 @@ void main()
 	// automatically set data types, sizes and strides to components of custom vertex type
 	gl::vertex_array arr(glc);
 
-	//{
+	{
 	gl::vertex_buffer_binding_enumerator vbufs(glc);
 	auto input_loc = vbufs.get<FooVertex>();
 
@@ -283,9 +295,9 @@ void main()
 	arr.set_attribute_format(norm_attrib, input_loc | &FooVertex::norm);
 
 	arr.set_buffer(input_loc, verbuf.begin());
-	//}
+	arr.set_element_buffer(indbuf);
+	}
 
-/*
 	gl::buffer<gl::vec2> quad_verbuf(glc);
 	quad_verbuf.storage((gl::vec2[])
 	{
@@ -303,7 +315,6 @@ void main()
 
 	quad_arr.set_buffer(input_loc, quad_verbuf.begin());
 	}
-*/
 
 	vshader.set_uniform(ambient_uni, {1, 1, 1, 0.2f});
 	vshader.set_uniform(light_dir_uni, {-1, 1, 1});
@@ -334,11 +345,11 @@ void main()
 
 	gl::query sample_query(glc, gl::query_type::samples_passed);
 
-	glc.use_vertex_array(arr);
-	glc.use_element_array(indbuf);
-
 	typedef std::chrono::steady_clock clock;
 	auto prev_frame_tp = clock::now();
+
+	gl::program_pipeline pline(glc);
+	glc.use_program_pipeline(pline);
 
 	dsp.set_display_func([&]
 	{
@@ -358,31 +369,27 @@ void main()
 
 		rotate *= gl::rotate(3.14f / 360, 0.f, 1.f, 0.f);
 
-		//glc.depth_mask(true);
-		//glc.color_mask({true, true, true, true});
+		glc.depth_mask(true);
+		glc.color_mask({true, true, true, true});
 		glc.clear(gl::buffer_mask::color | gl::buffer_mask::depth);
 
 		// Count layers
-		//glc.depth_mask({});
-		//glc.color_mask({});
-		
-		//pline.use_stages(gl::shader_stage::vertex, basic_vshader);
-		//pline.use_stages(gl::shader_stage::fragment, sort_fshader);
+		glc.depth_mask({});
+		glc.color_mask({});
 
-		//std::cout << "valid: " << pline.is_valid() << std::endl;
-
-		//glc.use_program_pipeline(pline);
+		pline.use_stages(gl::shader_stage::vertex, vshader);
+		pline.use_stages(gl::shader_stage::fragment, count_layers_fshader);
 
 		sample_query.start();
-		//std::cout << "indices.size(): " << indices.size() << std::endl;
-		glc.draw_elements(gl::primitive::triangles, 0, indices.size());
-		//glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
+		glc.draw_elements(arr, gl::primitive::triangles, 0, indices.size());
 		sample_query.stop();
 
 		// Compute base index
-		//glc.use_program(base_index_cshader);
-		//glc.dispatch_compute({1, 1, 1});
-		//glc.use_program(nullptr);
+		//glc.memory_barrier(gl::memory_barrier::shader_image_access);
+		glc.memory_barrier(gl::memory_barrier::all);
+		glc.use_program(base_index_cshader);
+		glc.dispatch_compute({1, 1, 1});
+		glc.use_program(nullptr);
 
 		auto const result_available = sample_query.result_available();
 		auto const samples_passed = sample_query.result();
@@ -395,20 +402,20 @@ void main()
 
 			glc.bind_buffer(frag_buf_loc, dnf.begin(), samples_passed);
 
-			// TODO: barrier
-
 			// Render to fragment buffer
-			//pline.use_stages(gl::shader_stage::fragment, fshader);
-			//glc.draw_elements(gl::primitive::triangles, 0, indices.size());
+			//glc.memory_barrier(gl::memory_barrier::shader_image_access);
+			glc.memory_barrier(gl::memory_barrier::all);
+			pline.use_stages(gl::shader_stage::fragment, fshader);
+			glc.draw_elements(arr, gl::primitive::triangles, 0, indices.size());
 
-			// TODO: Sort fragments, blend, output
-			//glc.clear(gl::buffer_mask::color | gl::buffer_mask::depth);
-			//glc.depth_mask(true);
-			//glc.color_mask({true, true, true, true});
-			//pline.use_stages(gl::shader_stage::vertex, basic_vshader);
-			//pline.use_stages(gl::shader_stage::fragment, sort_fshader);
-			//glc.use_vertex_array(quad_arr);
-			//glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
+			// Sort fragments, blend, output
+			//glc.memory_barrier(gl::memory_barrier::shader_storage);
+			glc.memory_barrier(gl::memory_barrier::all);
+			glc.depth_mask(true);
+			glc.color_mask({true, true, true, true});
+			pline.use_stages(gl::shader_stage::vertex, basic_vshader);
+			pline.use_stages(gl::shader_stage::fragment, sort_fshader);
+			glc.draw_arrays(quad_arr, gl::primitive::triangle_fan, 0, 4);
 		}
 
 		//std::cout << "samples_passed: " << samples_passed << std::endl;
