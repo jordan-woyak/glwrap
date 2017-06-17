@@ -198,25 +198,12 @@ public:
 	// TODO: require unpack_buffer is of the proper type and has the right number of components
 
 	template <typename T>
-	void load_sub_image(int_t _level, detail::tex_dims<Type> const& _offset, unpack_buffer<T, dimensions> const& _buffer)
+	void load_sub_image(int_t _level, dimension_type const& _offset, unpack_buffer<T, dimensions> const& _buffer)
 	{
 		_buffer.bind();
 
-		enum_t pfmt = static_cast<enum_t>(_buffer.m_pfmt);
-		// TODO: this is lame, and seems like it isn't needed with gl4?
-		// and it belongs somewhere else
-		if (!std::is_same<float_t, DataType>::value)
-		{
-			if (pixel_format::r == _buffer.m_pfmt)
-				pfmt = GL_RED_INTEGER;
-			else if (pixel_format::rg == _buffer.m_pfmt)
-				pfmt = GL_RG_INTEGER;
-			else if (pixel_format::rgb == _buffer.m_pfmt)
-				pfmt = GL_RGB_INTEGER;
-			else if (pixel_format::rgba == _buffer.m_pfmt)
-				pfmt = GL_RGBA_INTEGER;
-		}
-		
+		const enum_t pfmt = get_pixel_format_enum(_buffer.m_pfmt);
+
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			detail::gl_texture_sub_image<Type>(native_handle(), _level, _offset, _buffer.m_dims,
@@ -228,6 +215,54 @@ public:
 
 			detail::gl_tex_sub_image<Type>(_level, _offset, _buffer.m_dims,
 				pfmt, _buffer.m_data);
+		}
+	}
+
+	// TODO: take a value by-ref and assume the format from it.
+	template <typename T>
+	void clear_image(int_t _level, pixel_format _pfmt, const T* _data)
+	{
+		const enum_t pfmt = get_pixel_format_enum(_pfmt);
+
+		if (is_extension_present(GL_ARB_clear_texture))
+		{
+			GLWRAP_GL_CALL(glClearTexImage)(native_handle(), _level,
+				pfmt, detail::data_type_enum<T>(), _data);
+		}
+		else
+		{
+			// TODO: emulate glClearImage
+			throw std::exception();
+		}
+	}
+
+	// TODO: take a value by-ref and assume the format from it.
+	template <typename T>
+	void clear_sub_image(int_t _level, dimension_type const& _offset, dimension_type const& _size, pixel_format _pfmt, const T* _data)
+	{
+		const enum_t pfmt = get_pixel_format_enum(_pfmt);
+
+		if (is_extension_present(GL_ARB_clear_texture))
+		{
+			ivec3 offset{0, 0, 0};
+			ivec3 size{1, 1, 1};
+
+			// TODO: can this be less messy..
+			for (int i = 0; i != dimensions; ++i)
+			{
+				value_ptr(offset)[i] = value_ptr(_offset)[i];
+				value_ptr(size)[i] = value_ptr(_size)[i];
+			}
+
+			GLWRAP_GL_CALL(glClearTexSubImage)(native_handle(), _level,
+				offset.x, offset.y, offset.z,
+				size.x, size.y, size.z,
+				pfmt, detail::data_type_enum<T>(), _data);
+		}
+		else
+		{
+			// TODO: emulate glClearTexSubImage
+			throw std::exception();
 		}
 	}
 
@@ -260,7 +295,7 @@ public:
 		{
 			// TODO: ugly
 			detail::scoped_value<detail::parameter::texture<Type>> binding(native_handle());
-			
+
 			GLWRAP_GL_CALL(glGenerateMipmap)(target);
 		}
 	}
@@ -311,6 +346,26 @@ public:
 	}
 
 private:
+	enum_t get_pixel_format_enum(pixel_format _fmt)
+	{
+		enum_t pfmt = static_cast<enum_t>(_fmt);
+
+		// TODO: This is ugly and seems like it might not be needed with gl4?
+		if (!std::is_same<float_t, DataType>::value)
+		{
+			if (pixel_format::r == _fmt)
+				pfmt = GL_RED_INTEGER;
+			else if (pixel_format::rg == _fmt)
+				pfmt = GL_RG_INTEGER;
+			else if (pixel_format::rgb == _fmt)
+				pfmt = GL_RGB_INTEGER;
+			else if (pixel_format::rgba == _fmt)
+				pfmt = GL_RGBA_INTEGER;
+		}
+
+		return pfmt;
+	}
+
 	template <typename T>
 	void set_parameter_raw(GLenum _pname, T _val)
 	{

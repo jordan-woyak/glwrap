@@ -242,7 +242,7 @@ void main()
 	}
 
 	// This makes things not slow...
-	const int c = int(min(count, 100));
+	const int c = int(min(count, 50));
 
 	for (int i = c - 1; i > 0; --i)
 	{
@@ -370,9 +370,12 @@ void main()
 	{
 		gl::utexture_2d ltex(glc), btex(glc);
 
-		// TODO: make sure this starts cleared to zero
 		ltex.define_storage(1, counter_format, window_size);
 		layer_counts_tex = std::move(ltex);
+
+		const gl::uint_t val = {};
+		//layer_counts_tex.clear_sub_image(0, {}, window_size, gl::pixel_format::r, &val);
+		layer_counts_tex.clear_image(0, gl::pixel_format::r, &val);
 
 		btex.define_storage(1, counter_format, window_size);
 		base_indices_tex = std::move(btex);
