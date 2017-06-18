@@ -9,7 +9,22 @@ namespace detail
 {
 
 struct uniform_index
-{};
+{
+	static int_t get_index_count()
+	{
+		int_t val = 0;
+
+		detail::gl_get(GL_MAX_UNIFORM_LOCATIONS, &val);
+
+		return val;
+	}
+
+	template <typename T>
+	static int_t get_index_usage()
+	{
+		return detail::uniform_location_count<T>::value;
+	}
+};
 
 }
 
@@ -17,38 +32,8 @@ template <typename T>
 using uniform_location = detail::buffer_index<detail::uniform_index, T>;
 
 // TODO: name?
-class uniform_location_enumerator
-{
-public:
-	template <typename T>
-	using location_type = uniform_location<T>;
-	
-	// TODO: really need context?
-	uniform_location_enumerator(context& _context)
-		: m_current_index()
-		, m_max_uniform_locations()
-	{
-		// TODO: correct parameter?
-		detail::gl_get(GL_MAX_UNIFORM_LOCATIONS, &m_max_uniform_locations);
-	}
-
-	template <typename T>
-	location_type<T> get()
-	{
-		if (m_current_index >= m_max_uniform_locations)
-			throw exception(0);
-			
-		location_type<T> ind(m_current_index);
-
-		m_current_index += detail::uniform_location_count<T>::value;
-
-		return ind;
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_uniform_locations;
-};
+typedef detail::typed_index_enumerator<detail::uniform_index, uniform_location>
+	uniform_location_enumerator;
 
 template <typename T>
 class uniform_layout

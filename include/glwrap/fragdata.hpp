@@ -22,7 +22,6 @@ public:
 		: m_index(_index)
 	{}
 
-
 	int_t get_index() const
 	{
 		return m_index;

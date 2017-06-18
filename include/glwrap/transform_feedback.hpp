@@ -12,7 +12,22 @@ namespace detail
 {
 
 struct transform_feedback_index
-{};
+{
+	static int_t get_index_count()
+	{
+		int_t val = 0;
+
+		detail::gl_get(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS, &val);
+
+		return val;
+	}
+
+	template <typename T>
+	static int_t get_index_usage()
+	{
+		return 1;
+	}
+};
 
 }
 
@@ -25,30 +40,8 @@ template <typename T>
 using transform_feedback_binding_attribute = detail::buffer_index_attribute<detail::transform_feedback_index, T>;
 
 // TODO: name?
-class transform_feedback_binding_enumerator
-{
-public:
-	// TODO: really need context?
-	transform_feedback_binding_enumerator(context& _context)
-		: m_current_index()
-	{
-		// TODO: correct parameter?
-		detail::gl_get(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS, &m_max_tf_buffers);
-	}
-
-	template <typename T>
-	transform_feedback_binding<T> get()
-	{
-		if (m_current_index == m_max_tf_buffers)
-			throw exception(0);
-
-		return {m_current_index++};
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_tf_buffers;
-};
+typedef detail::typed_index_enumerator<detail::transform_feedback_index, transform_feedback_binding>
+	transform_feedback_binding_enumerator;
 
 namespace detail
 {

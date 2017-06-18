@@ -39,7 +39,41 @@ namespace detail
 {
 
 struct texture_unit_index
-{};
+{
+	static int_t get_index_count()
+	{
+		int_t val = 0;
+
+		// TODO: This is the max per program..
+		detail::gl_get(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &val);
+
+		return val;
+	}
+
+	template <typename T>
+	static int_t get_index_usage()
+	{
+		return 1;
+	}
+};
+
+struct image_unit_index
+{
+	static int_t get_index_count()
+	{
+		int_t val = 0;
+
+		detail::gl_get(GL_MAX_IMAGE_UNITS, &val);
+
+		return val;
+	}
+
+	template <typename T>
+	static int_t get_index_usage()
+	{
+		return 1;
+	}
+};
 
 }
 
@@ -47,72 +81,15 @@ struct texture_unit_index
 template <typename T>
 using texture_unit = detail::buffer_index<detail::texture_unit_index, T>;
 
-class texture_unit_enumerator
-{
-public:
-	// TODO: really need context?
-	texture_unit_enumerator(context& _context)
-		: m_current_index()
-		, m_max_comb_tunits()
-	{
-		// TODO: correct parameter?
-		detail::gl_get(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_max_comb_tunits);
-	}
-
-	template <typename T>
-	texture_unit<T> get()
-	{
-		// TODO: static_assert that T is basic_sampler
-		
-		if (m_current_index == m_max_comb_tunits)
-			throw exception(0);
-
-		return texture_unit<T>(m_current_index++);
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_comb_tunits;
-};
-
-namespace detail
-{
-
-struct image_unit_index
-{};
-
-}
+typedef detail::typed_index_enumerator<detail::texture_unit_index, texture_unit>
+	texture_unit_enumerator;
 
 // TODO: buffer_index doesn't make sense..
 template <typename T>
 using image_unit = detail::buffer_index<detail::image_unit_index, T>;
 
-class image_unit_enumerator
-{
-public:
-	// TODO: really need context?
-	image_unit_enumerator(context& _context)
-		: m_current_index()
-		, m_max_index()
-	{
-		detail::gl_get(GL_MAX_IMAGE_UNITS, &m_max_index);
-	}
-
-	template <typename T>
-	image_unit<T> get()
-	{
-		// TODO: static_assert that T is basic_image
-		
-		if (m_current_index == m_max_index)
-			throw exception(0);
-
-		return image_unit<T>(m_current_index++);
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_index;
-};
+typedef detail::typed_index_enumerator<detail::image_unit_index, image_unit>
+	image_unit_enumerator;
 
 namespace texture_parameter
 {

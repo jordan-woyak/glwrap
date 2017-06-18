@@ -9,17 +9,37 @@
 namespace GLWRAP_NAMESPACE
 {
 
-class program;
+namespace detail
+{
 
-class attribute_location_enumerator;
+struct attribute_index
+{
+	static int_t get_index_count()
+	{
+		int_t val = 0;
+
+		detail::gl_get(GL_MAX_VERTEX_ATTRIBS, &val);
+
+		return val;
+	}
+
+	template <typename T>
+	static int_t get_index_usage()
+	{
+		// TODO: put this elsewhere?
+		static_assert(detail::is_valid_attrib_type<T>::value, "Invalid Attrib Type");
+
+		return detail::variable_traits<T>::attrib_index_count;
+
+		// TODO: keep track of the attrib_resource_count also.
+	}
+};
+
+}
 
 template <typename T>
 class attribute_location
 {
-	friend class attribute_location_enumerator;
-
-	static_assert(detail::is_valid_attrib_type<T>::value, "Invalid Attrib Type");
-
 public:
 	int_t get_index() const
 	{
@@ -36,39 +56,8 @@ public:
 };
 
 // TODO: name?
-class attribute_location_enumerator
-{
-public:
-	template <typename T>
-	using location_type = attribute_location<T>;
-
-	// TODO: really need context?
-	attribute_location_enumerator(context& _context)
-		: m_current_index()
-		, m_max_vertex_attribs()
-	{
-		// TODO: correct parameter?
-		detail::gl_get(GL_MAX_VERTEX_ATTRIBS, &m_max_vertex_attribs);
-	}
-
-	template <typename T>
-	location_type<T> get()
-	{
-		location_type<T> ind(m_current_index);
-		m_current_index += detail::variable_traits<T>::attrib_index_count;
-
-		// TODO: keep track of the attrib_resource_count also.
-
-		if (m_current_index > m_max_vertex_attribs)
-			throw exception(0);
-
-		return ind;
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_vertex_attribs;
-};
+typedef detail::typed_index_enumerator<detail::attribute_index, attribute_location>
+	attribute_location_enumerator;
 
 template <typename T>
 class attribute_layout

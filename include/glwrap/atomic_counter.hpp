@@ -7,7 +7,26 @@ namespace detail
 {
 
 struct atomic_counter_index
-{};
+{
+	static int_t get_index_count()
+	{
+		int_t val = 0;
+
+		if (is_extension_present(GL_ARB_shader_storage_buffer_object))
+		{
+			// TODO: this is the max per program
+			detail::gl_get(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, &val);
+		}
+
+		return val;
+	}
+
+	template <typename T>
+	static int_t get_index_usage()
+	{
+		return 1;
+	}
+};
 
 }
 
@@ -20,38 +39,8 @@ template <typename T>
 using atomic_counter_binding_attribute = detail::buffer_index_attribute<detail::atomic_counter_index, T>;
 
 // TODO: name?
-class atomic_counter_binding_enumerator
-{
-public:
-	template <typename T>
-	using location_type = atomic_counter_binding<T>;
-	
-	// TODO: really need context?
-	atomic_counter_binding_enumerator(context& _context)
-		: m_current_index()
-		, m_max_bindings()
-	{
-		// TODO: correct parameter?
-		detail::gl_get(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, &m_max_bindings);
-	}
-
-	template <typename T>
-	location_type<T> get()
-	{
-		if (m_current_index >= m_max_bindings)
-			throw exception(0);
-			
-		location_type<T> ind(m_current_index);
-
-		++m_current_index;
-
-		return ind;
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_bindings;
-};
+typedef detail::typed_index_enumerator<detail::atomic_counter_index, atomic_counter_binding>
+	atomic_counter_binding_enumerator;
 
 template <typename T>
 class atomic_counter_layout

@@ -16,7 +16,23 @@ namespace detail
 {
 
 struct vertex_buffer_index
-{};
+{
+	static int_t get_index_count()
+	{
+		int_t val = 0;
+
+		// TODO: correct parameter?
+		detail::gl_get(GL_MAX_VERTEX_ATTRIB_BINDINGS, &val);
+
+		return val;
+	}
+
+	template <typename T>
+	static int_t get_index_usage()
+	{
+		return 1;
+	}
+};
 
 }
 
@@ -29,30 +45,8 @@ template <typename T>
 using vertex_buffer_binding_attribute = detail::buffer_index_attribute<detail::vertex_buffer_index, T>;
 
 // TODO: name?
-class vertex_buffer_binding_enumerator
-{
-public:
-	// TODO: really need context?
-	vertex_buffer_binding_enumerator(context& _context)
-		: m_current_index()
-	{
-		// TODO: correct parameter?
-		detail::gl_get(GL_MAX_VERTEX_ATTRIB_BINDINGS, &m_max_vertex_attrib_bindings);
-	}
-
-	template <typename T>
-	vertex_buffer_binding<T> get()
-	{
-		if (m_current_index == m_max_vertex_attrib_bindings)
-			throw exception(0);
-
-		return vertex_buffer_binding<T>(m_current_index++);
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_vertex_attrib_bindings;
-};
+typedef detail::typed_index_enumerator<detail::vertex_buffer_index, vertex_buffer_binding>
+	vertex_buffer_binding_enumerator;
 
 namespace detail
 {
