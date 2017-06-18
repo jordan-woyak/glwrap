@@ -99,7 +99,7 @@ void main(void)
 
 	prog.link();
 
-	if (!prog.is_good())
+	if (!prog.is_valid())
 	{
 		std::cout << "program log:\n" << prog.get_log() << std::endl;
 		return 1;
@@ -152,11 +152,9 @@ void main(void)
 	auto color0 = col_attachments.get();
 
 	// Create a fbo
-	gl::framebuffer_builder fbuf_builder(glc);
-	fbuf_builder.bind_draw_buffer(fragdata, color0);
-	fbuf_builder.bind_read_buffer(color0);
-
-	gl::framebuffer fbuf = fbuf_builder.create_framebuffer(glc);
+	gl::framebuffer fbuf(glc);
+	fbuf.bind_draw_buffers(gl::draw_buffers_descriptor().bind(fragdata, color0));
+	fbuf.bind_read_buffer(color0);
 
 	// multisampled renderbuffer
 	gl::renderbuffer rendbuf(glc);
@@ -183,7 +181,6 @@ void main(void)
 	gl::float_t rotate = 0;
 
 	glc.use_program(prog);
-	glc.use_vertex_array(arr);
 	glc.use_read_framebuffer(fbuf);
 
 	gl::buffer<gl::draw_arrays_indirect_cmd> cmdbuf(glc);
@@ -220,7 +217,7 @@ void main(void)
 		//fbuf.clear_color_buffer(fragdata, {1, 1, 1, 1});
 
 		//glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
-		glc.draw_arrays_indirect(gl::primitive::triangle_fan, cmdbuf.begin());
+		glc.draw_arrays_indirect(arr, gl::primitive::triangle_fan, cmdbuf.begin());
 		//glc.draw_arrays_indirect(gl::primitive::triangle_fan, &draw_cmd);
 
 		glc.use_draw_framebuffer(nullptr);
