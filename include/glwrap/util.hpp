@@ -345,6 +345,35 @@ using buffer_index = typed_index<uint_t, B, T>;
 template <typename B, typename T>
 using buffer_index_attribute = typed_index_attribute<uint_t, B, T>;
 
+template <typename T, template <typename> class I>
+class typed_index_enumerator
+{
+public:
+	// TODO: really need context?
+	typed_index_enumerator(context& _context)
+		: m_current_index()
+		, m_index_count(T::get_index_count())
+	{}
+
+	template <typename V>
+	I<V> get()
+	{
+		const I<V> result(m_current_index);
+
+		m_current_index += T::template get_index_usage<V>();
+
+		if (m_current_index >= m_index_count)
+			throw std::exception();
+
+		return result;
+	}
+
+private:
+	// TODO: support more than int_t
+	int_t m_current_index;
+	int_t m_index_count;
+};
+
 }
 
 }
