@@ -48,6 +48,25 @@ enum class normalized_image_format : enum_t
 	rgb10u_a2u = GL_RGB10_A2,
 };
 
+// TODO: Do I like these names?
+enum class depth_format : enum_t
+{
+	u16 = GL_DEPTH_COMPONENT16,
+	u24 = GL_DEPTH_COMPONENT24,
+	f32 = GL_DEPTH_COMPONENT32F,
+};
+
+enum class depth_stencil_format : enum_t
+{
+	u24u8 = GL_DEPTH24_STENCIL8,
+	f32u8 = GL_DEPTH32F_STENCIL8,
+};
+
+enum class stencil_format : enum_t
+{
+	u8 =  GL_STENCIL_INDEX8,
+};
+
 enum class signed_image_format : enum_t
 {
 	GLWRAP_ENUM_DEF(i, 8, I)
