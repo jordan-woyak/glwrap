@@ -50,10 +50,10 @@ int main()
 	gl::vertex_shader_builder vshad(glc);
 
 	auto position_attrib = vshad.create_input(gl::variable<gl::vec2>("position", attribs));
-	
+
 	vshad.set_source(
 R"(
-void main(void)
+void main()
 {
 	gl_Position = vec4(position, 0, 1);
 })"
@@ -64,15 +64,8 @@ void main(void)
 	gl::uniform_location_enumerator uniforms(glc);
 
 	//auto cell_in_uni = fshad.create_uniform(gl::variable<gl::shader::sampler_2d>("cell_in", uniforms));
+	auto cell_image_uni = fshad.create_uniform(gl::variable<gl::shader::image_2d>("cell_image", uniforms, tex_format));
 
-	// TODO: Make not so messy!!
-	auto cell_image_layout = gl::uniform_layout<gl::shader::image_2d>(uniforms.get<gl::shader::image_2d>());
-	cell_image_layout.add_layout_part(gl::detail::format_qualifier_string(tex_format), "");
-	auto cell_image_desc = gl::variable_description<gl::shader::image_2d, gl::uniform_layout<gl::shader::image_2d>>("cell_image", cell_image_layout);
-	//cell_image_desc.m_memory_qualifiers.emplace_back("writeonly");
-	
-	auto cell_image_uni = fshad.create_uniform(cell_image_desc);
-	
 	auto color_dead_uni = fshad.create_uniform(gl::variable<gl::vec3>("color_dead", uniforms));
 	auto color_live_uni = fshad.create_uniform(gl::variable<gl::vec3>("color_live", uniforms));
 
@@ -80,7 +73,7 @@ void main(void)
 
 	auto cell_out = fshad.create_output(gl::variable<gl::vec4>("cell_out", fragdatas));
 	auto color_out = fshad.create_output(gl::variable<gl::vec4>("color_out", fragdatas));
-	
+
 	fshad.set_source(
 R"(
 
@@ -90,12 +83,12 @@ int is_cell_alive(in ivec2 pos)
 	return int(imageLoad(cell_image, pos).r > 0.5);
 }
 
-void main(void)
+void main()
 {
 	ivec2 this_pos = ivec2(gl_FragCoord);
 	bool old_life = 0 != is_cell_alive(this_pos);
 
-	int neighbors = 
+	int neighbors =
 		is_cell_alive(this_pos + ivec2(-1, -1)) +
 		is_cell_alive(this_pos + ivec2(0, -1)) +
 		is_cell_alive(this_pos + ivec2(+1, -1)) +
@@ -105,7 +98,7 @@ void main(void)
 		is_cell_alive(this_pos + ivec2(0, +1)) +
 		is_cell_alive(this_pos + ivec2(+1, +1));
 
-	bool new_life = 
+	bool new_life =
 		3 == neighbors || (old_life && 2 == neighbors);
 
 	cell_out = vec4(new_life, 1, 1, 1);
@@ -154,21 +147,15 @@ void main(void)
 	auto cell_att = colors.get();
 	auto color_att = colors.get();
 
-	gl::framebuffer_builder fbob(glc);
-
-	fbob.bind_draw_buffer(cell_out, cell_att);
-	fbob.bind_draw_buffer(color_out, color_att);
-
-	fbob.bind_read_buffer(color_att);
-
-	auto fbo = fbob.create_framebuffer(glc);
+	gl::framebuffer fbo(glc);
+	fbo.bind_draw_buffers(gl::draw_buffers_descriptor().bind(cell_out, cell_att).bind(color_out, color_att));
+	fbo.bind_read_buffer(color_att);
 
 	gl::renderbuffer rbuf(glc);
 	rbuf.storage(grid_size);
 	fbo.bind_attachment(color_att, rbuf);
 
 	glc.use_program(prog);
-	glc.use_vertex_array(arr);
 	glc.use_read_framebuffer(fbo);
 
 	// used to connect texture objects and sampler uniforms together via texture unit.
@@ -198,7 +185,7 @@ void main(void)
 		std::swap(tex_data_back, tex_data_front);
 
 		glc.use_draw_framebuffer(fbo);
-		glc.draw_arrays(gl::primitive::triangle_fan, 0, 4);
+		glc.draw_arrays(arr, gl::primitive::triangle_fan, 0, 4);
 
 		//glc.memory_barrier(gl::memory_barrier::shader_image_access);
 

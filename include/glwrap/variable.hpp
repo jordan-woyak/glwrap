@@ -45,6 +45,40 @@ private:
 	layout_type m_layout;
 };
 
+// TODO: complete and use this
+/*
+template <typename T>
+class typed_variable_layout
+{
+	// TODO: rename?
+	void add_layout_part(std::string _key, std::string _val)
+	{
+		m_layout_parts[std::move(_key)] = std::move(_val);
+	}
+
+	std::string get_string() const
+	{
+		for (auto& layout_part : m_layout_parts)
+		{
+			result += ", " + layout_part.first;
+			if (!layout_part.second.empty())
+				result += " = " + layout_part.second;
+		}
+
+		return result;
+	}
+
+private:
+	std::map<std::string, std::string> m_layout_parts;
+};
+
+template <typename T>
+void add_layout_part(typed_variable_layout<T>& _layout, T::location_type)
+{
+
+}
+*/
+
 // Vertex Attribs
 template <typename T>
 auto variable(std::string _name, attribute_location_enumerator& _enum) -> variable_description<T, attribute_layout<T>>
