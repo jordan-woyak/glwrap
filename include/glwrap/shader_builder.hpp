@@ -126,7 +126,7 @@ public:
 
 		result += detail::get_type_name<var_type>() + " " +  _desc.get_name()
 			+ detail::glsl_var_suffix<var_type>::suffix()
-			+ ";\n};\n";
+			+ ";\n};";
 
 		m_header_lines.emplace_back(result);
 

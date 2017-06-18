@@ -65,7 +65,11 @@ typedef basic_sampler_cube_map<uint_t> usampler_cube;
 typedef basic_sampler_2d_multisample<uint_t> usampler_2d_multisample;
 
 template <texture_type T, typename D>
-struct basic_image {};
+struct basic_image
+{
+	static const texture_type target = T;
+	typedef D data_type;
+};
 
 template <typename T>
 using basic_image_2d = basic_image<texture_type::texture_2d, T>;

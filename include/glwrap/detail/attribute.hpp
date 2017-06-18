@@ -101,6 +101,7 @@ public:
 
 	static const int component_count = variable_traits<value_type>::component_count * length;
 	static const int attrib_index_count = variable_traits<value_type>::attrib_index_count * length;
+	// TODO: matrices take up no more than "4 * the smallest count of rows/columns"
 	static const int attrib_resource_count =
 		variable_traits<value_type>::attrib_resource_count * length;
 	

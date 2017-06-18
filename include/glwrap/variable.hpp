@@ -67,6 +67,19 @@ auto variable(std::string _name, uniform_location_enumerator& _enum)
 	return {std::move(_name), _enum.template get<T>()};
 }
 
+// Image uniform. HACKY!!!
+template <typename T, typename F>
+auto variable(std::string _name, uniform_location_enumerator& _enum, const F& _img_fmt)
+	-> variable_description<T, uniform_layout<T>>
+{
+	static_assert(std::is_same<typename image_format<typename T::data_type>::enum_type, F>::value, "Wrong image format for specified image type.");
+
+	auto img_layout = gl::uniform_layout<T>(_enum.get<T>());
+	img_layout.add_layout_part(gl::detail::format_qualifier_string(_img_fmt), "");
+
+	return {std::move(_name), img_layout};
+}
+
 // Atomic Counters
 template <typename T>
 auto variable(std::string _name, const atomic_counter_binding_attribute<T>& _attrib)

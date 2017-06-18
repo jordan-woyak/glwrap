@@ -16,9 +16,6 @@ namespace GLWRAP_NAMESPACE
 
 class context;
 
-// TODO: create a single_stage program template
-// so program_pipeline::use_stages can assume the stage bits
-
 namespace detail
 {
 
@@ -69,7 +66,7 @@ public:
 	}
 
 	// TODO: rename
-	bool is_good() const
+	bool is_linked() const
 	{
 		GLint status;
 		GLWRAP_GL_CALL(glGetProgramiv)(native_handle(), GL_LINK_STATUS, &status);
@@ -80,22 +77,11 @@ public:
 	bool is_valid() const
 	{
 		GLWRAP_GL_CALL(glValidateProgram)(native_handle());
-		
+
 		GLint status;
 		GLWRAP_GL_CALL(glGetProgramiv)(native_handle(), GL_VALIDATE_STATUS, &status);
 		return (GL_TRUE == status);
 	}
-/*
-	template <typename T>
-	uniform_block_location<T> create_uniform_block(const std::string& _name, uniform_block_definition<T> const& _block_def)
-	{
-		m_uniform_blocks.push_back(detail::uniform_block_variable(_name));
-
-		// TODO: silly
-		m_uniform_blocks.back().m_members = _block_def.m_members;
-		return uniform_block<T>(std::prev(m_uniform_blocks.end()));
-	}
-*/
 
 	// This overload takes a value of the proper type.
 	// It allows for nice syntax: set_uniform(loc, {0, 0, 0});
@@ -114,35 +100,27 @@ public:
 		detail::set_program_uniform<T>(native_handle(), _uniform.get_index(), _value);
 	}
 
-/*
+	// TODO: set arrays of locations and bindings in one go?
+	// TODO: overload this function to work with texture and image uniforms?
+	// and disallow set_uniform for those types?
 	template <typename T>
-	void set_uniform_block(uniform_block_location<T>& _block, uniform_block_binding<T> const& _binding)
+	void set_binding(uniform_block_location<T>& _loc, uniform_block_binding<T> const& _binding)
 	{
-		GLWRAP_GL_CALL(glUniformBlockBinding)(native_handle(), _block.get_index(), _binding.get_index());
-	}
-*/
-	// TODO: just ban dynamic shader variable bindings in general?
-/*
-	template <typename T>
-	void bind_attribute(attribute<T>& _attrib, attribute_location<T> const& _location)
-	{
-		// Subsequent indices after begin_index are automatically handled by OpenGL
-		GLWRAP_GL_CALL(glBindAttribLocation)(native_handle(), _location.get_begin_index(), _attrib.get_name().c_str());
+		GLWRAP_GL_CALL(glUniformBlockBinding)(native_handle(), _loc.get_index(), _binding.get_index());
 	}
 
 	template <typename T>
-	void bind_fragdata(fragdata<T>& _fragdata, color_number const& _number)
+	void set_binding(shader_storage_location<T>& _loc, shader_storage_binding<T> const& _binding)
 	{
-		GLWRAP_GL_CALL(glBindFragDataLocation)(native_handle(), _number.get_index(), _fragdata.get_name().c_str());
+		GLWRAP_GL_CALL(glShaderStorageBlockBinding)(native_handle(), _loc.get_index(), _binding.get_index());
 	}
-*/
 
 	// TODO: good name?
 	void use_transform_feedback_description(const transform_feedback_descriptor& _desc)
 	{
 		// TODO: detect the ability to use GL_SEPARATE_ATTRIBS?
 		// Is it worth it? any more performant?
-		
+
 		auto const varyings = _desc.build_varyings_array();
 		GLWRAP_GL_CALL(glTransformFeedbackVaryings)(native_handle(), varyings.size(), varyings.data(), GL_INTERLEAVED_ATTRIBS);
 	}
@@ -199,7 +177,12 @@ public:
 	{
 		GLWRAP_GL_CALL(glUseProgramStages)(native_handle(), static_cast<enum_t>(_stages), _prog.native_handle());
 	}
-
+/*
+	void use_all_stages(const program& _prog)
+	{
+		use_stages(gl::shader_stage::all, _prog);
+	}
+*/
 	std::string get_log() const
 	{
 		return detail::get_shader_string(native_handle(),
@@ -211,7 +194,7 @@ public:
 	bool is_valid() const
 	{
 		GLWRAP_GL_CALL(glValidateProgramPipeline)(native_handle());
-		
+
 		GLint status;
 		GLWRAP_GL_CALL(glGetProgramPipelineiv)(native_handle(), GL_VALIDATE_STATUS, &status);
 		return (GL_TRUE == status);

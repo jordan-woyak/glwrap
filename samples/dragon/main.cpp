@@ -34,7 +34,6 @@ int main()
 	std::vector<FooVertex> vertices;
 	std::vector<gl::uint_t> indices;
 
-	//ply::load("xyzrgb_dragon.ply", vert_fmt, vertices, indices);
 	ply::load("dragon.ply", vert_fmt, vertices, indices);
 
 	std::cout << "loaded vertices: " << vertices.size() << std::endl;
@@ -45,6 +44,7 @@ int main()
 	gl::fragdata_location_enumerator fragdatas(glc);
 	gl::shader_storage_location_enumerator storages(glc);
 	gl::image_unit_enumerator image_units(glc);
+	gl::shader_storage_binding_enumerator storage_bindings(glc);
 
 	auto const layer_counts_image_unit = image_units.get<gl::shader::uimage_2d>();
 	auto const base_index_image_unit = image_units.get<gl::shader::uimage_2d>();
@@ -82,11 +82,8 @@ void main()
 
 	auto const counter_format = gl::unsigned_image_format::r32ui;
 
-	//auto layers_uni = count_layers_fshad.create_uniform(gl::variable<gl::shader::uimage_2d>("layers", uniforms));
-	// TODO: Make not so messy!!
-	auto counter_image_layout = gl::uniform_layout<gl::shader::uimage_2d>(uniforms.get<gl::shader::uimage_2d>());
-	counter_image_layout.add_layout_part(gl::detail::format_qualifier_string(counter_format), "");
-	auto layer_counts_image_desc = gl::variable_description<gl::shader::uimage_2d, gl::uniform_layout<gl::shader::uimage_2d>>("layer_counts", counter_image_layout);
+	auto layer_counts_image_desc = gl::variable<gl::shader::uimage_2d>("layer_counts", uniforms, counter_format);
+	auto base_index_image_desc = gl::variable<gl::shader::uimage_2d>("base_indices", uniforms, counter_format);
 
 	auto layer_counts_image_uni = count_layers_fshad.create_uniform(layer_counts_image_desc);
 
@@ -108,11 +105,6 @@ void main()
 	gl::compute_shader_builder cshad(glc);
 
 	cshad.create_uniform(layer_counts_image_desc);
-
-	// TODO: make not so messy..
-	auto base_index_image_layout = gl::uniform_layout<gl::shader::uimage_2d>(uniforms.get<gl::shader::uimage_2d>());
-	base_index_image_layout.add_layout_part(gl::detail::format_qualifier_string(counter_format), "");
-	auto base_index_image_desc = gl::variable_description<gl::shader::uimage_2d, gl::uniform_layout<gl::shader::uimage_2d>>("base_indices", base_index_image_layout);
 	auto base_index_image_uni = cshad.create_uniform(base_index_image_desc);
 
 	cshad.set_source(
@@ -206,14 +198,18 @@ void main()
 	fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
 	fshader.set_uniform(base_index_image_uni, base_index_image_unit);
 
+	auto const frag_buf_binding = storage_bindings.get<gl::vec4[]>();
+
+	fshader.set_binding(frag_buf_loc, frag_buf_binding);
+
 	gl::fragment_shader_builder sort_fshad(glc);
 
 	sort_fshad.create_uniform(base_index_image_desc);
 	sort_fshad.create_uniform(layer_counts_image_desc);
+
 	sort_fshad.create_storage_array(fragment_buf_desc);
 
 	auto fragdata = sort_fshad.create_output(gl::variable<gl::vec4>("fragdata", fragdatas));
-	(void)fragdata;
 
 	sort_fshad.set_source(
 R"(
@@ -271,6 +267,8 @@ void main()
 	sort_fshader.set_uniform(layer_counts_image_uni, layer_counts_image_unit);
 	sort_fshader.set_uniform(base_index_image_uni, base_index_image_unit);
 
+	sort_fshader.set_binding(frag_buf_loc, frag_buf_binding);
+
 	gl::vertex_shader_builder basic_vshad(glc);
 
 	auto basic_vert_pos_attrib = basic_vshad.create_input(gl::variable<gl::vec2>("pos", attribs));
@@ -286,12 +284,6 @@ void main()
 	auto basic_vshader = basic_vshad.create_shader_program(glc);
 
 	gl::utexture_2d layer_counts_tex(glc), base_indices_tex(glc);
-
-	//std::cout << "vshad log:\n" << vshad.get_log() << std::endl;
-	//std::cout << "fshad log:\n" << fshad.get_log() << std::endl;
-
-	//std::cout << "program log:\n" << prog.get_log() << std::endl;
-	//std::cout << "program good: " << prog.is_good() << std::endl;
 
 	// load vertex data
 	auto verbuf = gl::make_buffer(glc, vertices, gl::buffer_access::none);
@@ -348,6 +340,14 @@ void main()
 	glc.blend_equation(gl::blend_mode::add);
 	glc.blend_func(gl::blend_factor::src_alpha, gl::blend_factor::inverse_src_alpha);
 
+	{
+	gl::framebuffer_builder fbb(glc);
+	fbb.bind_draw_buffer(fragdata, gl::default_color_buffer::back_left);
+
+	gl::framebuffer def_fb(glc, nullptr);
+	fbb.modify_framebuffer(def_fb);
+	}
+
 	// point the model down towards the camera
 	auto const pre_rotate = gl::rotate(0.2f, 1.f, 0.f, 0.f);
 	// shift the model out from it's rotation point a bit and scale up
@@ -362,6 +362,7 @@ void main()
 
 	gl::program_pipeline pline(glc);
 	glc.use_program_pipeline(pline);
+	//pline.use_stages(gl::shader_stage::compute, base_index_cshader);
 
 	auto set_up_textures = [&]
 	{
@@ -438,7 +439,7 @@ void main()
 			gl::buffer<gl::vec4, gl::detail::shader_storage_buffer_alignment> dnf(glc);
 			dnf.storage(samples_passed, gl::buffer_access::none);
 
-			glc.bind_buffer(frag_buf_loc, dnf.begin(), samples_passed);
+			glc.bind_buffer(frag_buf_binding, dnf.begin(), samples_passed);
 
 			// Render to fragment buffer
 			glc.memory_barrier(gl::memory_barrier::shader_image_access);

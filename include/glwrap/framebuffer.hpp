@@ -70,7 +70,14 @@ private:
 	int_t m_max_locations;
 };
 
-// TODO: framebuffer parameters: default size and such
+enum class default_color_buffer : enum_t
+{
+	none = GL_NONE,
+	front_left = GL_FRONT_LEFT,
+	front_right = GL_FRONT_RIGHT,
+	back_left = GL_BACK_LEFT,
+	back_right = GL_BACK_RIGHT,
+};
 
 namespace detail
 {
@@ -115,6 +122,11 @@ class framebuffer : public detail::globject<detail::framebuffer_obj>
 {
 public:
 	explicit framebuffer(context&)
+	{}
+
+	// TODO: do I like nullptr..?
+	explicit framebuffer(context&, std::nullptr_t)
+		: detail::globject<detail::framebuffer_obj>(native_handle_type(0), adopt_handle)
 	{}
 
 	// TODO: glInvalidateFramebuffer
@@ -359,22 +371,30 @@ private:
 };
 
 // TODO: this should take a color attachment enumerator and bind attachments to fragdatas
+// TODO: rename to framebuffer_buffer_binding_builder or something?
 class framebuffer_builder
 {
 public:
 	framebuffer_builder(context&)
 	{}
 
-	// TODO: allow constants: GL_BACK and such
 	template <typename T>
 	void bind_draw_buffer(const fragdata_location<T>& _loc, color_attachment const& _attachment)
+	{
+		// TODO: hacky
+		bind_draw_buffer(_loc, static_cast<default_color_buffer>(_loc.get_index()));
+	}
+
+	template <typename T>
+	void bind_draw_buffer(const fragdata_location<T>& _loc, default_color_buffer const& _color_buffer)
 	{
 		uint_t const index = _loc.get_index();
 
 		if (index >= m_draw_buffers.size())
 			m_draw_buffers.resize(index + 1, color_attachment(GL_NONE));
 
-		m_draw_buffers[index] = _attachment;
+		// TODO: hacky
+		m_draw_buffers[index] = color_attachment(static_cast<uint_t>(_color_buffer));
 	}
 
 	// TODO: needed?
@@ -406,8 +426,14 @@ public:
 
 		result.bind_draw_buffers(m_draw_buffers);
 		result.bind_read_buffer(m_read_buffer);
-		
+
 		return result;
+	}
+
+	void modify_framebuffer(framebuffer& _fb) const
+	{
+		_fb.bind_draw_buffers(m_draw_buffers);
+		_fb.bind_read_buffer(m_read_buffer);
 	}
 
 private:
