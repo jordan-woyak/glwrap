@@ -14,7 +14,7 @@ class program;
 namespace detail
 {
 
-struct uniform_block_index
+struct uniform_block_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -36,7 +36,7 @@ struct uniform_block_index
 	}
 };
 
-struct uniform_block_binding
+struct uniform_block_binding_traits
 {
 	static int_t get_index_count()
 	{
@@ -60,15 +60,15 @@ struct uniform_block_binding
 }
 
 template <typename T>
-using uniform_block_location = detail::buffer_index<detail::uniform_block_index, T>;
+using uniform_block_location = detail::typed_index<int_t, detail::uniform_block_index_traits, T>;
 
-typedef detail::typed_index_enumerator<detail::uniform_block_index, uniform_block_location>
+typedef detail::typed_index_enumerator<detail::uniform_block_index_traits, uniform_block_location>
 	uniform_block_location_enumerator;
 
 template <typename T>
-using uniform_block_binding = detail::buffer_index<detail::uniform_block_binding, T>;
+using uniform_block_binding = detail::buffer_index<detail::uniform_block_binding_traits, T>;
 
-typedef detail::typed_index_enumerator<detail::uniform_block_binding, uniform_block_binding>
+typedef detail::typed_index_enumerator<detail::uniform_block_binding_traits, uniform_block_binding>
 	uniform_block_binding_enumerator;
 
 // TODO: can shader storage and uniform block share the layout type?

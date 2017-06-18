@@ -6,7 +6,7 @@ namespace GLWRAP_NAMESPACE
 namespace detail
 {
 
-struct atomic_counter_index
+struct atomic_counter_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -30,16 +30,10 @@ struct atomic_counter_index
 
 }
 
-// TODO: name
 template <typename T>
-using atomic_counter_binding = detail::buffer_index_attribute<detail::atomic_counter_index, T>;
+using atomic_counter_binding = detail::buffer_index_attribute<detail::atomic_counter_index_traits, T>;
 
-// TODO: ugly, kill one of these
-template <typename T>
-using atomic_counter_binding_attribute = detail::buffer_index_attribute<detail::atomic_counter_index, T>;
-
-// TODO: name?
-typedef detail::typed_index_enumerator<detail::atomic_counter_index, atomic_counter_binding>
+typedef detail::typed_index_enumerator<detail::atomic_counter_index_traits, atomic_counter_binding>
 	atomic_counter_binding_enumerator;
 
 template <typename T>
@@ -48,7 +42,7 @@ class atomic_counter_layout
 public:
 	typedef void location_type;
 
-	atomic_counter_layout(const atomic_counter_binding_attribute<T>& _attrib)
+	atomic_counter_layout(const atomic_counter_binding<T>& _attrib)
 		: m_attrib(_attrib)
 	{}
 
@@ -63,7 +57,7 @@ public:
 	}
 
 private:
-	atomic_counter_binding_attribute<T> m_attrib;
+	atomic_counter_binding<T> m_attrib;
 };
 
 }

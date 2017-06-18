@@ -9,7 +9,7 @@ namespace detail
 {
 
 // TODO: rename everything shader_storage_block_*
-struct shader_storage_index
+struct shader_storage_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -31,7 +31,7 @@ struct shader_storage_index
 	}
 };
 
-struct shader_storage_binding
+struct shader_storage_binding_traits
 {
 	static int_t get_index_count()
 	{
@@ -55,15 +55,15 @@ struct shader_storage_binding
 }
 
 template <typename T>
-using shader_storage_location = detail::buffer_index<detail::shader_storage_index, T>;
+using shader_storage_location = detail::typed_index<int_t, detail::shader_storage_index_traits, T>;
 
-typedef detail::typed_index_enumerator<detail::shader_storage_index, shader_storage_location>
+typedef detail::typed_index_enumerator<detail::shader_storage_index_traits, shader_storage_location>
 	shader_storage_location_enumerator;
 
 template <typename T>
-using shader_storage_binding = detail::buffer_index<detail::shader_storage_binding, T>;
+using shader_storage_binding = detail::buffer_index<detail::shader_storage_binding_traits, T>;
 
-typedef detail::typed_index_enumerator<detail::shader_storage_binding, shader_storage_binding>
+typedef detail::typed_index_enumerator<detail::shader_storage_binding_traits, shader_storage_binding>
 	shader_storage_binding_enumerator;
 
 // TODO: detail namespace

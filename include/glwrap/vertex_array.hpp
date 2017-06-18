@@ -15,7 +15,7 @@ class context;
 namespace detail
 {
 
-struct vertex_buffer_index
+struct vertex_buffer_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -36,16 +36,10 @@ struct vertex_buffer_index
 
 }
 
-// TODO: name? just vertex_binding?
 template <typename T>
-using vertex_buffer_binding = detail::buffer_index_attribute<detail::vertex_buffer_index, T>;
+using vertex_buffer_binding = detail::buffer_index_attribute<detail::vertex_buffer_index_traits, T>;
 
-// TODO: ugly, kill one of these
-template <typename T>
-using vertex_buffer_binding_attribute = detail::buffer_index_attribute<detail::vertex_buffer_index, T>;
-
-// TODO: name?
-typedef detail::typed_index_enumerator<detail::vertex_buffer_index, vertex_buffer_binding>
+typedef detail::typed_index_enumerator<detail::vertex_buffer_index_traits, vertex_buffer_binding>
 	vertex_buffer_binding_enumerator;
 
 namespace detail
@@ -93,7 +87,7 @@ public:
 
 		// TODO: make not needed
 		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
-		
+
 		detail::gl_vertex_attrib_pointer<T, T, false>(_attrib.get_index(), _iter.get_stride(), _iter.get_offset());
 	}
 
@@ -102,15 +96,14 @@ public:
 	void set_attrib_divisor(const attribute_location<T>& _attrib, uint_t _divisor)
 	{
 		detail::scoped_value<detail::parameter::vertex_array> binding(native_handle());
-	
+
 		GLWRAP_GL_CALL(glVertexAttribDivisor)(_attrib.get_index(), _divisor);
 	}
 */
 
 	// TODO: separate Bind and Format / rename this
-	// TODO: templates are getting ugly
 	template <typename ShaderType, typename InputType>
-	void set_attribute_format(const attribute_location<ShaderType>& _attrib, const vertex_buffer_binding_attribute<InputType>& _binding)
+	void set_attribute_format(const attribute_location<ShaderType>& _attrib, const vertex_buffer_binding<InputType>& _binding)
 	{
 		typedef detail::variable_traits<ShaderType> s_traits;
 		typedef detail::variable_traits<InputType> i_traits;

@@ -9,59 +9,42 @@
 namespace GLWRAP_NAMESPACE
 {
 
+namespace detail
+{
+
 // TODO: rename this to drawbuffer ?
 // TODO: does it make sense for this to have a type?
 // color_number ?
 // "fragment_color"
 // buffer index
+struct fragdata_location_traits
+{
+	// TODO: actually use this typedef in typed_index
+	typedef int_t index_type;
+
+	static index_type get_index_count()
+	{
+		int_t val = 0;
+
+		detail::gl_get(GL_MAX_DRAW_BUFFERS, &val);
+
+		return val;
+	}
+
+	template <typename T>
+	static index_type get_index_usage()
+	{
+		return 1;
+	}
+};
+
+}
+
 template <typename T>
-class fragdata_location
-{
-public:
-	fragdata_location(int_t _index)
-		: m_index(_index)
-	{}
+using fragdata_location = detail::typed_index<int_t, detail::fragdata_location_traits, T>;
 
-	int_t get_index() const
-	{
-		return m_index;
-	}
-
-	int_t m_index;
-};
-
-// TODO: rename this
-class fragdata_location_enumerator
-{
-public:
-	template <typename T>
-	using location_type = fragdata_location<T>;
-	
-	// TODO: really need context?
-	fragdata_location_enumerator(context& _context)
-		: m_current_index()
-		, m_max_locations()
-	{
-		detail::gl_get(GL_MAX_DRAW_BUFFERS, &m_max_locations);
-	}
-
-	template <typename T>
-	fragdata_location<T> get()
-	{
-		if (m_current_index >= m_max_locations)
-			throw exception(0);
-			
-		fragdata_location<T> ind(m_current_index);
-
-		m_current_index += 1;
-
-		return ind;
-	}
-
-private:
-	int_t m_current_index;
-	int_t m_max_locations;
-};
+typedef detail::typed_index_enumerator<detail::fragdata_location_traits, fragdata_location>
+	fragdata_location_enumerator;
 
 class program;
 

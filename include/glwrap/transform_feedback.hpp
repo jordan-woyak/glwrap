@@ -11,7 +11,7 @@ namespace GLWRAP_NAMESPACE
 namespace detail
 {
 
-struct transform_feedback_index
+struct transform_feedback_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -31,16 +31,10 @@ struct transform_feedback_index
 
 }
 
-// TODO: name? transform_feedback_buffer_binding ?
 template <typename T>
-using transform_feedback_binding = detail::buffer_index_attribute<detail::transform_feedback_index, T>;
+using transform_feedback_binding = detail::buffer_index_attribute<detail::transform_feedback_index_traits, T>;
 
-// TODO: ugly, kill one of these
-template <typename T>
-using transform_feedback_binding_attribute = detail::buffer_index_attribute<detail::transform_feedback_index, T>;
-
-// TODO: name?
-typedef detail::typed_index_enumerator<detail::transform_feedback_index, transform_feedback_binding>
+typedef detail::typed_index_enumerator<detail::transform_feedback_index_traits, transform_feedback_binding>
 	transform_feedback_binding_enumerator;
 
 namespace detail
@@ -101,10 +95,10 @@ public:
 
 	// TODO: fix this int-hax
 	template <typename T>
-	void bind_vertex_attribute(const variable_description<T, int>& _varying, const transform_feedback_binding_attribute<T>& _attr)
+	void bind_vertex_attribute(const variable_description<T, int>& _varying, const transform_feedback_binding<T>& _attr)
 	{
 		// TODO: assert offsets are aligned
-		
+
 		m_bindings[_attr.get_index()][_attr.get_offset()] = _varying.get_name();
 	}
 

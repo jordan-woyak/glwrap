@@ -306,7 +306,7 @@ class typed_index_attribute
 {
 public:
 	typedef I index_type;
-	typedef B binding_type;
+	typedef B tag_type;
 	typedef T value_type;
 
 	typed_index_attribute(index_type _index, uint_t _offset = {})
@@ -334,7 +334,7 @@ typed_index_attribute<I, B, M> operator|(typed_index_attribute<I, B, T> const& _
 {
 	// TODO: only do this for types that need aligning:
 	//static_assert((detail::get_member_offset(_member) % sizeof(M)) == 0, "Member is not aligned.");
-	
+
 	return typed_index_attribute<I, B, M>(_attr.get_index(), _attr.get_offset() + detail::get_member_offset(_member));
 }
 

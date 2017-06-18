@@ -8,7 +8,7 @@ namespace GLWRAP_NAMESPACE
 namespace detail
 {
 
-struct uniform_index
+struct uniform_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -29,10 +29,10 @@ struct uniform_index
 }
 
 template <typename T>
-using uniform_location = detail::buffer_index<detail::uniform_index, T>;
+using uniform_location = detail::typed_index<int_t, detail::uniform_index_traits, T>;
 
 // TODO: name?
-typedef detail::typed_index_enumerator<detail::uniform_index, uniform_location>
+typedef detail::typed_index_enumerator<detail::uniform_index_traits, uniform_location>
 	uniform_location_enumerator;
 
 template <typename T>

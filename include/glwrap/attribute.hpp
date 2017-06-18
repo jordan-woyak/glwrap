@@ -12,7 +12,7 @@ namespace GLWRAP_NAMESPACE
 namespace detail
 {
 
-struct attribute_index
+struct attribute_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -38,25 +38,10 @@ struct attribute_index
 }
 
 template <typename T>
-class attribute_location
-{
-public:
-	int_t get_index() const
-	{
-		return m_index;
-	}
-
-// TODO: make more explicit perhaps..
-//private:
-	attribute_location(int_t _index)
-		: m_index(_index)
-	{}
-
-	int_t m_index;
-};
+using attribute_location = detail::typed_index_attribute<int_t, detail::attribute_index_traits, T>;
 
 // TODO: name?
-typedef detail::typed_index_enumerator<detail::attribute_index, attribute_location>
+typedef detail::typed_index_enumerator<detail::attribute_index_traits, attribute_location>
 	attribute_location_enumerator;
 
 template <typename T>

@@ -38,7 +38,7 @@ class context;
 namespace detail
 {
 
-struct texture_unit_index
+struct texture_unit_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -57,7 +57,7 @@ struct texture_unit_index
 	}
 };
 
-struct image_unit_index
+struct image_unit_index_traits
 {
 	static int_t get_index_count()
 	{
@@ -77,18 +77,16 @@ struct image_unit_index
 
 }
 
-// TODO: buffer_index doesn't make sense..
 template <typename T>
-using texture_unit = detail::buffer_index<detail::texture_unit_index, T>;
+using texture_unit = detail::typed_index<int_t, detail::texture_unit_index_traits, T>;
 
-typedef detail::typed_index_enumerator<detail::texture_unit_index, texture_unit>
+typedef detail::typed_index_enumerator<detail::texture_unit_index_traits, texture_unit>
 	texture_unit_enumerator;
 
-// TODO: buffer_index doesn't make sense..
 template <typename T>
-using image_unit = detail::buffer_index<detail::image_unit_index, T>;
+using image_unit = detail::typed_index<int_t, detail::image_unit_index_traits, T>;
 
-typedef detail::typed_index_enumerator<detail::image_unit_index, image_unit>
+typedef detail::typed_index_enumerator<detail::image_unit_index_traits, image_unit>
 	image_unit_enumerator;
 
 namespace texture_parameter
