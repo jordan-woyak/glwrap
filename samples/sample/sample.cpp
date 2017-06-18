@@ -158,7 +158,7 @@ void main(void)
 
 	// multisampled renderbuffer
 	gl::renderbuffer rendbuf(glc);
-	rendbuf.storage(window_size, 4);
+	rendbuf.storage_multisample(4, gl::normalized_image_format::rgba8u, window_size);
 	fbuf.bind_attachment(color0, rendbuf);
 
 	// used to connect texture objects and sampler uniforms together via texture unit.

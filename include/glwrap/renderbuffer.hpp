@@ -31,33 +31,40 @@ struct renderbuffer_obj
 }
 
 // TODO: depth and stencil renderbuffers
-
-class renderbuffer : public detail::globject<detail::renderbuffer_obj>
+template <typename DataType>
+class basic_renderbuffer : public detail::globject<detail::renderbuffer_obj>
 {
 public:
-	explicit renderbuffer(context&)
+	typedef typename image_format<DataType>::enum_type image_format_type;
+
+	explicit basic_renderbuffer(context&)
 	{}
 
-	// TODO: internal format
-	void storage(ivec2 const& _dims, sizei_t _samples = 0)
+	void storage_multisample(uint_t _samples, image_format_type _ifmt, ivec2 const& _dims)
 	{
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
-			GLWRAP_GL_CALL(glNamedRenderbufferStorageMultisample)(native_handle(), _samples, GL_RGBA, _dims.x, _dims.y);
+			GLWRAP_GL_CALL(glNamedRenderbufferStorageMultisample)(native_handle(), _samples, static_cast<enum_t>(_ifmt), _dims.x, _dims.y);
 		}
 		else
 		{
 			detail::scoped_value<detail::parameter::renderbuffer> binding(native_handle());
-			
-			GLWRAP_GL_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, _samples, GL_RGBA, _dims.x, _dims.y);
+
+			GLWRAP_GL_CALL(glRenderbufferStorageMultisample)(GL_RENDERBUFFER, _samples, static_cast<enum_t>(_ifmt), _dims.x, _dims.y);
 		}
+	}
+
+	void storage(image_format_type _ifmt, ivec2 const& _dims)
+	{
+		// "glRenderbufferStorage is equivalent to calling glRenderbufferStorageMultisample with the samples set to zero"
+		storage_multisample(0, _ifmt, _dims);
 	}
 
 	void resize(ivec2 const& _dims)
 	{
 
 		GLint samples{}, format{};
-		
+
 		if (is_extension_present(GL_ARB_direct_state_access))
 		{
 			GLWRAP_GL_CALL(glGetNamedRenderbufferParameteriv)(native_handle(), GL_RENDERBUFFER_SAMPLES, &samples);
@@ -76,5 +83,9 @@ public:
 		}
 	}
 };
+
+typedef basic_renderbuffer<int_t> irenderbuffer;
+typedef basic_renderbuffer<uint_t> urenderbuffer;
+typedef basic_renderbuffer<float_t> renderbuffer;
 
 }
