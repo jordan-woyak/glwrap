@@ -26,6 +26,7 @@
 
 #include "sampler.hpp"
 #include "texture.hpp"
+#include "bindless_texture.hpp"
 
 #include "framebuffer.hpp"
 #include "renderbuffer.hpp"

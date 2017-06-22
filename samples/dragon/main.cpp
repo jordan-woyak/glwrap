@@ -341,11 +341,11 @@ void main()
 	glc.blend_func(gl::blend_factor::src_alpha, gl::blend_factor::inverse_src_alpha);
 
 	{
-	gl::framebuffer_builder fbb(glc);
-	fbb.bind_draw_buffer(fragdata, gl::default_color_buffer::back_left);
+	//gl::framebuffer_builder fbb(glc);
+	//fbb.bind_draw_buffer(fragdata, gl::default_color_buffer::back_left);
 
-	gl::framebuffer def_fb(glc, nullptr);
-	fbb.modify_framebuffer(def_fb);
+	//gl::framebuffer def_fb(glc, nullptr);
+	//fbb.modify_framebuffer(def_fb);
 	}
 
 	// point the model down towards the camera

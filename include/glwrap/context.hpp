@@ -101,11 +101,13 @@ public:
 		GLWRAP_GL_CALL(glPolygonOffset)(_factor, _units);
 	}
 
+	// Not in GL ES
 	void point_size(float_t _size)
 	{
 		GLWRAP_GL_CALL(glPointSize)(_size);
 	}
 
+	// Not in GL ES
 	void provoking_vertex(provoke_mode _mode)
 	{
 		GLWRAP_GL_CALL(glProvokingVertex)(static_cast<GLenum>(_mode));
@@ -222,7 +224,7 @@ public:
 	{
 		GLWRAP_GL_CALL(glMemoryBarrierByRegion)(static_cast<GLenum>(_barrier));
 	}
-	
+
 	void enable(capability _cap)
 	{
 		GLWRAP_GL_CALL(glEnable)(static_cast<GLenum>(_cap));
@@ -262,7 +264,7 @@ public:
 	{
 		//static_assert(detail::texture_traits<T>::has_layers,
 			//"Layered image binding is only valid for textures with layers.");
-		
+
 		GLWRAP_GL_CALL(glBindImageTexture)(
 			_unit.get_index(),
 			_texture.native_handle(),
@@ -280,7 +282,7 @@ public:
 	{
 		// TODO: should this fail to compile for non-layered textures?
 		// force use of the other overload?
-		
+
 		GLWRAP_GL_CALL(glBindImageTexture)(
 			_unit.get_index(),
 			_texture.native_handle(),
@@ -555,23 +557,6 @@ public:
 		GLWRAP_GL_CALL(glBindFramebuffer)(GL_FRAMEBUFFER, _fb.native_handle());
 	}
 
-	// TODO: kill these:
-/*
-	color_attachment color_buffer(uint_t _index)
-	{
-		return {static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + _index)};
-	}
-*/
-	color_attachment stencil_buffer()
-	{
-		return {GL_STENCIL_ATTACHMENT};
-	}
-
-	color_attachment depth_buffer()
-	{
-		return {GL_DEPTH_ATTACHMENT};
-	}
-
 	std::string get_vendor_name()
 	{
 		return detail::get_string(GL_VENDOR);
@@ -600,7 +585,7 @@ public:
 	// TODO: allow customization of the debug level
 	void enable_debugging()
 	{
-		if (GL_KHR_debug)
+		if (is_extension_present(GL_KHR_debug))
 		{
 			GLWRAP_GL_CALL(glDebugMessageCallback)(&context::debug_message_callback, this);
 			GLWRAP_GL_CALL(glDebugMessageControl)(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true);
@@ -615,7 +600,7 @@ public:
 
 	void disable_debugging()
 	{
-		if (GL_KHR_debug)
+		if (is_extension_present(GL_KHR_debug))
 		{
 			GLWRAP_GL_CALL(glDisable)(GL_DEBUG_OUTPUT);
 		}

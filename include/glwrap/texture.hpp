@@ -170,6 +170,22 @@ public:
 		}
 	}
 
+	// TODO: Allow testing if this is available.
+	// TODO: Change interface for multi sample and non-layered textures
+	// TODO: Allow for other targets
+	void define_view(basic_texture& _orig, image_format_type _ifmt, uint_t _min_level, uint_t _num_levels, uint_t _min_layer, uint_t _num_layers)
+	{
+		if (is_extension_present(GL_ARB_texture_view))
+		{
+			GLWRAP_GL_CALL(glTextureView)(native_handle(), target, _orig.native_handle(), static_cast<enum_t>(_ifmt),
+				_min_level, _num_levels, _min_layer, _num_layers);
+		}
+		else
+		{
+			throw std::exception();
+		}
+	}
+
 	// TODO: require unpack_buffer is of the proper type and has the right number of components
 
 	template <typename T>
