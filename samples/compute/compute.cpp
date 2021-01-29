@@ -111,11 +111,21 @@ void main(void)
 	
 	gl::program prog(glc);
 	prog.attach(comp_shader);
+
+	gl::shader_storage_binding_enumerator ssbindings(glc);
+	auto ssb = ssbindings.get<MyShaderStorageData>();
+
+	gl::uniform_block_binding_enumerator ubbindings(glc);
+	auto ubb = ubbindings.get<MyUniformBlockData>();
+
+	prog.set_binding(storage_loc, ssb);
+	prog.set_binding(uniblock_loc, ubb);
+
 	prog.link();
 	std::cout << "program log:\n" << prog.get_log() << std::endl;
 
-	if (!prog.is_good())
-		return 1;
+	//if (!prog.is_good())
+	//	return 1;
 
 	gl::buffer_pool bpool(glc, gl::buffer_access::dynamic_storage | gl::buffer_access::map_read);
 
@@ -133,7 +143,7 @@ void main(void)
 	// Create shader storage
 	auto storage_buffer = bpool.get<MyShaderStorageData, gl::detail::shader_storage_buffer_alignment>(1);
 	storage_buffer.assign_range({MyShaderStorageData{}}, 0);
-	glc.bind_buffer(storage_loc, storage_buffer.begin());
+	glc.bind_buffer(ssb, storage_buffer.begin());
 
 	// Create counter buffer
 	auto counter_buffer = bpool.get<MyCounterType>(operands.size());
@@ -142,7 +152,7 @@ void main(void)
 	// Create uniform block storage
 	auto uniform_buffer = bpool.get<MyUniformBlockData, gl::detail::uniform_buffer_alignment>(1);
 	uniform_buffer.assign_range({{72, 31}}, 0);
-	glc.bind_buffer(uniblock_loc, uniform_buffer.begin());
+	glc.bind_buffer(ubb, uniform_buffer.begin());
 
 	auto cmdbuf = bpool.get<gl::uvec3>(1);
 	cmdbuf.assign_range({{5, 1, 1}}, 0);

@@ -215,7 +215,7 @@ template <>
 class parameter_ref<parameter::clear_depth>
 {
 public:
-	typedef glm::float_t value_type;
+	typedef float value_type;
 
 	GLWRAP_MEMBER_FUNC_DECL
 	void
@@ -236,7 +236,7 @@ template <>
 class parameter_ref<parameter::clear_stencil>
 {
 public:
-	typedef glm::int_t value_type;
+	typedef int value_type;
 
 	GLWRAP_MEMBER_FUNC_DECL
 	void

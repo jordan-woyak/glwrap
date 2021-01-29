@@ -30,7 +30,7 @@ public:
 	{
 		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 		glutInitWindowSize(_size.x, _size.y);
-		glutCreateWindow("");
+		m_glut_window = glutCreateWindow("");
 
 		glewInit();
 
@@ -74,6 +74,16 @@ public:
 	void set_resize_func(const std::function<void(ivec2)>& _func)
 	{
 		m_resize_func = _func;
+	}
+
+	// TODO: should there be an open function then?
+	void close()
+	{
+#ifdef USE_SFML
+		m_sf_window.Close();
+#else
+		glutDestroyWindow(m_glut_window);
+#endif	
 	}
 
 	void run_loop()
@@ -120,6 +130,8 @@ private:
 	// gross
 	static std::function<void()> m_display_func;
 	static std::function<void(ivec2)> m_resize_func;
+
+	int m_glut_window;
 
 	static void Display()
 	{

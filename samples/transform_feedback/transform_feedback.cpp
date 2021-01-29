@@ -90,8 +90,7 @@ void main(void)
 		gl::int_t input3[2];
 	};
 	
-	gl::buffer<Input> input_buffer(glc);
-	input_buffer.assign((Input[])
+	std::vector<Input> input_data =
 	{
 		{45, 10, {0, 2}},
 		{2, 30, {1, 3}},
@@ -101,7 +100,10 @@ void main(void)
 		{10, 499, {5, 7}},
 		{89, 30, {6, 8}},
 		{120, 7, {7, 9}}
-	}, gl::buffer_usage::static_draw);
+	};
+
+	gl::buffer<Input> input_buffer(glc);
+	input_buffer.storage(input_data, gl::buffer_access::none);
 
 	// Holds the state of our vertex formats and input buffers:
 	gl::vertex_array input_vertices(glc);
@@ -122,7 +124,7 @@ void main(void)
 
 	// output buffer
 	gl::buffer<Output> output_buffer(glc);
-	output_buffer.storage(input_buffer.size() * operands.size(), gl::buffer_usage::static_read);
+	output_buffer.storage(input_buffer.size() * operands.size(), gl::buffer_access::map_read);
 
 	gl::transform_feedback tfeedback(glc);
 	tfeedback.bind_buffer(feedback_out, output_buffer.begin(), output_buffer.size());
@@ -130,7 +132,7 @@ void main(void)
 	// Do the actual drawing:
 	glc.use_program(prog);
 	glc.use_transform_feedback(tfeedback);
-	glc.use_vertex_array(input_vertices);
+	//glc.use_vertex_array(input_vertices);
 
 	// transform feedback
 	glc.start_transform_feedback(gl::primitive::points);
@@ -138,7 +140,7 @@ void main(void)
 	for (auto operand : operands)
 	{
 		prog.set_uniform(operand1_uni, operand);
-		glc.draw_arrays(gl::primitive::points, 0, input_buffer.size());
+		glc.draw_arrays(input_vertices, gl::primitive::points, 0, input_buffer.size());
 	}
 
 	glc.stop_transform_feedback();
@@ -147,7 +149,7 @@ void main(void)
 
 	// print results
 	std::size_t i{};
-	for (auto& vert : gl::mapped_buffer<Output>(output_buffer))
+	for (auto& vert : gl::mapped_buffer<Output>(output_buffer, gl::map_access::read))
 		std::cout << vert.output1 << "\t" << std::string(0 == (++i % input_buffer.size()), '\n');
 
 	std::cout << std::endl;
