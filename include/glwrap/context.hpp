@@ -534,6 +534,14 @@ public:
 			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _iter.get_stride() * _count);
 	}
 
+	// TODO: This is ugly but needed until a better solution for unbounded array members is created.
+	template <typename T>
+	void bind_buffer_exact_size(shader_storage_binding<T> const& _binding, const shader_storage_buffer_iterator<T>& _iter, uint_t _byte_count)
+	{
+		GLWRAP_GL_CALL(glBindBufferRange)(GL_SHADER_STORAGE_BUFFER, _binding.get_index(),
+			_iter.get_buffer(), _iter.get_offset() - (ubyte_t*)0, _byte_count);
+	}
+
 	template <typename T>
 	void bind_buffer(uniform_block_binding<T> const& _binding, const uniform_buffer_iterator<T>& _iter)
 	{

@@ -138,11 +138,18 @@ public:
 	template <typename T, typename A = detail::tight_buffer_alignment<T>>
 	sub_buffer<T, A> get(uint_t _length)
 	{
+		A alignment(sizeof(T));
+		return get_exact_size<T,A>(alignment.get_stride() * _length);
+	}
+
+	// TODO: gross, but needed until proper support for unbounded members is added.
+	template <typename T, typename A = detail::tight_buffer_alignment<T>>
+	sub_buffer<T, A> get_exact_size(uint_t _byte_count)
+	{
 		// TODO: allow for probability of a sub buffer growing, sort blocks by this hint
 		// TODO: allow for pre-allocated space to be larger than initial requested size
 		
-		A alignment(sizeof(T));
-		uint_t const req_size = alignment.get_stride() * _length;
+		uint_t const req_size = _byte_count;
 
 		auto it = m_blocks.begin();
 
@@ -185,7 +192,7 @@ public:
 			
 			m_buffers.emplace_back(std::move(buf));
 
-			return get<T, A>(_length);
+			return get_exact_size<T, A>(_byte_count);
 		}
 	}
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "declarations.hpp"
+
 namespace GLWRAP_NAMESPACE
 {
 
@@ -175,6 +177,7 @@ enum class memory_barrier : GLenum
 	pixel_buffer = GL_PIXEL_BUFFER_BARRIER_BIT,
 	texture_update = GL_TEXTURE_UPDATE_BARRIER_BIT,
 	buffer_update = GL_BUFFER_UPDATE_BARRIER_BIT,
+	client_mapped_buffer = GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT,
 	framebuffer = GL_FRAMEBUFFER_BARRIER_BIT,
 	transform_feedback = GL_TRANSFORM_FEEDBACK_BARRIER_BIT,
 	atomic_counter = GL_ATOMIC_COUNTER_BARRIER_BIT,

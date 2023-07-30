@@ -33,6 +33,11 @@ void gl_get(GLenum _pname, GLint* _params)
 	GLWRAP_GL_CALL(glGetIntegerv)(_pname, _params);
 }
 
+void gl_get(GLenum _pname, GLuint _index, GLint* _params)
+{
+	GLWRAP_GL_CALL(glGetIntegeri_v)(_pname, _index, _params);
+}
+
 void gl_get(GLenum _pname, GLint64* _params)
 {
 	GLWRAP_GL_CALL(glGetInteger64v)(_pname, _params);

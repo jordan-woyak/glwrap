@@ -94,6 +94,12 @@ struct is_gl_floating_point<T, typename std::enable_if<
 		std::is_same<double_t, T>::value>::type> : std::true_type
 {};
 
+// TODO: work with array types?
+template <typename T>
+struct is_glsl_built_in : std::integral_constant<bool, is_gl_integral<T>::value
+	|| is_gl_floating_point<T>::value || is_vec<T>::value || is_mat<T>::value>
+{};
+
 template <typename T>
 constexpr GLenum data_type_enum()
 {

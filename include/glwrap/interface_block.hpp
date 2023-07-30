@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <type_traits>
 namespace GLWRAP_NAMESPACE
 {
 
@@ -29,9 +30,22 @@ struct struct_layout
 
 		m.offset = get_member_offset(_member);
 		m.name = _name;
-		m.definition = detail::get_type_name<M>()
-			+ " " + _name
-			+ detail::glsl_var_suffix<M>::suffix();
+
+		// TODO: need to not run this block for gl::vec and friends.
+		if constexpr (detail::is_glsl_built_in<std::remove_all_extents_t<M>>::value)
+		{
+			m.definition = detail::get_type_name<M>()
+				+ " " + _name
+				+ detail::glsl_var_suffix<M>::suffix();
+		}
+		else
+		{
+			// TODO: This is gross. Nested UDTs require manual inclusion into the shader.
+			// TODO: Emit UDT definitions at the top of the shader when mentioned automatically.
+			struct_layout<std::remove_all_extents_t<M>> sl;
+			get_struct_layout(sl);
+			m.definition = sl.get_name() + " " + _name + detail::glsl_var_suffix<M>::suffix();
+		}
 
 		members.push_back(std::move(m));
 	}

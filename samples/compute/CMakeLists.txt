@@ -11,7 +11,9 @@ include_directories(../../include)
 find_package(SFML 2.0 COMPONENTS window graphics REQUIRED)
 include_directories(${SFML_INCLUDE_DIR})
 
-set(CMAKE_CXX_FLAGS "-Wall -std=c++0x")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_CXX_FLAGS "-Wall -std=c++17")
 
 add_executable(${project_name} compute.cpp)
 

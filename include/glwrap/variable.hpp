@@ -22,9 +22,10 @@ public:
 	typedef T value_type;
 	typedef L layout_type;
 
-	variable_description(std::string _name, const layout_type& _layout)
+	variable_description(std::string _name, const layout_type& _layout, std::string _qualifiers = {})
 		: m_name(std::move(_name))
 		, m_layout(_layout)
+		, m_memory_qualifiers(std::move(_qualifiers))
 	{}
 
 	std::string const& get_name() const
@@ -38,7 +39,8 @@ public:
 	}
 
 	// TODO: private:
-	std::vector<std::string> m_memory_qualifiers;
+	//std::vector<std::string> m_memory_qualifiers;
+	std::string m_memory_qualifiers;
 
 private:
 	std::string m_name;
@@ -126,13 +128,13 @@ auto variable(std::string _name, const atomic_counter_binding<T>& _attrib)
 
 // Shader Storage
 template <typename T>
-auto variable(std::string _name, shader_storage_location_enumerator& _enum)
+auto variable(std::string _name, shader_storage_location_enumerator& _enum, std::string _qualifiers = {})
 	-> variable_description<T, shader_storage_layout<T>>
 {
 	//static_assert(std::is_array<T>::value && 0 == std::extent<T>::value,
 		//"Shader storage currently only supports arrays of indeterminate length.");
 
-	return {std::move(_name), _enum.template get<T>()};
+	return {std::move(_name), _enum.template get<T>(), std::move(_qualifiers)};
 }
 
 // Uniform Block

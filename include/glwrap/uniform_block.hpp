@@ -92,7 +92,7 @@ public:
 
 	std::string get_string() const
 	{
-		return "binding = " + std::to_string(m_location.get_index());
+		return "std140, binding = " + std::to_string(m_location.get_index());
 	}
 
 private:

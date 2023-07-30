@@ -163,6 +163,14 @@ public:
 		storage(_size, nullptr, _access);
 	}
 
+	// TODO: rename one of these two overloads
+	void storage_exact_size(sizei_t _size, buffer_access _access)
+	{
+		// Assuming extensions are present.
+		bitfield_t const flags = static_cast<bitfield_t>(_access);
+		GLWRAP_GL_CALL(glNamedBufferStorage)(native_handle(), _size, nullptr, flags);
+	}
+
 	template <typename R>
 	typename std::enable_if<detail::is_range<R>::value>::type
 	storage(const R& _range, buffer_access _access)

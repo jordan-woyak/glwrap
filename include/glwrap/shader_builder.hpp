@@ -6,6 +6,7 @@
 #include "program.hpp"
 
 #include "detail/variable.hpp"
+#include "interface_block.hpp"
 
 namespace GLWRAP_NAMESPACE
 {
@@ -105,6 +106,15 @@ public:
 		m_header_lines.emplace_back(get_glsl_block_definition<P>("buffer", _desc));
 
 		return _desc.get_layout().get_location();
+	}
+
+	// TODO: Ugly. UDT definition inclusion should be automatic.
+	template <typename U>
+	void include_udt_definition()
+	{
+		detail::struct_layout<U> sl;
+		get_struct_layout(sl);
+		m_header_lines.emplace_back("layout(std430)\nstruct " + sl.get_name() + " {\n" + sl.get_definitions_string() + "};\n\n");
 	}
 
 	// TODO: kill/rename
@@ -225,7 +235,9 @@ precision mediump float;
 
 		std::string layout = _desc.get_layout().get_string();
 		if (!layout.empty())
-			result += "layout(" + layout + ") ";
+			result += "layout(" + layout + ")\n";
+
+		result += _desc.m_memory_qualifiers + " ";
 
 		result += _storage_qualifier + " " + sl.get_name() + " \n{\n";
 
@@ -234,7 +246,7 @@ precision mediump float;
 
 		result += "} " + _desc.get_name()
 			+ detail::glsl_var_suffix<P>::suffix()
-			+ ";\n";
+			+ ";\n\n";
 
 			return result;
 	}
